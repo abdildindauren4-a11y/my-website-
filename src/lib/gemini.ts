@@ -1,34 +1,47 @@
 // filepath: src/lib/gemini.ts
 // Gemini AI клиенті — тіл үйренуге арналған тәлімгер.
-// Кілт .env файлынан (VITE_GEMINI_API_KEY) оқылады.
-// Кілт жоқ болса — configured: false (UI хабарлама көрсетеді).
+// Кілт ЕКІ жерден алынады: баптаулар (localStorage) немесе .env файлы.
+// Баптаулардан енгізілген кілт басым.
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { buildKnowledgeContext } from "./knowledge";
 
+const ENV_KEY = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
 const STORAGE_KEY = "linguafast_gemini_key";
 
+// Сақталған кілтті алу (localStorage немесе .env)
 export function getGeminiKey(): string | null {
-  return localStorage.getItem(STORAGE_KEY);
+  // 1) Баптаулардан (localStorage) — басым
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && saved.length > 10) return saved;
+  } catch { /* ignore */ }
+  // 2) .env файлынан
+  if (ENV_KEY && ENV_KEY !== "осында_кілтті_қойыңыз" && ENV_KEY.length > 10) return ENV_KEY;
+  return null;
 }
 
+// Кілтті сақтау (баптаулардан)
 export function saveGeminiKey(key: string): void {
-  localStorage.setItem(STORAGE_KEY, key);
+  try {
+    localStorage.setItem(STORAGE_KEY, key.trim());
+  } catch { /* ignore */ }
 }
 
+// Кілтті өшіру
 export function clearGeminiKey(): void {
-  localStorage.removeItem(STORAGE_KEY);
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch { /* ignore */ }
 }
 
-const API_KEY = localStorage.getItem(STORAGE_KEY) || (import.meta.env.VITE_GEMINI_API_KEY as string | undefined);
-
-// Кілт қосылған ба
-export const geminiConfigured = !!API_KEY && API_KEY !== "осында_кілтті_қойыңыз" && API_KEY.length > 10;
-
-let genAI: GoogleGenerativeAI | null = null;
-if (geminiConfigured) {
-  genAI = new GoogleGenerativeAI(API_KEY!);
+// Кілт қосылған ба (динамикалық — әр шақыруда тексереді)
+export function isGeminiConfigured(): boolean {
+  return getGeminiKey() !== null;
 }
+
+// Кері үйлесімділік үшін (ескі код қолданады)
+export const geminiConfigured = isGeminiConfigured();
 
 // ── AI тәлімгердің мінез-құлқы (system instruction) ──
 // Тіл үйретудің ең күшті әдістеріне негізделген: Krashen, Swain, Vygotsky, SRS.
@@ -100,9 +113,12 @@ export async function sendChatMessage(
   uiLang: "kk" | "en",
   level: string = "intermediate"
 ): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
-  if (!genAI) {
+  // Кілтті әр шақыруда тексереміз (баптаулардан өзгеруі мүмкін)
+  const key = getGeminiKey();
+  if (!key) {
     return { ok: false, error: "no-key" };
   }
+  const genAI = new GoogleGenerativeAI(key);
 
   try {
     // Қолданушы хабарламасына қарай ҚАЖЕТТІ білімді таңдау (тіл + деңгей)

@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
   * {
     @apply border-border;
@@ -22,17 +22,17 @@
 }
 
 @layer components {
-  /* Шыны эффекті (glassmorphism) */
+  /* Шыны эффекті (жеңіл) */
   .glass {
-    @apply bg-surface/80 backdrop-blur-sm border border-border;
+    @apply bg-surface/90 backdrop-blur-sm border border-border;
   }
-  /* Карточка */
+  /* Карточка — жұмсақ көлеңкемен (шынайы, glow жоқ) */
   .card {
-    @apply bg-surface border border-border rounded-card;
+    @apply bg-surface border border-border rounded-card shadow-card;
   }
-  /* Негізгі батырма */
+  /* Негізгі батырма — жасыл, жұмсақ */
   .btn-primary {
-    @apply bg-accent-blue text-white rounded-btn px-4 py-2 font-medium transition-all hover:shadow-glow hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-accent-green text-white rounded-btn px-4 py-2 font-medium transition-all hover:brightness-105 shadow-soft disabled:opacity-50 disabled:cursor-not-allowed;
   }
   /* Екінші батырма */
   .btn-ghost {
@@ -40,18 +40,19 @@
   }
 }
 
-/* Скроллбар стилі */
+/* Скроллбар стилі — жеңіл */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #0D0D1A;
+  background: #F0F4F1;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1E1E3F;
-  border-radius: 4px;
+  background: #D1DAD3;
+  border-radius: 5px;
+  border: 2px solid #F0F4F1;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #4F46E5;
+  background: #16A34A;
 }

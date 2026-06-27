@@ -16,7 +16,7 @@ function MasteryRing({ value }: { value: number }) {
   return (
     <div className="relative w-11 h-11 shrink-0">
       <svg className="w-11 h-11 -rotate-90" viewBox="0 0 40 40">
-        <circle cx="20" cy="20" r={r} fill="none" stroke="#1E1E3F" strokeWidth="3" />
+        <circle cx="20" cy="20" r={r} fill="none" stroke="#E2E8E3" strokeWidth="3" />
         <circle cx="20" cy="20" r={r} fill="none" stroke={color} strokeWidth="3" strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round" className="transition-all" />
       </svg>
       <span className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold" style={{ color }}>{value}%</span>

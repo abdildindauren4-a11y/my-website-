@@ -37,7 +37,7 @@ export default function AnimatedBot({ state = "idle", size = 80 }: Props) {
             style={{
               background: state === "happy"
                 ? "radial-gradient(circle, rgba(16,185,129,0.4) 0%, transparent 70%)"
-                : "radial-gradient(circle, rgba(79,70,229,0.4) 0%, transparent 70%)",
+                : "radial-gradient(circle, rgba(14,165,233,0.4) 0%, transparent 70%)",
             }}
             animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.8, 0.5] }}
             transition={{ duration: 1.5, repeat: Infinity }}
@@ -47,12 +47,12 @@ export default function AnimatedBot({ state = "idle", size = 80 }: Props) {
         <svg viewBox="0 0 80 80" className="w-full h-full relative z-10">
           <defs>
             <linearGradient id="botBody" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#4F46E5" />
-              <stop offset="100%" stopColor="#06B6D4" />
+              <stop offset="0%" stopColor="#16A34A" />
+              <stop offset="100%" stopColor="#0EA5E9" />
             </linearGradient>
             <linearGradient id="botFace" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1A1A38" />
-              <stop offset="100%" stopColor="#13132A" />
+              <stop offset="0%" stopColor="#F0F4F1" />
+              <stop offset="100%" stopColor="#FFFFFF" />
             </linearGradient>
           </defs>
 
@@ -84,13 +84,13 @@ export default function AnimatedBot({ state = "idle", size = 80 }: Props) {
           >
             {/* Сол көз */}
             <motion.circle
-              cx="32" cy="38" r="4" fill="#06B6D4"
+              cx="32" cy="38" r="4" fill="#16A34A"
               animate={{ scale: eyeScale }}
               transition={{ duration: 0.3 }}
             />
             {/* Оң көз */}
             <motion.circle
-              cx="48" cy="38" r="4" fill="#06B6D4"
+              cx="48" cy="38" r="4" fill="#16A34A"
               animate={{ scale: eyeScale }}
               transition={{ duration: 0.3 }}
             />
@@ -102,7 +102,7 @@ export default function AnimatedBot({ state = "idle", size = 80 }: Props) {
           {/* Ауыз */}
           <motion.path
             d={mouthPath}
-            stroke="#06B6D4"
+            stroke="#16A34A"
             strokeWidth="2.5"
             strokeLinecap="round"
             fill="none"

@@ -12,6 +12,7 @@ import CinemaPage from "@/pages/CinemaPage";
 import ChatPage from "@/pages/ChatPage";
 import DictionaryPage from "@/pages/DictionaryPage";
 import OnboardingPage from "@/pages/OnboardingPage";
+import SettingsPage from "@/pages/SettingsPage";
 
 // Маршруттар (кейін placeholder-лер нақты беттерге ауысады)
 const routes: [string, string][] = [
@@ -51,7 +52,8 @@ function AppContent() {
           <Route path="/cinema" element={<CinemaPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/dictionary" element={<DictionaryPage />} />
-          {routes.filter(([p]) => p !== "/" && p !== "/cinema" && p !== "/chat" && p !== "/dictionary").map(([path, title]) => (
+          <Route path="/settings" element={<SettingsPage />} />
+          {routes.filter(([p]) => p !== "/" && p !== "/cinema" && p !== "/chat" && p !== "/dictionary" && p !== "/settings").map(([path, title]) => (
             <Route key={path} path={path} element={<PlaceholderPage title={title} />} />
           ))}
         </Route>
