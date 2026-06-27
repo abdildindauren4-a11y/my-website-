@@ -6,7 +6,21 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { buildKnowledgeContext } from "./knowledge";
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+const STORAGE_KEY = "linguafast_gemini_key";
+
+export function getGeminiKey(): string | null {
+  return localStorage.getItem(STORAGE_KEY);
+}
+
+export function saveGeminiKey(key: string): void {
+  localStorage.setItem(STORAGE_KEY, key);
+}
+
+export function clearGeminiKey(): void {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+const API_KEY = localStorage.getItem(STORAGE_KEY) || (import.meta.env.VITE_GEMINI_API_KEY as string | undefined);
 
 // Кілт қосылған ба
 export const geminiConfigured = !!API_KEY && API_KEY !== "осында_кілтті_қойыңыз" && API_KEY.length > 10;

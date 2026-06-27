@@ -228,9 +228,27 @@ export const translations = {
 
   // ── Settings ──
   "set.title": { kk: "Баптаулар", en: "Settings" },
+  "set.subtitle": { kk: "Тіл, деңгей және AI баптаулары", en: "Language, level and AI settings" },
   "set.interfaceLanguage": { kk: "Интерфейс тілі", en: "Interface language" },
   "set.learningLanguage": { kk: "Үйрену тілі", en: "Learning language" },
   "set.theme": { kk: "Тема", en: "Theme" },
+  "set.aiSection": { kk: "AI тәлімгер (Gemini)", en: "AI Tutor (Gemini)" },
+  "set.keyActive": { kk: "API кілті белсенді", en: "API key is active" },
+  "set.removeKey": { kk: "Кілтті жою", en: "Remove key" },
+  "set.geminiKey": { kk: "Gemini API кілті", en: "Gemini API key" },
+  "set.geminiKeyDesc": { kk: "Кілтті қосу арқылы AI чат функциясын іске қосасыз. Бұл тегін.", en: "Add your key to enable AI chat. It's free." },
+  "set.keyPlaceholder": { kk: "AIza...", en: "AIza..." },
+  "set.keySaved": { kk: "Сақталды!", en: "Saved!" },
+  "set.saveKey": { kk: "Сақтау", en: "Save" },
+  "set.getKeyHint": { kk: "Тегін кілт алу:", en: "Get a free key:" },
+  "set.getKeyLink": { kk: "Google AI Studio", en: "Google AI Studio" },
+  "set.langSection": { kk: "Тіл және деңгей", en: "Language & level" },
+  "set.learningLang": { kk: "Үйрену тілі", en: "Learning language" },
+  "set.yourLevel": { kk: "Деңгейіңіз", en: "Your level" },
+  "set.dailyGoal": { kk: "Күндік мақсат", en: "Daily goal" },
+  "set.interfaceLang": { kk: "Интерфейс тілі", en: "Interface language" },
+  "set.dataSection": { kk: "Деректер", en: "Data" },
+  "set.resetOnboarding": { kk: "Бастапқы орнатуды қайталау", en: "Reset onboarding" },
 } as const;
 
 export type TransKey = keyof typeof translations;
