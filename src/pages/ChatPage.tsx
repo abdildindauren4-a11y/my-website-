@@ -114,7 +114,7 @@ export default function ChatPage() {
     return (
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-4 pb-3 border-b border-border">
-          <AnimatedBot state="idle" size={56} />
+          <AnimatedBot state="idle" size={76} />
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-display font-bold text-lg">{t("chat.title")}</h1>
@@ -157,7 +157,7 @@ export default function ChatPage() {
       {/* Анимациялы бот шапкасы */}
       <div className="flex items-center justify-between gap-4 shrink-0 pb-3 border-b border-border">
         <div className="flex items-center gap-4">
-          <AnimatedBot state={botState} size={64} />
+          <AnimatedBot state={botState} size={88} />
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-display font-bold text-lg">{t("chat.title")}</h1>
@@ -193,7 +193,7 @@ export default function ChatPage() {
         ))}
         {loading && (
           <div className="flex items-start gap-3">
-            <div className="shrink-0"><AnimatedBot state="thinking" size={40} /></div>
+            <div className="shrink-0"><AnimatedBot state="thinking" size={52} /></div>
             <div className="card bg-surface px-4 py-3 border-border self-center">
               <div className="flex gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-accent-blue animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -266,7 +266,7 @@ function MessageBubble({ message, onRetry }: { message: DisplayMessage; onRetry?
 
   return (
     <div className="flex items-start gap-3">
-      <div className="shrink-0 mt-1"><AnimatedBot state="idle" size={36} /></div>
+      <div className="shrink-0 mt-1"><AnimatedBot state="idle" size={48} /></div>
       <div className="max-w-[80%]">
         <div className={`card px-4 py-2.5 ${message.error ? "border-accent-red/40 bg-accent-red/5" : "bg-surface border-border"}`}>
           {message.error && <AlertCircle className="w-4 h-4 text-accent-red inline mr-1.5 -mt-0.5" />}
