@@ -6,6 +6,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { gamesList } from "@/lib/gamesData";
+import GameArt from "@/components/games/GameArt";
 import { Gamepad2, Grid3x3, Zap, CloudRain, SpellCheck, ListOrdered, Brain, ArrowLeft } from "lucide-react";
 
 // Ойын компоненттері
@@ -75,8 +76,8 @@ export default function GamesPage() {
         </div>
       </div>
 
-      {/* Ойын карточкалары */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Ойын карточкалары — суретпен (3D-стиль иллюстрация) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {gamesList.map((game, i) => {
           const Icon = iconMap[game.icon] || Gamepad2;
           return (
@@ -88,34 +89,41 @@ export default function GamesPage() {
               transition={{ delay: i * 0.06 }}
               whileHover={{ y: -4, transition: { duration: 0.2 } }}
               whileTap={{ scale: 0.98 }}
-              className="group relative overflow-hidden rounded-card text-left h-44"
+              className="group relative overflow-hidden rounded-card text-left h-40 shadow-lg"
             >
               {/* Градиент фон */}
               <div className={`absolute inset-0 bg-gradient-to-br ${game.gradient}`} />
-              {/* Декоративті паттерн (айналмалы дөңгелектер) */}
-              <div className="absolute inset-0 opacity-20">
-                <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/30 blur-2xl group-hover:scale-150 transition-transform duration-500" />
-                <div className="absolute -left-4 -bottom-4 w-24 h-24 rounded-full bg-white/20 blur-xl" />
+              {/* Жұмсақ жарық дақтары */}
+              <div className="absolute inset-0 opacity-25">
+                <div className="absolute -right-6 -top-10 w-40 h-40 rounded-full bg-white/30 blur-2xl group-hover:scale-125 transition-transform duration-500" />
+                <div className="absolute -left-4 -bottom-6 w-28 h-28 rounded-full bg-white/20 blur-xl" />
               </div>
-              {/* Мазмұн */}
-              <div className="relative h-full p-5 flex flex-col justify-between">
-                <div className="w-12 h-12 rounded-card bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                  <Icon className="w-6 h-6 text-white" />
+
+              {/* 3D иллюстрация (оң жақта) */}
+              <div className="absolute right-1 top-1/2 -translate-y-1/2 w-44 h-40 pointer-events-none group-hover:scale-105 transition-transform duration-300">
+                <GameArt id={game.id} className="w-full h-full" />
+              </div>
+
+              {/* Мазмұн (сол жақта) */}
+              <div className="relative h-full p-5 flex flex-col justify-between max-w-[62%]">
+                <div className="w-11 h-11 rounded-card bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                  <Icon className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white font-display font-bold text-lg mb-0.5">
+                  <h3 className="text-white font-display font-bold text-lg mb-0.5 drop-shadow-sm">
                     {lang === "kk" ? game.titleKk : game.titleEn}
                   </h3>
-                  <p className="text-white/80 text-sm">
+                  <p className="text-white/85 text-sm leading-snug">
                     {lang === "kk" ? game.descKk : game.descEn}
                   </p>
                 </div>
-                {/* Ойнау белгісі (hover-де) */}
-                <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-xs font-semibold text-white bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full">
-                    {t("games.play")} →
-                  </span>
-                </div>
+              </div>
+
+              {/* Ойнау белгісі (hover-де) */}
+              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-xs font-semibold text-white bg-white/25 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                  {t("games.play")} →
+                </span>
               </div>
             </motion.button>
           );

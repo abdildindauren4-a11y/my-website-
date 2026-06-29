@@ -130,7 +130,7 @@ export async function sendChatMessage(
       "═══════════════════════════════════════\n" + knowledge;
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash", // тегін әрі жылдам
+      model: "gemini-2.0-flash", // тегін, жылдам әрі қазіргі (1.5 ескірген)
       systemInstruction: fullSystemPrompt,
     });
 

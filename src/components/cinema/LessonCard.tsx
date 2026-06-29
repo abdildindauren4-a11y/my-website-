@@ -48,10 +48,12 @@ export default function LessonCard({ lesson, progress, onClick }: Props) {
             <Play className="w-6 h-6 text-white ml-1" fill="currentColor" />
           </div>
         </div>
-        {/* Ұзақтық */}
-        <div className="absolute bottom-2 right-2 bg-black/70 rounded px-2 py-0.5 text-xs text-white flex items-center gap-1">
-          <Clock className="w-3 h-3" /> {mins} {t("cinema.minutes")}
-        </div>
+        {/* Ұзақтық (белгілі болса) */}
+        {mins > 0 && (
+          <div className="absolute bottom-2 right-2 bg-black/70 rounded px-2 py-0.5 text-xs text-white flex items-center gap-1">
+            <Clock className="w-3 h-3" /> {mins} {t("cinema.minutes")}
+          </div>
+        )}
         {/* Аяқталған белгісі */}
         {completed && (
           <div className="absolute top-2 right-2 bg-accent-green rounded-full p-1">

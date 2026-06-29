@@ -13,6 +13,7 @@ export const translations = {
   "common.next": { kk: "Келесі", en: "Next" },
   "common.search": { kk: "Іздеу…", en: "Search…" },
   "common.close": { kk: "Жабу", en: "Close" },
+  "common.optional": { kk: "міндетті емес", en: "optional" },
 
   // ── Навигация (sidebar) ──
   "nav.home": { kk: "Басты бет", en: "Home" },
@@ -325,6 +326,21 @@ export const translations = {
   "cinema.lessonsCount": { kk: "сабақ", en: "lessons" },
   "cinema.progress": { kk: "Барысы", en: "Progress" },
   "cinema.notStarted": { kk: "Басталмаған", en: "Not started" },
+  // Өз видеоңды қосу
+  "cinema.addVideo": { kk: "Видео қосу", en: "Add video" },
+  "cinema.addVideoTitle": { kk: "Өз видеоңды қосу", en: "Add your own video" },
+  "cinema.addVideoBtn": { kk: "Қосу", en: "Add" },
+  "cinema.videoUrl": { kk: "YouTube сілтемесі", en: "YouTube link" },
+  "cinema.videoFound": { kk: "Видео табылды", en: "Video found" },
+  "cinema.videoInvalid": { kk: "Дұрыс YouTube сілтемесін енгізіңіз", en: "Enter a valid YouTube link" },
+  "cinema.videoName": { kk: "Атауы", en: "Title" },
+  "cinema.videoNameKk": { kk: "Қазақша атауы", en: "Kazakh title" },
+  "cinema.videoDesc": { kk: "Сипаттама", en: "Description" },
+  "cinema.videoLevel": { kk: "Деңгей", en: "Level" },
+  "cinema.videoLang": { kk: "Видео тілі", en: "Video language" },
+  "cinema.myVideo": { kk: "Менің видеом", en: "My video" },
+  "cinema.deleteVideo": { kk: "Видеоны жою", en: "Delete video" },
+  "cinema.deleteVideoConfirm": { kk: "Бұл видеоны жоясыз ба?", en: "Delete this video?" },
   // Түсіну тесті (Quiz)
   "quiz.title": { kk: "Түсіну тесті", en: "Comprehension Quiz" },
   "quiz.correct": { kk: "дұрыс", en: "correct" },

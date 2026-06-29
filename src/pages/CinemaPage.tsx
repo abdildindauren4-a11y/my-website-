@@ -10,8 +10,10 @@ import VocabPanel from "@/components/cinema/VocabPanel";
 import LessonCard from "@/components/cinema/LessonCard";
 import ComprehensionQuiz from "@/components/cinema/ComprehensionQuiz";
 import SubtitleUpload from "@/components/cinema/SubtitleUpload";
+import AddVideoModal from "@/components/cinema/AddVideoModal";
 import { cinemaLessons, categories } from "@/lib/cinemaData";
-import { Film, X, ArrowLeft, Play, GraduationCap } from "lucide-react";
+import { useCustomVideos } from "@/store/customVideoStore";
+import { Film, X, ArrowLeft, Play, GraduationCap, Plus, Trash2 } from "lucide-react";
 import type { CinemaLesson, SubtitleLine } from "@/types/cinema";
 
 type Level = "all" | "beginner" | "intermediate" | "advanced";
@@ -26,6 +28,8 @@ export default function CinemaPage() {
   const [category, setCategory] = useState("all");
   const [level, setLevel] = useState<Level>("all");
   const [uploadedSubs, setUploadedSubs] = useState<SubtitleLine[] | null>(null);
+  const [showAddVideo, setShowAddVideo] = useState(false);
+  const { videos: customVideos, addVideo, removeVideo } = useCustomVideos();
 
   // Жүктелген субтитрді сабаққа қолдану (ағылшын мәтін, қазақша кейін)
   const handleSubtitlesLoaded = (subs: Omit<SubtitleLine, "kk">[]) => {
@@ -51,14 +55,17 @@ export default function CinemaPage() {
     });
   };
 
+  // Дайын + қолданушы видеолары
+  const allLessons = useMemo(() => [...customVideos, ...cinemaLessons], [customVideos]);
+
   // Сүзілген сабақтар
   const filtered = useMemo(() => {
-    return cinemaLessons.filter((l) => {
+    return allLessons.filter((l) => {
       if (category !== "all" && l.category !== category) return false;
       if (level !== "all" && l.level !== level) return false;
       return true;
     });
-  }, [category, level]);
+  }, [allLessons, category, level]);
 
   // ════════ САБАҚ КӨРІНІСІ ════════
   if (activeLesson) {
@@ -174,10 +181,17 @@ export default function CinemaPage() {
         <div className="w-11 h-11 rounded-card bg-accent-pink/15 flex items-center justify-center">
           <Film className="w-6 h-6 text-accent-pink" />
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-display font-bold">{t("cinema.title")}</h1>
           <p className="text-sm text-text-secondary">{filtered.length} {t("cinema.lessonsCount")} · {t("cinema.subtitle")}</p>
         </div>
+        {/* Өз видеоңды қосу */}
+        <button
+          onClick={() => setShowAddVideo(true)}
+          className="btn-primary flex items-center gap-2 shrink-0"
+        >
+          <Plus className="w-4 h-4" /> <span className="hidden sm:inline">{t("cinema.addVideo")}</span>
+        </button>
       </div>
 
       {/* Сүзгілер */}
@@ -212,14 +226,41 @@ export default function CinemaPage() {
       {filtered.length === 0 ? (
         <div className="card p-12 text-center">
           <Film className="w-12 h-12 text-text-muted mx-auto mb-3" />
-          <p className="text-text-secondary">{t("cinema.noVideo")}</p>
+          <p className="text-text-secondary mb-4">{t("cinema.noVideo")}</p>
+          <button onClick={() => setShowAddVideo(true)} className="btn-primary inline-flex items-center gap-2">
+            <Plus className="w-4 h-4" /> {t("cinema.addVideo")}
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((lesson) => (
-            <LessonCard key={lesson.id} lesson={lesson} onClick={() => { setActiveLesson(lesson); setUploadedSubs(null); }} />
-          ))}
+          {filtered.map((lesson) => {
+            const isCustom = lesson.id.startsWith("custom-");
+            return (
+              <div key={lesson.id} className="relative group">
+                <LessonCard lesson={lesson} onClick={() => { setActiveLesson(lesson); setUploadedSubs(null); }} />
+                {isCustom && (
+                  <>
+                    <span className="absolute top-2 left-2 z-10 text-[10px] font-bold bg-accent-pink text-white px-2 py-0.5 rounded-full pointer-events-none">
+                      {t("cinema.myVideo")}
+                    </span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); if (window.confirm(t("cinema.deleteVideoConfirm"))) removeVideo(lesson.id); }}
+                      className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-accent-red"
+                      title={t("cinema.deleteVideo")}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
+      )}
+
+      {/* Видео қосу модалі */}
+      {showAddVideo && (
+        <AddVideoModal onClose={() => setShowAddVideo(false)} onAdd={addVideo} />
       )}
     </div>
   );
