@@ -5,10 +5,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useLang } from "@/contexts/LangContext";
-import { sendChatMessage, geminiConfigured, type ChatMessage } from "@/lib/gemini";
+import { useUserPrefs } from "@/store/userPrefs";
+import { sendChatMessage, isGeminiConfigured, type ChatMessage } from "@/lib/gemini";
 import AnimatedBot, { type BotState } from "@/components/chat/AnimatedBot";
 import { knowledgeStats } from "@/lib/knowledge";
-import { Send, Key, ExternalLink, AlertCircle } from "lucide-react";
+import { Send, Key, ExternalLink, AlertCircle, Trash2, RotateCcw } from "lucide-react";
 
 interface DisplayMessage extends ChatMessage {
   id: string;
@@ -18,17 +19,43 @@ interface DisplayMessage extends ChatMessage {
 
 export default function ChatPage() {
   const { t, lang } = useLang();
+  const { prefs } = useUserPrefs();
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [botState, setBotState] = useState<BotState>("idle");
+  const [lastFailed, setLastFailed] = useState<string | null>(null); // қате болған хабарлама (retry үшін)
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Бастапқы сәлемдесу
+  // Чат тарихын сақтау кілті (тілге қарай бөлек)
+  const storageKey = `linguafast_chat_${prefs.learningLang}`;
+
+  // Бастапқы: сақталған тарихты жүктеу немесе сәлемдесу
   useEffect(() => {
-    setMessages([{ id: "welcome", role: "model", text: t("chat.welcome"), time: now() }]);
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved) as DisplayMessage[];
+        if (parsed.length > 0) {
+          setMessages(parsed);
+          return;
+        }
+      }
+    } catch { /* ignore */ }
+    // Сақталған тарих жоқ — сәлемдесу (тілге сай)
+    const welcomeText = prefs.learningLang === "zh" ? t("chat.welcomeZh") : t("chat.welcome");
+    setMessages([{ id: "welcome", role: "model", text: welcomeText, time: now() }]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [storageKey]);
+
+  // Хабарлама өзгергенде localStorage-қа сақтау
+  useEffect(() => {
+    if (messages.length > 0) {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(messages));
+      } catch { /* ignore */ }
+    }
+  }, [messages, storageKey]);
 
   // Жаңа хабарламаға скролл
   useEffect(() => {
@@ -39,27 +66,36 @@ export default function ChatPage() {
     return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   }
 
+  // Әңгімені тазалау
+  const clearChat = () => {
+    if (!window.confirm(t("chat.clearConfirm"))) return;
+    try { localStorage.removeItem(storageKey); } catch { /* ignore */ }
+    const welcomeText = prefs.learningLang === "zh" ? t("chat.welcomeZh") : t("chat.welcome");
+    setMessages([{ id: "welcome", role: "model", text: welcomeText, time: now() }]);
+    setLastFailed(null);
+  };
+
   const send = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
+    setLastFailed(null);
     const userMsg: DisplayMessage = { id: "u" + Date.now(), role: "user", text: trimmed, time: now() };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
-    setBotState("thinking"); // бот ойлана бастайды
+    setBotState("thinking");
 
-    // Тарих (welcome-сыз, тек нақты сұхбат)
     const history: ChatMessage[] = messages
       .filter((m) => m.id !== "welcome" && !m.error)
       .map((m) => ({ role: m.role, text: m.text }));
 
-    const res = await sendChatMessage(history, trimmed, "English", lang);
+    const learnLangName = prefs.learningLang === "zh" ? "Chinese" : "English";
+    const res = await sendChatMessage(history, trimmed, learnLangName, lang, prefs.level);
     setLoading(false);
 
     if (res.ok) {
       setMessages((prev) => [...prev, { id: "m" + Date.now(), role: "model", text: res.text, time: now() }]);
-      // Жауап келді — бот қуанады, содан тынышталады
       setBotState("happy");
       setTimeout(() => setBotState("idle"), 2500);
     } else {
@@ -68,12 +104,13 @@ export default function ChatPage() {
         res.error === "bad-key" ? t("chat.errorKey") :
         t("chat.errorGeneral");
       setMessages((prev) => [...prev, { id: "e" + Date.now(), role: "model", text: errMsg, time: now(), error: true }]);
+      setLastFailed(trimmed); // қайта жіберу үшін сақтау
       setBotState("idle");
     }
   };
 
   // ── Кілт қосылмаған күй ──
-  if (!geminiConfigured) {
+  if (!isGeminiConfigured()) {
     return (
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-4 pb-3 border-b border-border">
@@ -118,29 +155,41 @@ export default function ChatPage() {
   return (
     <div className="max-w-3xl mx-auto flex flex-col h-[calc(100vh-8rem)]">
       {/* Анимациялы бот шапкасы */}
-      <div className="flex items-center gap-4 shrink-0 pb-3 border-b border-border">
-        <AnimatedBot state={botState} size={64} />
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="font-display font-bold text-lg">{t("chat.title")}</h1>
-            <span className="text-[10px] font-bold bg-accent-purple/20 text-accent-purple px-1.5 py-0.5 rounded">BETA</span>
-            <span className="text-[10px] font-medium bg-accent-green/15 text-accent-green px-2 py-0.5 rounded-full hidden sm:inline">
-              {knowledgeStats.total}+ {t("chat.methods")}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" />
-            <span className="text-xs text-text-secondary">
-              {botState === "thinking" ? t("chat.thinking") : t("chat.alwaysHere")}
-            </span>
+      <div className="flex items-center justify-between gap-4 shrink-0 pb-3 border-b border-border">
+        <div className="flex items-center gap-4">
+          <AnimatedBot state={botState} size={64} />
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="font-display font-bold text-lg">{t("chat.title")}</h1>
+              <span className="text-[10px] font-bold bg-accent-purple/20 text-accent-purple px-1.5 py-0.5 rounded">BETA</span>
+              <span className="text-[10px] font-medium bg-accent-green/15 text-accent-green px-2 py-0.5 rounded-full hidden sm:inline">
+                {knowledgeStats.total}+ {t("chat.methods")}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" />
+              <span className="text-xs text-text-secondary">
+                {botState === "thinking" ? t("chat.thinking") : t("chat.alwaysHere")}
+              </span>
+            </div>
           </div>
         </div>
+        {/* Тазалау батырмасы (хабарлама бар болса) */}
+        {messages.length > 1 && (
+          <button
+            onClick={clearChat}
+            className="text-text-muted hover:text-accent-red transition-colors p-2 rounded-btn hover:bg-surface-2 shrink-0"
+            title={t("chat.clear")}
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Хабарламалар */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto py-5 space-y-4">
         {messages.map((m) => (
-          <MessageBubble key={m.id} message={m} />
+          <MessageBubble key={m.id} message={m} onRetry={m.error && lastFailed ? () => send(lastFailed) : undefined} />
         ))}
         {loading && (
           <div className="flex items-start gap-3">
@@ -198,7 +247,8 @@ export default function ChatPage() {
 }
 
 // ── Хабарлама көпіршігі ──
-function MessageBubble({ message }: { message: DisplayMessage }) {
+function MessageBubble({ message, onRetry }: { message: DisplayMessage; onRetry?: () => void }) {
+  const { t } = useLang();
   const isUser = message.role === "user";
 
   if (isUser) {
@@ -222,7 +272,17 @@ function MessageBubble({ message }: { message: DisplayMessage }) {
           {message.error && <AlertCircle className="w-4 h-4 text-accent-red inline mr-1.5 -mt-0.5" />}
           <p className="text-sm leading-relaxed whitespace-pre-wrap inline">{message.text}</p>
         </div>
-        <p className="text-[10px] text-text-muted mt-1">{message.time}</p>
+        <div className="flex items-center gap-2 mt-1">
+          <p className="text-[10px] text-text-muted">{message.time}</p>
+          {message.error && onRetry && (
+            <button
+              onClick={onRetry}
+              className="text-[11px] text-accent-blue hover:underline flex items-center gap-1"
+            >
+              <RotateCcw className="w-3 h-3" /> {t("chat.retry")}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLang } from "@/contexts/LangContext";
 import { searchDictionary, searchFullDictionary, dictStats, type DictEntry } from "@/lib/dictionary";
+import { speak } from "@/lib/speech";
 import { Search, Plus, Check, Volume2, Database, Loader2 } from "lucide-react";
 import type { LearnLang } from "@/types/vocabulary";
 
@@ -110,7 +111,10 @@ export default function DictSearch({ onAddWord, existingTerms }: Props) {
                   <p className="text-sm text-text-secondary mt-0.5">{entry.d}</p>
                 </div>
                 {/* Дыбыс */}
-                <button className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-accent-blue transition-colors shrink-0">
+                <button
+                  onClick={() => speak(entry.t, lang)}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-accent-blue transition-colors shrink-0"
+                >
                   <Volume2 className="w-4 h-4" />
                 </button>
                 {/* SRS-ке қосу */}

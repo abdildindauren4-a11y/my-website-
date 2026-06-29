@@ -17,6 +17,7 @@ export default function OnboardingPage({ onComplete }: Props) {
   const { completeOnboarding } = useUserPrefs();
 
   const [step, setStep] = useState(0); // 0=welcome, 1=lang, 2=level, 3=goal
+  const [name, setName] = useState("");
   const [learningLang, setLearningLang] = useState<LearningLanguage>("en");
   const [level, setLevel] = useState<ProficiencyLevel>("beginner");
   const [goalMin, setGoalMin] = useState(15);
@@ -24,7 +25,7 @@ export default function OnboardingPage({ onComplete }: Props) {
   const totalSteps = 3; // welcome-тен кейінгі қадамдар
 
   const finish = () => {
-    completeOnboarding({ learningLang, level, dailyGoalMin: goalMin });
+    completeOnboarding({ learningLang, level, dailyGoalMin: goalMin, name: name.trim() || undefined });
     onComplete();
   };
 
@@ -83,6 +84,18 @@ export default function OnboardingPage({ onComplete }: Props) {
                     <span className="text-xs text-text-secondary">{f.label}</span>
                   </div>
                 ))}
+              </div>
+              {/* Аты енгізу */}
+              <div className="mb-5 text-left">
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={t("onb.namePlaceholder")}
+                  maxLength={30}
+                  className="w-full bg-surface border border-border rounded-card px-4 py-3 text-center focus:outline-none focus:border-accent-green/50 transition-colors"
+                  onKeyDown={(e) => e.key === "Enter" && setStep(1)}
+                />
               </div>
               <button onClick={() => setStep(1)} className="btn-primary w-full flex items-center justify-center gap-2 text-base py-3">
                 {t("onb.getStarted")} <ArrowRight className="w-5 h-5" />

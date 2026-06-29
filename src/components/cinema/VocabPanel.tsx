@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { useLang } from "@/contexts/LangContext";
 import { Volume2, Bookmark, ArrowRight } from "lucide-react";
+import { speak } from "@/lib/speech";
 import type { VocabWord } from "@/types/cinema";
 
 // Меңгеру дөңгелегі (пайыз)
@@ -27,9 +28,10 @@ function MasteryRing({ value }: { value: number }) {
 interface Props {
   words: VocabWord[];
   onSaveWord?: (id: string) => void;
+  lang?: "en" | "zh";
 }
 
-export default function VocabPanel({ words, onSaveWord }: Props) {
+export default function VocabPanel({ words, onSaveWord, lang = "en" }: Props) {
   const { t } = useLang();
   const [saved, setSaved] = useState<Set<string>>(new Set());
 
@@ -68,7 +70,10 @@ export default function VocabPanel({ words, onSaveWord }: Props) {
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="font-display font-bold text-text-primary">{w.word}</span>
-                  <button className="text-text-secondary hover:text-accent-blue transition-colors shrink-0">
+                  <button
+                    onClick={() => speak(w.word, lang)}
+                    className="text-text-secondary hover:text-accent-blue transition-colors shrink-0"
+                  >
                     <Volume2 className="w-4 h-4" />
                   </button>
                 </div>

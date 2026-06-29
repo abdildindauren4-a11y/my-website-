@@ -1,0 +1,200 @@
+// filepath: src/lib/ielts/test4.ts
+// IELTS Reading — 4-тест. Жаңа тақырыптар, 40 сұрақ.
+
+import type { ReadingTest } from "@/types/ielts";
+
+export const test4: ReadingTest = {
+  id: "reading-test-4",
+  title: "Academic Reading — Test 4",
+  titleKk: "Академиялық оқу — 4-тест",
+  timeMinutes: 60,
+  totalQuestions: 40,
+  passages: [
+    // ═══════════ PASSAGE 1 ═══════════
+    {
+      id: "t4p1",
+      number: 1,
+      title: "The World of Coral Reefs",
+      titleKk: "Маржан рифтерінің әлемі",
+      topic: "Nature",
+      difficulty: "easy",
+      wordCount: 730,
+      paragraphs: [
+        { label: "A", text: "Coral reefs are among the most diverse and valuable ecosystems on Earth. Often referred to as the 'rainforests of the sea', they occupy less than one per cent of the ocean floor, yet they support an estimated twenty-five per cent of all marine species. These remarkable structures are found in warm, shallow waters, primarily in tropical regions, and have existed in some form for hundreds of millions of years." },
+        { label: "B", text: "Despite their appearance, coral reefs are not rocks or plants but are built by tiny animals called coral polyps. These small creatures, which are related to jellyfish and sea anemones, live in colonies and secrete a hard skeleton of calcium carbonate. As generations of polyps live and die, their skeletons accumulate, gradually building up the massive structures we recognise as coral reefs. The largest of these, the Great Barrier Reef off the coast of Australia, stretches over two thousand kilometres and is visible from space." },
+        { label: "C", text: "Coral polyps have a remarkable relationship with microscopic algae called zooxanthellae, which live within their tissues. This relationship is mutually beneficial: the algae carry out photosynthesis, providing the coral with food and oxygen, while the coral provides the algae with shelter and the compounds they need for photosynthesis. The algae are also responsible for the vibrant colours of healthy coral reefs. This partnership is so important that corals cannot survive for long without their algae." },
+        { label: "D", text: "Coral reefs provide a wide range of benefits to both marine life and human communities. They serve as nurseries and habitats for countless species of fish and other marine organisms, many of which are important sources of food for people. Reefs also protect coastlines from storms and erosion by absorbing the energy of waves. In addition, they support tourism and fishing industries that are vital to the economies of many coastal nations." },
+        { label: "E", text: "Unfortunately, coral reefs around the world are under serious threat. One of the most significant dangers is coral bleaching, which occurs when corals are stressed by rising water temperatures. Under stress, corals expel the algae living in their tissues, causing them to turn white. If conditions do not improve, the corals may die. Mass bleaching events, linked to climate change, have become increasingly frequent and severe in recent decades." },
+        { label: "F", text: "In addition to bleaching, coral reefs face threats from ocean acidification, pollution, overfishing, and destructive fishing practices. Scientists and conservationists are working to protect and restore reefs through various means, including establishing marine protected areas, developing more resilient coral varieties, and reducing the pollution that flows into the oceans. The survival of these extraordinary ecosystems will depend on concerted global action to address the threats they face." },
+      ],
+      groups: [
+        {
+          id: "t4p1g1",
+          type: "true-false-notgiven",
+          instruction: "Do the following statements agree with the information? Choose TRUE, FALSE or NOT GIVEN.",
+          instructionKk: "Тұжырымдар сәйкес пе? TRUE, FALSE немесе NOT GIVEN.",
+          questions: [
+            { id: "t4q1", type: "true-false-notgiven", number: 1, prompt: "Coral reefs cover less than one per cent of the ocean floor.", answer: "TRUE", explanation: "A абзац: мұхит түбінің 1%-нан азын алады.", paragraphRef: 0 },
+            { id: "t4q2", type: "true-false-notgiven", number: 2, prompt: "Coral reefs are a type of plant.", answer: "FALSE", explanation: "B абзац: рифтер өсімдік емес, ұсақ жануарлар (полиптер) салады.", paragraphRef: 1 },
+            { id: "t4q3", type: "true-false-notgiven", number: 3, prompt: "The Great Barrier Reef is the oldest reef in the world.", answer: "NOT GIVEN", explanation: "Оның ең көне екені айтылмаған, тек ең үлкені.", paragraphRef: 1 },
+            { id: "t4q4", type: "true-false-notgiven", number: 4, prompt: "Corals can survive indefinitely without their algae.", answer: "FALSE", explanation: "C абзац: маржандар балдырсыз ұзақ өмір сүре алмайды.", paragraphRef: 2 },
+            { id: "t4q5", type: "true-false-notgiven", number: 5, prompt: "Coral bleaching is caused by rising water temperatures.", answer: "TRUE", explanation: "E абзац: ағару су температурасының көтерілуінен болады.", paragraphRef: 4 },
+          ],
+        },
+        {
+          id: "t4p1g2",
+          type: "sentence-completion",
+          instruction: "Complete the sentences. Choose NO MORE THAN TWO WORDS from the passage.",
+          instructionKk: "Сөйлемдерді толықтырыңыз. ЕКІ СӨЗДЕН АСПАЙТЫН сөз таңдаңыз.",
+          wordLimit: 2,
+          questions: [
+            { id: "t4q6", type: "sentence-completion", number: 6, prompt: "Coral reefs are often called the rainforests of the _______.", answer: "sea", explanation: "A абзац: 'теңіздің тропикалық ормандары'.", paragraphRef: 0 },
+            { id: "t4q7", type: "sentence-completion", number: 7, prompt: "Coral reefs are built by animals called coral _______.", answer: "polyps", explanation: "B абзац: маржан полиптері.", paragraphRef: 1 },
+            { id: "t4q8", type: "sentence-completion", number: 8, prompt: "Coral skeletons are made of calcium _______.", answer: "carbonate", explanation: "B абзац: кальций карбонаты.", paragraphRef: 1 },
+            { id: "t4q9", type: "sentence-completion", number: 9, prompt: "The algae living in coral are called _______.", answer: "zooxanthellae", explanation: "C абзац: зооксантеллалар.", paragraphRef: 2 },
+            { id: "t4q10", type: "sentence-completion", number: 10, prompt: "Reefs protect coastlines from storms and _______.", answer: "erosion", explanation: "D абзац: дауыл мен эрозиядан қорғайды.", paragraphRef: 3 },
+          ],
+        },
+        {
+          id: "t4p1g3",
+          type: "multiple-choice",
+          instruction: "Choose the correct letter, A, B, C or D.",
+          instructionKk: "Дұрыс әріпті таңдаңыз: A, B, C немесе D.",
+          questions: [
+            { id: "t4q11", type: "multiple-choice", number: 11, prompt: "What is the relationship between coral and algae?", options: ["The coral harms the algae", "It is mutually beneficial", "The algae harm the coral", "They compete for food"], answer: "1", explanation: "C абзац: өзара тиімді қарым-қатынас (индекс 1).", paragraphRef: 2 },
+            { id: "t4q12", type: "multiple-choice", number: 12, prompt: "What happens during coral bleaching?", options: ["Corals grow faster", "Corals expel their algae and turn white", "Corals change colour to blue", "Corals produce more algae"], answer: "1", explanation: "E абзац: маржандар балдырды шығарып, ағарады (индекс 1).", paragraphRef: 4 },
+            { id: "t4q13", type: "multiple-choice", number: 13, prompt: "How are conservationists trying to protect reefs?", options: ["By building new reefs from rock", "By establishing marine protected areas", "By removing all fish", "By raising water temperatures"], answer: "1", explanation: "F абзац: теңіз қорғалатын аймақтарын құру (индекс 1).", paragraphRef: 5 },
+          ],
+        },
+      ],
+    },
+    // ═══════════ PASSAGE 2 ═══════════
+    {
+      id: "t4p2",
+      number: 2,
+      title: "How Languages Change",
+      titleKk: "Тілдер қалай өзгереді",
+      topic: "Linguistics",
+      difficulty: "medium",
+      wordCount: 890,
+      paragraphs: [
+        { label: "A", text: "Languages are not static; they are constantly changing and evolving. A speaker of English from a thousand years ago would find the language spoken today almost entirely incomprehensible. This process of linguistic change is gradual and usually goes unnoticed by speakers, yet over centuries it can transform a language beyond recognition. Understanding how and why languages change is a central concern of the field of linguistics." },
+        { label: "B", text: "One of the most obvious ways in which languages change is through their vocabulary. New words are constantly being created to describe new objects, ideas, and experiences. The rise of digital technology, for example, has introduced countless new words into English, such as 'internet', 'smartphone', and 'download'. At the same time, other words fall out of use as the things they describe become obsolete. Words can also change their meanings over time, sometimes quite dramatically." },
+        { label: "C", text: "Languages also borrow words from one another, particularly when cultures come into contact through trade, conquest, or migration. English is a notable example of a language that has borrowed extensively from others. Following the Norman conquest of England in 1066, thousands of French words entered the English language. English has also absorbed words from Latin, Greek, Arabic, Hindi, and many other languages, reflecting centuries of cultural exchange." },
+        { label: "D", text: "Changes in pronunciation are another important aspect of linguistic change. Over time, the way words are pronounced can shift considerably. A famous example is the Great Vowel Shift, a major change in the pronunciation of English vowels that occurred between the fourteenth and eighteenth centuries. This shift fundamentally altered the sound of English and is one reason why English spelling, which was largely fixed before the shift, often seems to bear little relation to pronunciation." },
+        { label: "E", text: "Grammar, too, changes over time, although such changes tend to occur more slowly than changes in vocabulary or pronunciation. Old English, for instance, had a complex system of word endings that indicated the grammatical function of words in a sentence. Over the centuries, most of these endings were lost, and English came to rely more heavily on word order to convey meaning. Such fundamental changes in the structure of a language can take many generations to complete." },
+        { label: "F", text: "Why do languages change at all? Linguists have identified several factors. One is simply the natural tendency for pronunciation to become more efficient, with speakers unconsciously simplifying sounds that are difficult to produce. Another factor is social: people may adopt new ways of speaking to identify with a particular group, or to distinguish themselves from others. Contact between speakers of different languages or dialects is also a powerful driver of change." },
+        { label: "G", text: "Some people view language change with concern, regarding it as a form of decay or corruption. Linguists, however, generally take a different view. They argue that language change is a natural and inevitable process, neither good nor bad, and that all living languages change continuously. From this perspective, the changes occurring in language today are simply the latest chapter in a story that has been unfolding for as long as humans have spoken." },
+      ],
+      groups: [
+        {
+          id: "t4p2g1",
+          type: "matching-headings",
+          instruction: "Choose the correct heading for paragraphs B, C, D, E and F.",
+          instructionKk: "B, C, D, E және F абзацтарына сәйкес тақырыпты таңдаңыз.",
+          headings: [
+            { id: "i", text: "Borrowing words from other languages" },
+            { id: "ii", text: "Changes in how words are pronounced" },
+            { id: "iii", text: "New and changing vocabulary" },
+            { id: "iv", text: "The reasons behind language change" },
+            { id: "v", text: "Changes in grammatical structure" },
+            { id: "vi", text: "Different attitudes to language change" },
+            { id: "vii", text: "Languages are always changing" },
+          ],
+          questions: [
+            { id: "t4q14", type: "matching-headings", number: 14, prompt: "Paragraph B", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "iii", explanation: "B абзац: жаңа және өзгеретін сөздік қор.", paragraphRef: 1 },
+            { id: "t4q15", type: "matching-headings", number: 15, prompt: "Paragraph C", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "i", explanation: "C абзац: басқа тілдерден сөз алу.", paragraphRef: 2 },
+            { id: "t4q16", type: "matching-headings", number: 16, prompt: "Paragraph D", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "ii", explanation: "D абзац: айтылымның өзгеруі.", paragraphRef: 3 },
+            { id: "t4q17", type: "matching-headings", number: 17, prompt: "Paragraph E", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "v", explanation: "E абзац: грамматикалық құрылым өзгерісі.", paragraphRef: 4 },
+            { id: "t4q18", type: "matching-headings", number: 18, prompt: "Paragraph F", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "iv", explanation: "F абзац: тіл өзгерісінің себептері.", paragraphRef: 5 },
+          ],
+        },
+        {
+          id: "t4p2g2",
+          type: "true-false-notgiven",
+          instruction: "Do the following statements agree with the information? Choose TRUE, FALSE or NOT GIVEN.",
+          instructionKk: "Тұжырымдар сәйкес пе? TRUE, FALSE немесе NOT GIVEN.",
+          questions: [
+            { id: "t4q19", type: "true-false-notgiven", number: 19, prompt: "Speakers usually notice language change as it happens.", answer: "FALSE", explanation: "A абзац: өзгеріс байқалмай жүреді.", paragraphRef: 0 },
+            { id: "t4q20", type: "true-false-notgiven", number: 20, prompt: "Many French words entered English after 1066.", answer: "TRUE", explanation: "C абзац: Норман жаулауынан кейін мыңдаған француз сөзі енді.", paragraphRef: 2 },
+            { id: "t4q21", type: "true-false-notgiven", number: 21, prompt: "Grammar changes faster than vocabulary.", answer: "FALSE", explanation: "E абзац: грамматика баяуырақ өзгереді.", paragraphRef: 4 },
+            { id: "t4q22", type: "true-false-notgiven", number: 22, prompt: "Most linguists believe language change is a form of decay.", answer: "FALSE", explanation: "G абзац: лингвистер мұны табиғи процесс деп санайды, шіру емес.", paragraphRef: 6 },
+          ],
+        },
+        {
+          id: "t4p2g3",
+          type: "sentence-completion",
+          instruction: "Complete the sentences. Choose NO MORE THAN TWO WORDS from the passage.",
+          instructionKk: "Сөйлемдерді толықтырыңыз. ЕКІ СӨЗДЕН АСПАЙТЫН сөз таңдаңыз.",
+          wordLimit: 2,
+          questions: [
+            { id: "t4q23", type: "sentence-completion", number: 23, prompt: "The _______ conquest brought many French words to English.", answer: "Norman", explanation: "C абзац: Норман жаулауы.", paragraphRef: 2 },
+            { id: "t4q24", type: "sentence-completion", number: 24, prompt: "The Great Vowel _______ changed English pronunciation.", answer: "Shift", explanation: "D абзац: Ұлы дауысты ауысуы.", paragraphRef: 3 },
+            { id: "t4q25", type: "sentence-completion", number: 25, prompt: "Old English used word _______ to show grammatical function.", answer: "endings", explanation: "E абзац: сөз жалғаулары.", paragraphRef: 4 },
+            { id: "t4q26", type: "sentence-completion", number: 26, prompt: "Modern English relies more on word _______ to convey meaning.", answer: "order", explanation: "E абзац: сөз тәртібіне сүйенеді.", paragraphRef: 4 },
+          ],
+        },
+      ],
+    },
+    // ═══════════ PASSAGE 3 ═══════════
+    {
+      id: "t4p3",
+      number: 3,
+      title: "The Science of Exercise",
+      titleKk: "Жаттығу ғылымы",
+      topic: "Health",
+      difficulty: "hard",
+      wordCount: 940,
+      paragraphs: [
+        { label: "A", text: "The benefits of regular physical exercise have been recognised for thousands of years, but only relatively recently has science begun to fully understand the profound effects that exercise has on the human body and mind. Modern research has revealed that exercise influences virtually every system in the body, from the muscles and bones to the heart, brain, and immune system. These findings have transformed our understanding of the role that physical activity plays in maintaining health and preventing disease." },
+        { label: "B", text: "When a person exercises, a complex series of physiological changes takes place. The heart beats faster to pump more blood to the working muscles, and breathing rate increases to supply more oxygen. Over time, regular exercise strengthens the heart, allowing it to pump blood more efficiently. This is why physically active people typically have a lower resting heart rate than those who are sedentary. Regular exercise also improves the function of blood vessels and helps to regulate blood pressure." },
+        { label: "C", text: "Exercise has a particularly important effect on muscles and bones. When muscles are subjected to the stress of physical activity, they adapt by becoming stronger and larger, a process known as hypertrophy. Similarly, weight-bearing exercise stimulates the bones to become denser and stronger. This is especially important for preventing osteoporosis, a condition in which bones become weak and brittle, which is common in older people, particularly women." },
+        { label: "D", text: "Perhaps some of the most surprising discoveries in recent years concern the effects of exercise on the brain. Research has shown that physical activity stimulates the production of new brain cells and strengthens the connections between them. Exercise has been found to improve memory, concentration, and other cognitive functions. It can also help to protect against age-related cognitive decline and may reduce the risk of developing conditions such as dementia." },
+        { label: "E", text: "Exercise also has powerful effects on mental health and mood. Physical activity stimulates the release of chemicals in the brain, including endorphins, which can produce feelings of happiness and wellbeing. Numerous studies have demonstrated that regular exercise can be effective in reducing symptoms of depression and anxiety. For this reason, exercise is increasingly being recognised as an important component in the treatment of mental health conditions." },
+        { label: "F", text: "Despite the well-established benefits of exercise, a large proportion of people worldwide do not get enough physical activity. Modern lifestyles, characterised by sedentary work and abundant labour-saving technology, have made it easy to be inactive. Public health authorities generally recommend that adults engage in at least 150 minutes of moderate-intensity exercise per week, yet many people fall well short of this target. Encouraging greater levels of physical activity has become a major public health priority." },
+        { label: "G", text: "Importantly, research suggests that the benefits of exercise can be obtained from relatively modest amounts of activity, and that it is never too late to start. Even people who have been inactive for most of their lives can experience significant health improvements by becoming more active. The key, experts suggest, is to find forms of activity that are enjoyable and sustainable, and to incorporate movement into daily life in whatever ways are practical and achievable." },
+      ],
+      groups: [
+        {
+          id: "t4p3g1",
+          type: "multiple-choice",
+          instruction: "Choose the correct letter, A, B, C or D.",
+          instructionKk: "Дұрыс әріпті таңдаңыз: A, B, C немесе D.",
+          questions: [
+            { id: "t4q27", type: "multiple-choice", number: 27, prompt: "Why do physically active people have a lower resting heart rate?", options: ["They have smaller hearts", "Regular exercise strengthens the heart to pump more efficiently", "They breathe more slowly", "They have less blood"], answer: "1", explanation: "B абзац: жаттығу жүректі күшейтіп, тиімдірек соғуға мүмкіндік береді (индекс 1).", paragraphRef: 1 },
+            { id: "t4q28", type: "multiple-choice", number: 28, prompt: "What is hypertrophy?", options: ["A type of disease", "The process of muscles becoming stronger and larger", "A brain function", "A breathing technique"], answer: "1", explanation: "C абзац: бұлшықеттердің күшейіп, үлкеюі (индекс 1).", paragraphRef: 2 },
+            { id: "t4q29", type: "multiple-choice", number: 29, prompt: "What effect does exercise have on the brain?", options: ["It reduces brain cells", "It stimulates the production of new brain cells", "It has no effect", "It only affects memory"], answer: "1", explanation: "D абзац: жаңа ми жасушаларының өндірісін ынталандырады (индекс 1).", paragraphRef: 3 },
+            { id: "t4q30", type: "multiple-choice", number: 30, prompt: "How much exercise do health authorities recommend per week?", options: ["50 minutes", "At least 150 minutes of moderate-intensity exercise", "300 minutes", "No specific amount"], answer: "1", explanation: "F абзац: аптасына кемінде 150 минут орташа қарқынды (индекс 1).", paragraphRef: 5 },
+          ],
+        },
+        {
+          id: "t4p3g2",
+          type: "yes-no-notgiven",
+          instruction: "Do the following statements agree with the claims of the writer? Choose YES, NO or NOT GIVEN.",
+          instructionKk: "Тұжырымдар автор пікірімен сәйкес пе? YES, NO немесе NOT GIVEN.",
+          questions: [
+            { id: "t4q31", type: "yes-no-notgiven", number: 31, prompt: "Exercise affects almost every system in the body.", answer: "YES", explanation: "A абзац: дененің барлық дерлік жүйесіне әсер етеді.", paragraphRef: 0 },
+            { id: "t4q32", type: "yes-no-notgiven", number: 32, prompt: "Osteoporosis is more common in young men than older women.", answer: "NO", explanation: "C абзац: остеопороз егде адамдарда, әсіресе әйелдерде жиі.", paragraphRef: 2 },
+            { id: "t4q33", type: "yes-no-notgiven", number: 33, prompt: "Exercise can help reduce symptoms of depression.", answer: "YES", explanation: "E абзац: депрессия симптомдарын азайтуға көмектеседі.", paragraphRef: 4 },
+            { id: "t4q34", type: "yes-no-notgiven", number: 34, prompt: "Most people worldwide get enough exercise.", answer: "NO", explanation: "F абзац: көп адам жеткілікті жаттығу алмайды.", paragraphRef: 5 },
+          ],
+        },
+        {
+          id: "t4p3g3",
+          type: "summary-completion",
+          instruction: "Complete the summary. Choose NO MORE THAN TWO WORDS from the passage.",
+          instructionKk: "Қорытындыны толықтырыңыз. ЕКІ СӨЗДЕН АСПАЙТЫН сөз таңдаңыз.",
+          wordLimit: 2,
+          questions: [
+            { id: "t4q35", type: "summary-completion", number: 35, prompt: "When exercising, the heart pumps more _______ to the muscles.", answer: "blood", explanation: "B абзац: бұлшықетке көп қан айдайды.", paragraphRef: 1 },
+            { id: "t4q36", type: "summary-completion", number: 36, prompt: "Weight-bearing exercise makes bones _______ and stronger.", answer: "denser", explanation: "C абзац: сүйектерді тығызырақ етеді.", paragraphRef: 2 },
+            { id: "t4q37", type: "summary-completion", number: 37, prompt: "Exercise stimulates the release of _______ in the brain.", answer: "endorphins", explanation: "E абзац: эндорфиндердің бөлінуі.", paragraphRef: 4 },
+            { id: "t4q38", type: "summary-completion", number: 38, prompt: "Exercise may reduce the risk of developing _______.", answer: "dementia", explanation: "D абзац: деменция қаупін азайтады.", paragraphRef: 3 },
+            { id: "t4q39", type: "summary-completion", number: 39, prompt: "Modern lifestyles involve a lot of _______ work.", answer: "sedentary", explanation: "F абзац: отырықшы жұмыс.", paragraphRef: 5 },
+            { id: "t4q40", type: "summary-completion", number: 40, prompt: "Experts say it is never too _______ to start exercising.", answer: "late", explanation: "G абзац: бастауға ешқашан кеш емес.", paragraphRef: 6 },
+          ],
+        },
+      ],
+    },
+  ],
+};

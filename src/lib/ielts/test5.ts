@@ -1,0 +1,200 @@
+// filepath: src/lib/ielts/test5.ts
+// IELTS Reading — 5-тест. Жаңа тақырыптар, 40 сұрақ.
+
+import type { ReadingTest } from "@/types/ielts";
+
+export const test5: ReadingTest = {
+  id: "reading-test-5",
+  title: "Academic Reading — Test 5",
+  titleKk: "Академиялық оқу — 5-тест",
+  timeMinutes: 60,
+  totalQuestions: 40,
+  passages: [
+    // ═══════════ PASSAGE 1 ═══════════
+    {
+      id: "t5p1",
+      number: 1,
+      title: "The History of Chocolate",
+      titleKk: "Шоколад тарихы",
+      topic: "History",
+      difficulty: "easy",
+      wordCount: 720,
+      paragraphs: [
+        { label: "A", text: "Chocolate is enjoyed by people all over the world today, but its history stretches back thousands of years to the ancient civilisations of Central America. The cacao tree, from which chocolate is made, is native to the tropical regions of the Americas. The Olmec, one of the earliest known civilisations in the region, are believed to have been the first to cultivate cacao and consume it in some form, as early as 1500 BC." },
+        { label: "B", text: "The Maya and later the Aztecs developed a deep appreciation for chocolate, which they consumed as a bitter drink. Unlike the sweet chocolate we know today, this beverage was made from ground cacao beans mixed with water, spices, and sometimes chilli peppers. Chocolate held great cultural and religious significance for these civilisations. The Aztecs valued cacao beans so highly that they were used as a form of currency, and chocolate was associated with the gods." },
+        { label: "C", text: "Chocolate was introduced to Europe in the sixteenth century, following the Spanish conquest of the Aztec empire. The Spanish initially found the bitter drink unpalatable, but they discovered that adding sugar and honey made it more appealing to European tastes. For a long time, chocolate remained an expensive luxury enjoyed only by the wealthy elite. It was consumed exclusively as a drink, and the secret of its preparation was closely guarded by the Spanish for many years." },
+        { label: "D", text: "Over time, knowledge of chocolate spread throughout Europe, and it became fashionable among the aristocracy. Chocolate houses, similar to coffee houses, opened in cities across the continent. However, chocolate remained a drink until the nineteenth century, when a series of technological innovations transformed it. In 1828, a Dutch chemist invented a method for pressing the fat from cacao beans, producing cocoa powder and making chocolate smoother and more affordable." },
+        { label: "E", text: "The development of solid chocolate that could be eaten rather than drunk was a major milestone. In 1847, a British company produced the first chocolate bar by combining cocoa powder, sugar, and cocoa butter. Later innovations included the invention of milk chocolate in Switzerland, achieved by adding condensed milk to the chocolate mixture. These developments transformed chocolate from a luxury drink into an affordable treat that could be enjoyed by people of all social classes." },
+        { label: "F", text: "Today, chocolate is a global industry worth billions of dollars. The cacao tree is now cultivated in many tropical regions around the world, with West Africa producing the majority of the world's cacao. However, the chocolate industry faces challenges, including concerns about labour practices on cacao farms and the environmental impact of cacao cultivation. Many consumers and companies are now seeking to ensure that chocolate is produced in a more ethical and sustainable manner." },
+      ],
+      groups: [
+        {
+          id: "t5p1g1",
+          type: "true-false-notgiven",
+          instruction: "Do the following statements agree with the information? Choose TRUE, FALSE or NOT GIVEN.",
+          instructionKk: "Тұжырымдар сәйкес пе? TRUE, FALSE немесе NOT GIVEN.",
+          questions: [
+            { id: "t5q1", type: "true-false-notgiven", number: 1, prompt: "The cacao tree originally came from the Americas.", answer: "TRUE", explanation: "A абзац: какао ағашы Американың тропикалық аймақтарынан.", paragraphRef: 0 },
+            { id: "t5q2", type: "true-false-notgiven", number: 2, prompt: "The Aztecs drank sweet chocolate.", answer: "FALSE", explanation: "B абзац: ацтектер ащы сусын ішті, тәтті емес.", paragraphRef: 1 },
+            { id: "t5q3", type: "true-false-notgiven", number: 3, prompt: "Cacao beans were used as money by the Aztecs.", answer: "TRUE", explanation: "B абзац: какао дәндері валюта ретінде қолданылды.", paragraphRef: 1 },
+            { id: "t5q4", type: "true-false-notgiven", number: 4, prompt: "The Spanish immediately loved the bitter chocolate drink.", answer: "FALSE", explanation: "C абзац: испандар алдымен ұнатпады, кейін қант қосты.", paragraphRef: 2 },
+            { id: "t5q5", type: "true-false-notgiven", number: 5, prompt: "Milk chocolate was first made in France.", answer: "FALSE", explanation: "E абзац: сүтті шоколад Швейцарияда жасалды.", paragraphRef: 4 },
+          ],
+        },
+        {
+          id: "t5p1g2",
+          type: "sentence-completion",
+          instruction: "Complete the sentences. Choose NO MORE THAN TWO WORDS from the passage.",
+          instructionKk: "Сөйлемдерді толықтырыңыз. ЕКІ СӨЗДЕН АСПАЙТЫН сөз таңдаңыз.",
+          wordLimit: 2,
+          questions: [
+            { id: "t5q6", type: "sentence-completion", number: 6, prompt: "The _______ were the first to cultivate cacao.", answer: "Olmec", explanation: "A абзац: ольмектер алғаш өсірді.", paragraphRef: 0 },
+            { id: "t5q7", type: "sentence-completion", number: 7, prompt: "The Aztec chocolate drink sometimes contained _______ peppers.", answer: "chilli", acceptableAnswers: ["chili"], explanation: "B абзац: кейде чили бұрышы.", paragraphRef: 1 },
+            { id: "t5q8", type: "sentence-completion", number: 8, prompt: "In 1828, a Dutch chemist invented a way to make cocoa _______.", answer: "powder", explanation: "D абзац: какао ұнтағы.", paragraphRef: 3 },
+            { id: "t5q9", type: "sentence-completion", number: 9, prompt: "The first chocolate bar was made by a _______ company.", answer: "British", explanation: "E абзац: британдық компания.", paragraphRef: 4 },
+            { id: "t5q10", type: "sentence-completion", number: 10, prompt: "Today, most of the world's cacao is produced in West _______.", answer: "Africa", explanation: "F абзац: Батыс Африка.", paragraphRef: 5 },
+          ],
+        },
+        {
+          id: "t5p1g3",
+          type: "multiple-choice",
+          instruction: "Choose the correct letter, A, B, C or D.",
+          instructionKk: "Дұрыс әріпті таңдаңыз: A, B, C немесе D.",
+          questions: [
+            { id: "t5q11", type: "multiple-choice", number: 11, prompt: "How did the Spanish make chocolate more appealing?", options: ["By adding chilli", "By adding sugar and honey", "By drinking it cold", "By removing the cacao"], answer: "1", explanation: "C абзац: қант пен бал қосып (индекс 1).", paragraphRef: 2 },
+            { id: "t5q12", type: "multiple-choice", number: 12, prompt: "What did the 1828 invention produce?", options: ["Milk chocolate", "Cocoa powder", "Chocolate bars", "Hot chocolate"], answer: "1", explanation: "D абзац: какао ұнтағын өндірді (индекс 1).", paragraphRef: 3 },
+            { id: "t5q13", type: "multiple-choice", number: 13, prompt: "What challenge does the modern chocolate industry face?", options: ["Too little demand", "Concerns about labour and environment", "Lack of cacao trees", "Too much sugar"], answer: "1", explanation: "F абзац: еңбек және қоршаған орта мәселелері (индекс 1).", paragraphRef: 5 },
+          ],
+        },
+      ],
+    },
+    // ═══════════ PASSAGE 2 ═══════════
+    {
+      id: "t5p2",
+      number: 2,
+      title: "The Age of Exploration",
+      titleKk: "Ұлы географиялық ашулар дәуірі",
+      topic: "History",
+      difficulty: "medium",
+      wordCount: 880,
+      paragraphs: [
+        { label: "A", text: "The period from the fifteenth to the seventeenth century is often referred to as the Age of Exploration, a time when European powers undertook ambitious voyages of discovery across the world's oceans. During this remarkable era, European explorers mapped previously unknown coastlines, established new trade routes, and made contact with civilisations that had developed in isolation from one another for thousands of years. The consequences of these voyages, both positive and negative, would reshape the entire world." },
+        { label: "B", text: "Several factors combined to make the Age of Exploration possible. Advances in shipbuilding produced vessels capable of undertaking long ocean voyages, while improvements in navigation, including the use of the compass and the astrolabe, allowed sailors to determine their position more accurately. Equally important were the economic motivations driving exploration, particularly the desire to find new routes to the rich spice markets of Asia, bypassing the overland trade routes controlled by intermediaries." },
+        { label: "C", text: "Portugal led the way in the early phase of exploration. Under the patronage of Prince Henry, often called 'the Navigator', Portuguese sailors gradually explored the western coast of Africa. In 1498, the Portuguese explorer Vasco da Gama succeeded in sailing around the southern tip of Africa and reaching India, establishing a sea route to Asia that would prove enormously profitable. This achievement gave Portugal control over a lucrative trade in spices and other goods." },
+        { label: "D", text: "Spain, Portugal's neighbour and rival, also became a major force in exploration. In 1492, the Italian navigator Christopher Columbus, sailing on behalf of Spain, set out to reach Asia by sailing west across the Atlantic. Instead, he reached the Americas, a landmass previously unknown to Europeans. Although Columbus himself never realised the true significance of his discovery, his voyages opened the way for European exploration and colonisation of the American continents." },
+        { label: "E", text: "The voyages of exploration had profound and far-reaching consequences. They led to the establishment of vast colonial empires and the development of global trade networks that connected the continents as never before. One significant result was the so-called Columbian Exchange, the widespread transfer of plants, animals, and diseases between the Old World and the New World. Crops such as potatoes and maize were introduced to Europe, while horses and cattle were brought to the Americas." },
+        { label: "F", text: "However, the Age of Exploration also had devastating consequences, particularly for the indigenous peoples of the Americas. The arrival of Europeans brought diseases, such as smallpox, to which the native populations had no immunity. These diseases spread rapidly and killed millions of people, causing the collapse of entire societies. The era also saw the beginning of the transatlantic slave trade, in which millions of Africans were forcibly transported to the Americas." },
+        { label: "G", text: "The Age of Exploration marked a turning point in human history, initiating an era of global interconnection that continues to this day. It expanded geographical knowledge enormously and laid the foundations for the modern globalised world. At the same time, it unleashed forces of colonialism and exploitation whose consequences are still being felt. Understanding this complex and consequential period remains essential to making sense of the world we live in today." },
+      ],
+      groups: [
+        {
+          id: "t5p2g1",
+          type: "matching-headings",
+          instruction: "Choose the correct heading for paragraphs B, C, D, E and F.",
+          instructionKk: "B, C, D, E және F абзацтарына сәйкес тақырыпты таңдаңыз.",
+          headings: [
+            { id: "i", text: "Spain reaches the Americas" },
+            { id: "ii", text: "The exchange between two worlds" },
+            { id: "iii", text: "What made exploration possible" },
+            { id: "iv", text: "Portugal finds a route to Asia" },
+            { id: "v", text: "The devastating human cost" },
+            { id: "vi", text: "A lasting legacy" },
+            { id: "vii", text: "The beginning of a new era" },
+          ],
+          questions: [
+            { id: "t5q14", type: "matching-headings", number: 14, prompt: "Paragraph B", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "iii", explanation: "B абзац: ашуды мүмкін еткен факторлар.", paragraphRef: 1 },
+            { id: "t5q15", type: "matching-headings", number: 15, prompt: "Paragraph C", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "iv", explanation: "C абзац: Португалия Азияға жол табады.", paragraphRef: 2 },
+            { id: "t5q16", type: "matching-headings", number: 16, prompt: "Paragraph D", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "i", explanation: "D абзац: Испания Америкаға жетеді.", paragraphRef: 3 },
+            { id: "t5q17", type: "matching-headings", number: 17, prompt: "Paragraph E", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "ii", explanation: "E абзац: екі әлем арасындағы алмасу.", paragraphRef: 4 },
+            { id: "t5q18", type: "matching-headings", number: 18, prompt: "Paragraph F", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "v", explanation: "F абзац: ауыр адами шығын.", paragraphRef: 5 },
+          ],
+        },
+        {
+          id: "t5p2g2",
+          type: "true-false-notgiven",
+          instruction: "Do the following statements agree with the information? Choose TRUE, FALSE or NOT GIVEN.",
+          instructionKk: "Тұжырымдар сәйкес пе? TRUE, FALSE немесе NOT GIVEN.",
+          questions: [
+            { id: "t5q19", type: "true-false-notgiven", number: 19, prompt: "The compass and astrolabe helped sailors navigate.", answer: "TRUE", explanation: "B абзац: компас пен астролябия навигацияға көмектесті.", paragraphRef: 1 },
+            { id: "t5q20", type: "true-false-notgiven", number: 20, prompt: "Vasco da Gama reached India in 1498.", answer: "TRUE", explanation: "C абзац: 1498 жылы Үндістанға жетті.", paragraphRef: 2 },
+            { id: "t5q21", type: "true-false-notgiven", number: 21, prompt: "Columbus knew he had reached a new continent.", answer: "FALSE", explanation: "D абзац: Колумб ашуының маңызын түсінбеді.", paragraphRef: 3 },
+            { id: "t5q22", type: "true-false-notgiven", number: 22, prompt: "Potatoes were introduced to Europe from the Americas.", answer: "TRUE", explanation: "E абзац: картоп Америкадан Еуропаға енгізілді.", paragraphRef: 4 },
+          ],
+        },
+        {
+          id: "t5p2g3",
+          type: "sentence-completion",
+          instruction: "Complete the sentences. Choose NO MORE THAN TWO WORDS from the passage.",
+          instructionKk: "Сөйлемдерді толықтырыңыз. ЕКІ СӨЗДЕН АСПАЙТЫН сөз таңдаңыз.",
+          wordLimit: 2,
+          questions: [
+            { id: "t5q23", type: "sentence-completion", number: 23, prompt: "Explorers wanted to find new routes to the _______ markets of Asia.", answer: "spice", explanation: "B абзац: дәмдеуіш нарықтары.", paragraphRef: 1 },
+            { id: "t5q24", type: "sentence-completion", number: 24, prompt: "Prince Henry was known as 'the _______'.", answer: "Navigator", explanation: "C абзац: 'Теңізші' Генрих.", paragraphRef: 2 },
+            { id: "t5q25", type: "sentence-completion", number: 25, prompt: "The transfer of plants and animals is called the _______ Exchange.", answer: "Columbian", explanation: "E абзац: Колумб алмасуы.", paragraphRef: 4 },
+            { id: "t5q26", type: "sentence-completion", number: 26, prompt: "Native populations had no immunity to diseases like _______.", answer: "smallpox", explanation: "F абзац: шешек ауруы.", paragraphRef: 5 },
+          ],
+        },
+      ],
+    },
+    // ═══════════ PASSAGE 3 ═══════════
+    {
+      id: "t5p3",
+      number: 3,
+      title: "Understanding Climate Change",
+      titleKk: "Климаттың өзгеруін түсіну",
+      topic: "Environment",
+      difficulty: "hard",
+      wordCount: 950,
+      paragraphs: [
+        { label: "A", text: "Climate change is widely regarded as one of the most pressing challenges facing humanity in the twenty-first century. While the Earth's climate has always varied naturally over long periods, the changes observed in recent decades have been unusually rapid and are overwhelmingly attributed by scientists to human activity. Understanding the causes, effects, and potential solutions to climate change has become a central concern for governments, scientists, and citizens around the world." },
+        { label: "B", text: "The fundamental mechanism behind climate change is the greenhouse effect. Certain gases in the Earth's atmosphere, known as greenhouse gases, trap heat from the sun, preventing it from escaping back into space. This natural process is essential for life, as without it the Earth would be too cold to support most living things. However, human activities have significantly increased the concentration of these gases, intensifying the greenhouse effect and causing the planet to warm." },
+        { label: "C", text: "The primary cause of the increase in greenhouse gases is the burning of fossil fuels, such as coal, oil, and natural gas, which releases carbon dioxide into the atmosphere. Since the beginning of the Industrial Revolution, the concentration of carbon dioxide in the atmosphere has risen dramatically. Other human activities, including deforestation and certain agricultural practices, also contribute to the problem by releasing greenhouse gases or reducing the planet's capacity to absorb them." },
+        { label: "D", text: "The effects of climate change are already being observed around the world. Global average temperatures have risen, and many regions are experiencing more frequent and severe heatwaves, droughts, and storms. The melting of glaciers and polar ice is causing sea levels to rise, threatening coastal communities. Changes in temperature and rainfall patterns are affecting agriculture and ecosystems, and many species are struggling to adapt to the rapidly changing conditions." },
+        { label: "E", text: "The consequences of unchecked climate change could be severe. Scientists warn that continued warming could lead to the displacement of millions of people, widespread food and water shortages, the loss of countless species, and significant economic disruption. The impacts are likely to fall most heavily on the world's poorest populations, who have contributed least to the problem but are often the most vulnerable to its effects and the least able to adapt." },
+        { label: "F", text: "Addressing climate change requires action on multiple fronts. The most important step is to reduce emissions of greenhouse gases, primarily by transitioning from fossil fuels to renewable sources of energy. Other measures include improving energy efficiency, protecting and restoring forests, and developing new technologies to remove carbon dioxide from the atmosphere. International cooperation is essential, as climate change is a global problem that no single country can solve alone." },
+        { label: "G", text: "Despite the scale of the challenge, there are reasons for cautious optimism. Awareness of climate change has grown enormously, and many countries, companies, and individuals are taking action to reduce their emissions. The cost of renewable energy has fallen dramatically, making the transition to clean energy increasingly feasible. While the challenge remains immense, concerted and sustained action offers the hope of avoiding the worst consequences and building a more sustainable future." },
+      ],
+      groups: [
+        {
+          id: "t5p3g1",
+          type: "multiple-choice",
+          instruction: "Choose the correct letter, A, B, C or D.",
+          instructionKk: "Дұрыс әріпті таңдаңыз: A, B, C немесе D.",
+          questions: [
+            { id: "t5q27", type: "multiple-choice", number: 27, prompt: "What do greenhouse gases do?", options: ["They cool the planet", "They trap heat from the sun", "They produce oxygen", "They block sunlight"], answer: "1", explanation: "B абзац: күн жылуын ұстайды (индекс 1).", paragraphRef: 1 },
+            { id: "t5q28", type: "multiple-choice", number: 28, prompt: "What is the primary cause of increased greenhouse gases?", options: ["Natural climate variation", "The burning of fossil fuels", "Volcanic eruptions", "Ocean currents"], answer: "1", explanation: "C абзац: қазба отынды жағу (индекс 1).", paragraphRef: 2 },
+            { id: "t5q29", type: "multiple-choice", number: 29, prompt: "Who is likely to be most affected by climate change?", options: ["Wealthy nations", "The world's poorest populations", "Industrial companies", "No one in particular"], answer: "1", explanation: "E абзац: әлемнің ең кедей халқы (индекс 1).", paragraphRef: 4 },
+            { id: "t5q30", type: "multiple-choice", number: 30, prompt: "What is the most important step to address climate change?", options: ["Building more cities", "Reducing greenhouse gas emissions", "Increasing fossil fuel use", "Ignoring the problem"], answer: "1", explanation: "F абзац: парниктік газ шығарындыларын азайту (индекс 1).", paragraphRef: 5 },
+          ],
+        },
+        {
+          id: "t5p3g2",
+          type: "yes-no-notgiven",
+          instruction: "Do the following statements agree with the claims of the writer? Choose YES, NO or NOT GIVEN.",
+          instructionKk: "Тұжырымдар автор пікірімен сәйкес пе? YES, NO немесе NOT GIVEN.",
+          questions: [
+            { id: "t5q31", type: "yes-no-notgiven", number: 31, prompt: "The greenhouse effect is entirely harmful to life.", answer: "NO", explanation: "B абзац: табиғи парниктік эффект өмір үшін қажет.", paragraphRef: 1 },
+            { id: "t5q32", type: "yes-no-notgiven", number: 32, prompt: "The effects of climate change are already visible.", answer: "YES", explanation: "D абзац: әсерлер қазірдің өзінде байқалуда.", paragraphRef: 3 },
+            { id: "t5q33", type: "yes-no-notgiven", number: 33, prompt: "Climate change can be solved by one country alone.", answer: "NO", explanation: "F абзац: бірде-бір ел жалғыз шеше алмайды.", paragraphRef: 5 },
+            { id: "t5q34", type: "yes-no-notgiven", number: 34, prompt: "There are some reasons to be optimistic about climate change.", answer: "YES", explanation: "G абзац: сақ оптимизмге негіз бар.", paragraphRef: 6 },
+          ],
+        },
+        {
+          id: "t5p3g3",
+          type: "summary-completion",
+          instruction: "Complete the summary. Choose NO MORE THAN TWO WORDS from the passage.",
+          instructionKk: "Қорытындыны толықтырыңыз. ЕКІ СӨЗДЕН АСПАЙТЫН сөз таңдаңыз.",
+          wordLimit: 2,
+          questions: [
+            { id: "t5q35", type: "summary-completion", number: 35, prompt: "Greenhouse gases trap heat and prevent it from escaping into _______.", answer: "space", explanation: "B абзац: ғарышқа кетуіне жол бермейді.", paragraphRef: 1 },
+            { id: "t5q36", type: "summary-completion", number: 36, prompt: "Burning fossil fuels releases carbon _______ into the atmosphere.", answer: "dioxide", explanation: "C абзац: көмірқышқыл газы.", paragraphRef: 2 },
+            { id: "t5q37", type: "summary-completion", number: 37, prompt: "The melting of ice is causing sea _______ to rise.", answer: "levels", explanation: "D абзац: теңіз деңгейі көтерілуде.", paragraphRef: 3 },
+            { id: "t5q38", type: "summary-completion", number: 38, prompt: "The best solution is transitioning to _______ energy.", answer: "renewable", explanation: "F абзац: жаңартылатын энергия.", paragraphRef: 5 },
+            { id: "t5q39", type: "summary-completion", number: 39, prompt: "Protecting and restoring _______ can help absorb greenhouse gases.", answer: "forests", explanation: "F абзац: ормандарды қорғау.", paragraphRef: 5 },
+            { id: "t5q40", type: "summary-completion", number: 40, prompt: "International _______ is essential to solve the problem.", answer: "cooperation", explanation: "F абзац: халықаралық ынтымақтастық.", paragraphRef: 5 },
+          ],
+        },
+      ],
+    },
+  ],
+};

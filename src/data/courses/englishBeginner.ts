@@ -1,0 +1,203 @@
+// filepath: src/data/courses/englishBeginner.ts
+// Ағылшын тілі — Бастауыш деңгей курсы.
+// Бөлімдер: Сәлемдесу, Отбасы, Сандар, Күнделікті өмір.
+
+import type { CourseLevel } from "@/types/course";
+
+export const englishBeginner: CourseLevel = {
+  id: "en-beginner",
+  level: "beginner",
+  title: "English for Beginners",
+  titleKk: "Бастауышқа арналған ағылшын",
+  description: "Start your English journey with the basics",
+  descriptionKk: "Ағылшын тілін негізден бастаңыз",
+  lang: "en",
+  units: [
+    // ═══════════ БӨЛІМ 1: Сәлемдесу ═══════════
+    {
+      id: "u1",
+      number: 1,
+      title: "Greetings",
+      titleKk: "Сәлемдесу",
+      description: "Learn how to greet people",
+      descriptionKk: "Адамдармен сәлемдесуді үйреніңіз",
+      icon: "Hand",
+      color: "accent-green",
+      lessons: [
+        // Сабақ 1.1 — Сөздік
+        {
+          id: "l1-1",
+          type: "vocabulary",
+          title: "Basic Greetings",
+          titleKk: "Негізгі сәлемдесулер",
+          description: "Common greeting words",
+          descriptionKk: "Жиі қолданылатын сәлемдесу сөздері",
+          xpReward: 20,
+          estimatedMinutes: 5,
+          exercises: [
+            { id: "e1", type: "flashcard", prompt: "Learn this word", term: "Hello", translation: "Сәлем", phonetic: "/həˈloʊ/", answer: "Сәлем" },
+            { id: "e2", type: "flashcard", prompt: "Learn this word", term: "Goodbye", translation: "Сау бол", phonetic: "/ɡʊdˈbaɪ/", answer: "Сау бол" },
+            { id: "e3", type: "flashcard", prompt: "Learn this word", term: "Good morning", translation: "Қайырлы таң", phonetic: "/ɡʊd ˈmɔːrnɪŋ/", answer: "Қайырлы таң" },
+            { id: "e4", type: "flashcard", prompt: "Learn this word", term: "Thank you", translation: "Рахмет", phonetic: "/θæŋk juː/", answer: "Рахмет" },
+            { id: "e5", type: "multiple-choice", prompt: "What does 'Hello' mean?", options: ["Сау бол", "Сәлем", "Рахмет", "Кешіріңіз"], answer: "Сәлем" },
+            { id: "e6", type: "multiple-choice", prompt: "How do you say 'Қайырлы таң'?", options: ["Good night", "Good morning", "Goodbye", "Hello"], answer: "Good morning" },
+            { id: "e7", type: "translation", prompt: "Translate: 'Thank you'", term: "Thank you", answer: "рахмет", acceptableAnswers: ["рахмет", "рақмет"] },
+          ],
+        },
+        // Сабақ 1.2 — Грамматика
+        {
+          id: "l1-2",
+          type: "grammar",
+          title: "The verb 'to be'",
+          titleKk: "'To be' етістігі",
+          description: "Learn am, is, are",
+          descriptionKk: "Am, is, are үйреніңіз",
+          xpReward: 25,
+          estimatedMinutes: 8,
+          theory: {
+            explanation: "The verb 'to be' has three forms in the present tense: 'am' (with I), 'is' (with he/she/it), and 'are' (with you/we/they).",
+            explanationKk: "'To be' етістігінің осы шақта үш формасы бар: 'am' (I-мен), 'is' (he/she/it-пен), 'are' (you/we/they-мен).",
+            examples: [
+              { text: "I am a student.", translation: "Мен студентпін." },
+              { text: "She is happy.", translation: "Ол бақытты." },
+              { text: "They are friends.", translation: "Олар дос." },
+            ],
+          },
+          exercises: [
+            { id: "e1", type: "fill-blank", prompt: "Complete the sentence", sentence: "I ___ a teacher.", answer: "am", hint: "I-мен қолданылады" },
+            { id: "e2", type: "fill-blank", prompt: "Complete the sentence", sentence: "She ___ my sister.", answer: "is", hint: "she-мен қолданылады" },
+            { id: "e3", type: "fill-blank", prompt: "Complete the sentence", sentence: "We ___ students.", answer: "are", hint: "we-мен қолданылады" },
+            { id: "e4", type: "multiple-choice", prompt: "Choose: 'He ___ tall.'", options: ["am", "is", "are", "be"], answer: "is" },
+            { id: "e5", type: "multiple-choice", prompt: "Choose: 'You ___ welcome.'", options: ["am", "is", "are", "be"], answer: "are" },
+            { id: "e6", type: "word-order", prompt: "Put in order", sentence: "am | I | happy", answer: "I am happy" },
+          ],
+        },
+        // Сабақ 1.3 — Жаттығу
+        {
+          id: "l1-3",
+          type: "practice",
+          title: "Greetings Practice",
+          titleKk: "Сәлемдесу жаттығуы",
+          description: "Review what you learned",
+          descriptionKk: "Үйренгеніңізді қайталаңыз",
+          xpReward: 30,
+          estimatedMinutes: 6,
+          exercises: [
+            { id: "e1", type: "multiple-choice", prompt: "Someone says 'Hello'. You reply:", options: ["Goodbye", "Hello", "Thank you", "Good night"], answer: "Hello" },
+            { id: "e2", type: "translation", prompt: "Translate: 'Сау бол'", term: "Сау бол", answer: "goodbye", acceptableAnswers: ["goodbye", "good bye", "bye"] },
+            { id: "e3", type: "fill-blank", prompt: "Complete", sentence: "Good ___, see you tomorrow!", answer: "night", hint: "Кешке айтылады" },
+            { id: "e4", type: "match-pairs", prompt: "Match the pairs", answer: "matched" },
+            { id: "e5", type: "multiple-choice", prompt: "Which is a greeting?", options: ["Table", "Good morning", "Apple", "Run"], answer: "Good morning" },
+          ],
+        },
+      ],
+    },
+    // ═══════════ БӨЛІМ 2: Отбасы ═══════════
+    {
+      id: "u2",
+      number: 2,
+      title: "Family",
+      titleKk: "Отбасы",
+      description: "Talk about your family",
+      descriptionKk: "Отбасыңыз туралы сөйлесіңіз",
+      icon: "Users",
+      color: "accent-blue",
+      lessons: [
+        {
+          id: "l2-1",
+          type: "vocabulary",
+          title: "Family Members",
+          titleKk: "Отбасы мүшелері",
+          description: "Words for family",
+          descriptionKk: "Отбасыға қатысты сөздер",
+          xpReward: 20,
+          estimatedMinutes: 5,
+          exercises: [
+            { id: "e1", type: "flashcard", prompt: "Learn", term: "Mother", translation: "Ана", phonetic: "/ˈmʌðər/", answer: "Ана" },
+            { id: "e2", type: "flashcard", prompt: "Learn", term: "Father", translation: "Әке", phonetic: "/ˈfɑːðər/", answer: "Әке" },
+            { id: "e3", type: "flashcard", prompt: "Learn", term: "Brother", translation: "Аға/іні", phonetic: "/ˈbrʌðər/", answer: "Аға/іні" },
+            { id: "e4", type: "flashcard", prompt: "Learn", term: "Sister", translation: "Әпке/қарындас", phonetic: "/ˈsɪstər/", answer: "Әпке/қарындас" },
+            { id: "e5", type: "multiple-choice", prompt: "What is 'Ана' in English?", options: ["Father", "Sister", "Mother", "Brother"], answer: "Mother" },
+            { id: "e6", type: "translation", prompt: "Translate: 'Father'", term: "Father", answer: "әке", acceptableAnswers: ["әке", "ата"] },
+            { id: "e7", type: "multiple-choice", prompt: "Your mother's son is your...", options: ["Sister", "Brother", "Father", "Mother"], answer: "Brother" },
+          ],
+        },
+        {
+          id: "l2-2",
+          type: "grammar",
+          title: "Possessive 'my, your'",
+          titleKk: "Тәуелдік 'my, your'",
+          description: "Show belonging",
+          descriptionKk: "Тиесілікті көрсету",
+          xpReward: 25,
+          estimatedMinutes: 7,
+          theory: {
+            explanation: "Possessive adjectives show who something belongs to: 'my' (mine), 'your' (yours), 'his', 'her'. They come before a noun.",
+            explanationKk: "Тәуелдік сын есімдер бір нәрсенің кімге тиесілі екенін көрсетеді: 'my' (менің), 'your' (сенің), 'his' (оның-ер), 'her' (оның-әйел). Зат есімнің алдында тұрады.",
+            examples: [
+              { text: "This is my mother.", translation: "Бұл менің анам." },
+              { text: "Your father is tall.", translation: "Сенің әкең ұзын." },
+              { text: "Her sister is kind.", translation: "Оның әпкесі мейірімді." },
+            ],
+          },
+          exercises: [
+            { id: "e1", type: "fill-blank", prompt: "Complete", sentence: "This is ___ brother. (мен)", answer: "my", hint: "менің" },
+            { id: "e2", type: "fill-blank", prompt: "Complete", sentence: "Is this ___ family? (сен)", answer: "your", hint: "сенің" },
+            { id: "e3", type: "multiple-choice", prompt: "Choose: '___ name is Anna.' (ол-әйел)", options: ["My", "Your", "Her", "His"], answer: "Her" },
+            { id: "e4", type: "word-order", prompt: "Put in order", sentence: "my | this | sister | is", answer: "this is my sister" },
+            { id: "e5", type: "translation", prompt: "Translate: 'менің анам'", answer: "my mother", acceptableAnswers: ["my mother", "my mom"] },
+          ],
+        },
+      ],
+    },
+    // ═══════════ БӨЛІМ 3: Сандар ═══════════
+    {
+      id: "u3",
+      number: 3,
+      title: "Numbers",
+      titleKk: "Сандар",
+      description: "Count from 1 to 20",
+      descriptionKk: "1-ден 20-ға дейін санаңыз",
+      icon: "Hash",
+      color: "accent-gold",
+      lessons: [
+        {
+          id: "l3-1",
+          type: "vocabulary",
+          title: "Numbers 1-10",
+          titleKk: "1-10 сандары",
+          description: "Learn to count",
+          descriptionKk: "Санауды үйреніңіз",
+          xpReward: 20,
+          estimatedMinutes: 5,
+          exercises: [
+            { id: "e1", type: "flashcard", prompt: "Learn", term: "One", translation: "Бір", phonetic: "/wʌn/", answer: "Бір" },
+            { id: "e2", type: "flashcard", prompt: "Learn", term: "Two", translation: "Екі", phonetic: "/tuː/", answer: "Екі" },
+            { id: "e3", type: "flashcard", prompt: "Learn", term: "Three", translation: "Үш", phonetic: "/θriː/", answer: "Үш" },
+            { id: "e4", type: "flashcard", prompt: "Learn", term: "Four", translation: "Төрт", phonetic: "/fɔːr/", answer: "Төрт" },
+            { id: "e5", type: "flashcard", prompt: "Learn", term: "Five", translation: "Бес", phonetic: "/faɪv/", answer: "Бес" },
+            { id: "e6", type: "multiple-choice", prompt: "What is 'Three'?", options: ["Бір", "Үш", "Бес", "Екі"], answer: "Үш" },
+            { id: "e7", type: "multiple-choice", prompt: "How do you say 'Бес'?", options: ["Four", "Five", "Six", "Two"], answer: "Five" },
+            { id: "e8", type: "translation", prompt: "Translate: 'One'", term: "One", answer: "бір" },
+          ],
+        },
+        {
+          id: "l3-2",
+          type: "practice",
+          title: "Numbers Practice",
+          titleKk: "Сандар жаттығуы",
+          description: "Practice numbers",
+          descriptionKk: "Сандарды жаттықтырыңыз",
+          xpReward: 30,
+          estimatedMinutes: 6,
+          exercises: [
+            { id: "e1", type: "multiple-choice", prompt: "What is 'Two' + 'Three'?", options: ["Four", "Five", "Six", "Seven"], answer: "Five" },
+            { id: "e2", type: "fill-blank", prompt: "Count: one, two, ___", sentence: "one, two, ___", answer: "three", hint: "Үш" },
+            { id: "e3", type: "translation", prompt: "Translate: 'Төрт'", answer: "four" },
+            { id: "e4", type: "multiple-choice", prompt: "Which number is 'Бір'?", options: ["One", "Two", "Three", "Four"], answer: "One" },
+          ],
+        },
+      ],
+    },
+  ],
+};

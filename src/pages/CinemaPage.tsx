@@ -4,24 +4,52 @@
 
 import { useState, useMemo } from "react";
 import { useLang } from "@/contexts/LangContext";
+import { useVocab } from "@/store/vocabStore";
 import VideoPlayer from "@/components/cinema/VideoPlayer";
 import VocabPanel from "@/components/cinema/VocabPanel";
 import LessonCard from "@/components/cinema/LessonCard";
 import ComprehensionQuiz from "@/components/cinema/ComprehensionQuiz";
+import SubtitleUpload from "@/components/cinema/SubtitleUpload";
 import { cinemaLessons, categories } from "@/lib/cinemaData";
 import { Film, X, ArrowLeft, Play, GraduationCap } from "lucide-react";
-import type { CinemaLesson } from "@/types/cinema";
+import type { CinemaLesson, SubtitleLine } from "@/types/cinema";
 
 type Level = "all" | "beginner" | "intermediate" | "advanced";
 type LessonTab = "watch" | "quiz";
 
 export default function CinemaPage() {
   const { t, lang } = useLang();
+  const { addCard, cards } = useVocab();
   const [activeLesson, setActiveLesson] = useState<CinemaLesson | null>(null);
   const [showTranscript, setShowTranscript] = useState(false);
   const [lessonTab, setLessonTab] = useState<LessonTab>("watch");
   const [category, setCategory] = useState("all");
   const [level, setLevel] = useState<Level>("all");
+  const [uploadedSubs, setUploadedSubs] = useState<SubtitleLine[] | null>(null);
+
+  // Жүктелген субтитрді сабаққа қолдану (ағылшын мәтін, қазақша кейін)
+  const handleSubtitlesLoaded = (subs: Omit<SubtitleLine, "kk">[]) => {
+    // Қазақша аударманы әзірге бос қалдырамыз (кейін AI/Translate қосады)
+    const withKk: SubtitleLine[] = subs.map((s) => ({ ...s, kk: "" }));
+    setUploadedSubs(withKk);
+  };
+
+  // Видеода көрсетілетін сабақ (жүктелген субтитр болса — соны қолданады)
+  const lessonForPlayer: CinemaLesson | null = activeLesson
+    ? (uploadedSubs ? { ...activeLesson, subtitles: uploadedSubs } : activeLesson)
+    : null;
+
+  // Субтитрден сөзді сөздікке (SRS) қосу
+  const handleAddWordFromSubtitle = (word: string, definition: string, phonetic?: string) => {
+    if (cards.some((c) => c.term.toLowerCase() === word.toLowerCase())) return;
+    addCard({
+      lang: activeLesson?.lang || "en",
+      term: word,
+      translation: definition,
+      phonetic,
+      source: "cinema",
+    });
+  };
 
   // Сүзілген сабақтар
   const filtered = useMemo(() => {
@@ -39,7 +67,7 @@ export default function CinemaPage() {
       <div className="max-w-7xl mx-auto">
         {/* Артқа */}
         <button
-          onClick={() => { setActiveLesson(null); setShowTranscript(false); setLessonTab("watch"); }}
+          onClick={() => { setActiveLesson(null); setShowTranscript(false); setLessonTab("watch"); setUploadedSubs(null); }}
           className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary mb-4"
         >
           <ArrowLeft className="w-4 h-4" /> {t("cinema.backToLibrary")}
@@ -83,7 +111,11 @@ export default function CinemaPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <div className="lg:col-span-2">
-              <VideoPlayer lesson={activeLesson} onShowTranscript={() => setShowTranscript(true)} />
+              <VideoPlayer lesson={lessonForPlayer!} onShowTranscript={() => setShowTranscript(true)} onAddWord={handleAddWordFromSubtitle} />
+              {/* Субтитр жүктеу (.srt) */}
+              <div className="mt-4">
+                <SubtitleUpload onLoaded={handleSubtitlesLoaded} />
+              </div>
               {/* Тестке өту шақыруы */}
               {hasQuiz && (
                 <button
@@ -104,7 +136,7 @@ export default function CinemaPage() {
               )}
             </div>
             <div className="lg:col-span-1 h-[600px]">
-              <VocabPanel words={activeLesson.vocabulary} />
+              <VocabPanel words={activeLesson.vocabulary} lang={activeLesson.lang} />
             </div>
           </div>
         )}
@@ -185,7 +217,7 @@ export default function CinemaPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((lesson) => (
-            <LessonCard key={lesson.id} lesson={lesson} onClick={() => setActiveLesson(lesson)} />
+            <LessonCard key={lesson.id} lesson={lesson} onClick={() => { setActiveLesson(lesson); setUploadedSubs(null); }} />
           ))}
         </div>
       )}

@@ -13,6 +13,11 @@ import ChatPage from "@/pages/ChatPage";
 import DictionaryPage from "@/pages/DictionaryPage";
 import OnboardingPage from "@/pages/OnboardingPage";
 import SettingsPage from "@/pages/SettingsPage";
+import GamesPage from "@/pages/GamesPage";
+import IeltsPage from "@/pages/IeltsPage";
+import CoursesPage from "@/pages/CoursesPage";
+import PracticePage from "@/pages/PracticePage";
+import ProgressPage from "@/pages/ProgressPage";
 
 // Маршруттар (кейін placeholder-лер нақты беттерге ауысады)
 const routes: [string, string][] = [
@@ -53,7 +58,12 @@ function AppContent() {
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/dictionary" element={<DictionaryPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          {routes.filter(([p]) => p !== "/" && p !== "/cinema" && p !== "/chat" && p !== "/dictionary" && p !== "/settings").map(([path, title]) => (
+          <Route path="/games" element={<GamesPage />} />
+          <Route path="/ielts" element={<IeltsPage />} />
+          <Route path="/courses" element={<CoursesPage />} />
+          <Route path="/practice" element={<PracticePage />} />
+          <Route path="/progress" element={<ProgressPage />} />
+          {routes.filter(([p]) => p !== "/" && p !== "/cinema" && p !== "/chat" && p !== "/dictionary" && p !== "/settings" && p !== "/games" && p !== "/ielts" && p !== "/courses" && p !== "/practice" && p !== "/progress").map(([path, title]) => (
             <Route key={path} path={path} element={<PlaceholderPage title={title} />} />
           ))}
         </Route>

@@ -2,10 +2,13 @@
 // Сөздік — SRS жүйесімен сөз жаттау.
 // Екі режим: Қайталау (flashcard) және Шолу (барлық сөз).
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useLang } from "@/contexts/LangContext";
+import { useUserPrefs } from "@/store/userPrefs";
 import { useVocab } from "@/store/vocabStore";
+import { useProgress } from "@/store/progressStore";
 import { getDueCards, calcStats, masteryPercent, timeUntilReview } from "@/lib/srs";
+import { speak } from "@/lib/speech";
 import Flashcard from "@/components/vocab/Flashcard";
 import DictSearch from "@/components/vocab/DictSearch";
 import { BookA, Brain, Layers, Search, CheckCircle2, Sparkles, Volume2, Trash2, GraduationCap } from "lucide-react";
@@ -17,11 +20,21 @@ type Mode = "overview" | "review" | "browse" | "search";
 export default function DictionaryPage() {
   const { t, lang } = useLang();
   const { cards, reviewCard, removeCard, addCard } = useVocab();
+  const { addXP } = useProgress();
+  const { prefs, loaded } = useUserPrefs();
   const [mode, setMode] = useState<Mode>("overview");
   const [reviewQueue, setReviewQueue] = useState<string[]>([]);
   const [reviewIndex, setReviewIndex] = useState(0);
   const [query, setQuery] = useState("");
-  const [langFilter, setLangFilter] = useState<"all" | "en" | "zh">("all");
+  const [langFilter, setLangFilter] = useState<"all" | "en" | "zh">(prefs.learningLang);
+  const [filterTouched, setFilterTouched] = useState(false);
+
+  // Prefs жүктелгенде сүзгіні үйрену тіліне қою (қолданушы әлі өзгертпесе)
+  useEffect(() => {
+    if (loaded && !filterTouched) {
+      setLangFilter(prefs.learningLang);
+    }
+  }, [loaded, prefs.learningLang, filterTouched]);
 
   // SRS-те бар сөздер (іздеуде қайталап қоспау үшін)
   const existingTerms = useMemo(() => new Set(cards.map((c) => c.term.toLowerCase())), [cards]);
@@ -54,6 +67,8 @@ export default function DictionaryPage() {
   const handleReview = (result: ReviewResult) => {
     const cardId = reviewQueue[reviewIndex];
     reviewCard(cardId, result);
+    // Әр қайталау = XP (дұрыс жауап көбірек)
+    addXP(result === "easy" ? 15 : result === "good" ? 10 : result === "hard" ? 5 : 2);
     if (reviewIndex + 1 < reviewQueue.length) {
       setReviewIndex(reviewIndex + 1);
     } else {
@@ -212,7 +227,7 @@ export default function DictionaryPage() {
               {([["all", t("vocab.allLangs")], ["en", "EN"], ["zh", "中"]] as const).map(([val, label]) => (
                 <button
                   key={val}
-                  onClick={() => setLangFilter(val)}
+                  onClick={() => { setLangFilter(val); setFilterTouched(true); }}
                   className={`px-3 py-1.5 rounded text-sm font-medium transition-all ${langFilter === val ? "bg-accent-blue text-white" : "text-text-secondary hover:text-text-primary"}`}
                 >
                   {label}
@@ -261,7 +276,10 @@ function WordRow({ card, lang, onRemove }: { card: any; lang: "kk" | "en"; onRem
       </div>
       {/* Дыбыс + өшіру */}
       <div className="flex items-center gap-1 shrink-0">
-        <button className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-accent-blue transition-colors">
+        <button
+          onClick={() => speak(card.term, card.lang)}
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-accent-blue transition-colors"
+        >
           <Volume2 className="w-4 h-4" />
         </button>
         <button onClick={onRemove} className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-accent-red transition-colors opacity-0 group-hover:opacity-100">

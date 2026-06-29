@@ -1,0 +1,200 @@
+// filepath: src/lib/ielts/test3.ts
+// IELTS Reading — 3-тест. Жаңа тақырыптар, 40 сұрақ.
+
+import type { ReadingTest } from "@/types/ielts";
+
+export const test3: ReadingTest = {
+  id: "reading-test-3",
+  title: "Academic Reading — Test 3",
+  titleKk: "Академиялық оқу — 3-тест",
+  timeMinutes: 60,
+  totalQuestions: 40,
+  passages: [
+    // ═══════════ PASSAGE 1 ═══════════
+    {
+      id: "t3p1",
+      number: 1,
+      title: "The Story of Coffee",
+      titleKk: "Кофе хикаясы",
+      topic: "History",
+      difficulty: "easy",
+      wordCount: 710,
+      paragraphs: [
+        { label: "A", text: "Coffee is today one of the most popular drinks in the world, consumed by billions of people each day. Yet the origins of this beloved beverage are surrounded by legend and uncertainty. The most famous story attributes the discovery of coffee to an Ethiopian goat herder named Kaldi, who, according to legend, noticed that his goats became unusually energetic after eating the berries of a certain plant. Curious, Kaldi tried the berries himself and experienced a similar burst of energy." },
+        { label: "B", text: "Whatever the truth of this legend, it is generally accepted that coffee cultivation began in Ethiopia and spread from there to the Arabian Peninsula. By the 15th century, coffee was being grown in Yemen, and it soon became an important part of Arab culture. Coffee houses, known as 'qahveh khaneh', began to appear in cities across the Middle East. These establishments became popular gathering places where people would meet to drink coffee, listen to music, play games, and discuss the news of the day." },
+        { label: "C", text: "Coffee was introduced to Europe in the 17th century, where it initially met with suspicion. Some people regarded the dark beverage with distrust, and it was even condemned by certain religious authorities. However, coffee gradually gained acceptance and popularity. Coffee houses sprang up across Europe and, like their Middle Eastern counterparts, became important centres of social and intellectual life. In England, they were sometimes called 'penny universities', because for the price of a cup of coffee, a person could engage in stimulating conversation." },
+        { label: "D", text: "The demand for coffee in Europe led to its cultivation in colonies around the world. The Dutch were among the first to establish coffee plantations outside Arabia, growing coffee in their colonies in what is now Indonesia. Later, coffee cultivation spread to the Caribbean, Central and South America, and other tropical regions. Brazil, which began growing coffee in the 18th century, eventually became the world's largest producer, a position it still holds today." },
+        { label: "E", text: "The way coffee is prepared and consumed varies greatly around the world, reflecting local cultures and traditions. In Italy, espresso is the standard form, served in small cups and consumed quickly. In Turkey, coffee is brewed in a special pot and served unfiltered, with the grounds settling at the bottom of the cup. In recent decades, coffee culture has become increasingly sophisticated, with consumers showing growing interest in the origins, processing, and flavour profiles of the coffee they drink." },
+        { label: "F", text: "Today, the coffee industry is a vast global enterprise that supports the livelihoods of millions of people, particularly in developing countries where most coffee is grown. However, the industry also faces significant challenges, including price volatility, the effects of climate change on growing conditions, and concerns about the fair treatment of coffee farmers. Movements such as fair trade have emerged in response to these concerns, seeking to ensure that farmers receive a fair price for their product." },
+      ],
+      groups: [
+        {
+          id: "t3p1g1",
+          type: "true-false-notgiven",
+          instruction: "Do the following statements agree with the information? Choose TRUE, FALSE or NOT GIVEN.",
+          instructionKk: "Тұжырымдар сәйкес пе? TRUE, FALSE немесе NOT GIVEN.",
+          questions: [
+            { id: "t3q1", type: "true-false-notgiven", number: 1, prompt: "According to legend, Kaldi noticed his goats became energetic after eating certain berries.", answer: "TRUE", explanation: "A абзац: ешкілер жидектен кейін қуатты болды.", paragraphRef: 0 },
+            { id: "t3q2", type: "true-false-notgiven", number: 2, prompt: "Coffee was immediately accepted when it arrived in Europe.", answer: "FALSE", explanation: "C абзац: алдымен күдікпен қарсы алынды.", paragraphRef: 2 },
+            { id: "t3q3", type: "true-false-notgiven", number: 3, prompt: "Coffee houses in England were free to enter.", answer: "NOT GIVEN", explanation: "Кіру тегін екені айтылмаған; бір кесе кофе бағасы аталған.", paragraphRef: 2 },
+            { id: "t3q4", type: "true-false-notgiven", number: 4, prompt: "Brazil is currently the world's largest coffee producer.", answer: "TRUE", explanation: "D абзац: Бразилия әлі ең ірі өндіруші.", paragraphRef: 3 },
+            { id: "t3q5", type: "true-false-notgiven", number: 5, prompt: "Turkish coffee is served filtered.", answer: "FALSE", explanation: "E абзац: түрік кофесі сүзілмей беріледі.", paragraphRef: 4 },
+          ],
+        },
+        {
+          id: "t3p1g2",
+          type: "sentence-completion",
+          instruction: "Complete the sentences. Choose NO MORE THAN TWO WORDS from the passage.",
+          instructionKk: "Сөйлемдерді толықтырыңыз. ЕКІ СӨЗДЕН АСПАЙТЫН сөз таңдаңыз.",
+          wordLimit: 2,
+          questions: [
+            { id: "t3q6", type: "sentence-completion", number: 6, prompt: "Coffee cultivation is believed to have begun in _______.", answer: "Ethiopia", explanation: "B абзац: Эфиопияда басталды.", paragraphRef: 1 },
+            { id: "t3q7", type: "sentence-completion", number: 7, prompt: "By the 15th century, coffee was grown in _______.", answer: "Yemen", explanation: "B абзац: Йеменде өсірілді.", paragraphRef: 1 },
+            { id: "t3q8", type: "sentence-completion", number: 8, prompt: "In England, coffee houses were called _______.", answer: "penny universities", explanation: "C абзац: 'penny universities' деп аталды.", paragraphRef: 2 },
+            { id: "t3q9", type: "sentence-completion", number: 9, prompt: "The _______ were among the first to grow coffee outside Arabia.", answer: "Dutch", explanation: "D абзац: голландтар алғашқылардың бірі.", paragraphRef: 3 },
+            { id: "t3q10", type: "sentence-completion", number: 10, prompt: "In Italy, the standard form of coffee is _______.", answer: "espresso", explanation: "E абзац: Италияда эспрессо.", paragraphRef: 4 },
+          ],
+        },
+        {
+          id: "t3p1g3",
+          type: "multiple-choice",
+          instruction: "Choose the correct letter, A, B, C or D.",
+          instructionKk: "Дұрыс әріпті таңдаңыз: A, B, C немесе D.",
+          questions: [
+            { id: "t3q11", type: "multiple-choice", number: 11, prompt: "What were Middle Eastern coffee houses used for?", options: ["Only for drinking coffee", "As places to meet, listen to music and discuss news", "As religious centres", "As markets"], answer: "1", explanation: "B абзац: кездесу, музыка, жаңалық талқылау орны (индекс 1).", paragraphRef: 1 },
+            { id: "t3q12", type: "multiple-choice", number: 12, prompt: "What challenge does the coffee industry face?", options: ["Too much coffee", "Climate change and price volatility", "Lack of interest", "Too many farmers"], answer: "1", explanation: "F абзац: климат өзгерісі, баға тұрақсыздығы (индекс 1).", paragraphRef: 5 },
+            { id: "t3q13", type: "multiple-choice", number: 13, prompt: "What is the aim of fair trade movements?", options: ["To increase coffee prices for consumers", "To ensure farmers receive a fair price", "To reduce coffee production", "To promote espresso"], answer: "1", explanation: "F абзац: фермерлерге әділ баға қамтамасыз ету (индекс 1).", paragraphRef: 5 },
+          ],
+        },
+      ],
+    },
+    // ═══════════ PASSAGE 2 ═══════════
+    {
+      id: "t3p2",
+      number: 2,
+      title: "Renewable Energy",
+      titleKk: "Жаңартылатын энергия",
+      topic: "Environment",
+      difficulty: "medium",
+      wordCount: 870,
+      paragraphs: [
+        { label: "A", text: "As concerns about climate change and the depletion of fossil fuels have grown, renewable energy has moved to the forefront of global efforts to create a sustainable future. Unlike fossil fuels such as coal, oil, and natural gas, which are finite and release harmful greenhouse gases when burned, renewable energy sources are naturally replenished and produce little or no pollution. The transition to renewable energy is widely regarded as essential for addressing the environmental challenges facing the planet." },
+        { label: "B", text: "Solar power is one of the most rapidly growing forms of renewable energy. It harnesses the energy of the sun using photovoltaic cells, which convert sunlight directly into electricity. The cost of solar panels has fallen dramatically in recent years, making solar power increasingly affordable and accessible. Solar energy can be generated on a large scale in solar farms, or on a smaller scale by individual households installing panels on their roofs." },
+        { label: "C", text: "Wind power is another important and growing source of renewable energy. Wind turbines convert the kinetic energy of moving air into electricity. Wind farms can be located on land or, increasingly, offshore, where winds tend to be stronger and more consistent. While some people object to wind turbines on aesthetic grounds, or because of concerns about their impact on wildlife, wind power has become one of the most cost-effective sources of new electricity generation in many regions." },
+        { label: "D", text: "Hydroelectric power, which generates electricity from flowing water, is the oldest and most established form of renewable energy. Large dams can produce vast amounts of electricity, and hydroelectric power currently accounts for a significant proportion of the world's renewable energy. However, the construction of large dams can have considerable environmental and social impacts, including the displacement of communities and the disruption of river ecosystems." },
+        { label: "E", text: "Other forms of renewable energy include geothermal power, which harnesses heat from within the Earth, and biomass, which generates energy from organic materials. Each of these sources has its own advantages and limitations. Geothermal energy, for instance, is reliable and produces minimal emissions, but it is only viable in certain geographical locations. Biomass can make use of waste materials, but its sustainability depends on how the organic material is sourced." },
+        { label: "F", text: "Despite the many advantages of renewable energy, the transition away from fossil fuels presents significant challenges. One of the main difficulties is that some renewable sources, particularly solar and wind, are intermittent: they do not produce energy consistently, but depend on weather conditions and the time of day. This creates a need for effective methods of storing energy, such as batteries, so that power generated when conditions are favourable can be used when it is needed." },
+        { label: "G", text: "The future of renewable energy looks increasingly promising. Technological advances continue to improve the efficiency and reduce the cost of renewable energy systems. Many countries have set ambitious targets for increasing their use of renewable energy, and investment in the sector is growing rapidly. While significant obstacles remain, the shift towards a future powered by clean, renewable energy appears not only desirable but inevitable." },
+      ],
+      groups: [
+        {
+          id: "t3p2g1",
+          type: "matching-headings",
+          instruction: "Choose the correct heading for paragraphs B, C, D, E and F.",
+          instructionKk: "B, C, D, E және F абзацтарына сәйкес тақырыпты таңдаңыз.",
+          headings: [
+            { id: "i", text: "The problem of inconsistent supply" },
+            { id: "ii", text: "Energy from the sun" },
+            { id: "iii", text: "Power from moving water" },
+            { id: "iv", text: "Other renewable sources" },
+            { id: "v", text: "Energy from the wind" },
+            { id: "vi", text: "Why we need renewable energy" },
+            { id: "vii", text: "A promising future" },
+          ],
+          questions: [
+            { id: "t3q14", type: "matching-headings", number: 14, prompt: "Paragraph B", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "ii", explanation: "B абзац: күн энергиясы.", paragraphRef: 1 },
+            { id: "t3q15", type: "matching-headings", number: 15, prompt: "Paragraph C", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "v", explanation: "C абзац: жел энергиясы.", paragraphRef: 2 },
+            { id: "t3q16", type: "matching-headings", number: 16, prompt: "Paragraph D", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "iii", explanation: "D абзац: су энергиясы (гидроэлектр).", paragraphRef: 3 },
+            { id: "t3q17", type: "matching-headings", number: 17, prompt: "Paragraph E", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "iv", explanation: "E абзац: басқа жаңартылатын көздер.", paragraphRef: 4 },
+            { id: "t3q18", type: "matching-headings", number: 18, prompt: "Paragraph F", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "i", explanation: "F абзац: тұрақсыз жабдықтау мәселесі.", paragraphRef: 5 },
+          ],
+        },
+        {
+          id: "t3p2g2",
+          type: "true-false-notgiven",
+          instruction: "Do the following statements agree with the information? Choose TRUE, FALSE or NOT GIVEN.",
+          instructionKk: "Тұжырымдар сәйкес пе? TRUE, FALSE немесе NOT GIVEN.",
+          questions: [
+            { id: "t3q19", type: "true-false-notgiven", number: 19, prompt: "The cost of solar panels has increased in recent years.", answer: "FALSE", explanation: "B абзац: күн панельдерінің бағасы күрт төмендеді.", paragraphRef: 1 },
+            { id: "t3q20", type: "true-false-notgiven", number: 20, prompt: "Offshore winds are usually stronger than winds on land.", answer: "TRUE", explanation: "C абзац: теңіздегі желдер күштірек.", paragraphRef: 2 },
+            { id: "t3q21", type: "true-false-notgiven", number: 21, prompt: "Hydroelectric dams have no negative impacts.", answer: "FALSE", explanation: "D абзац: үлкен бөгеттердің қоршаған орта мен әлеуметтік әсерлері бар.", paragraphRef: 3 },
+            { id: "t3q22", type: "true-false-notgiven", number: 22, prompt: "Geothermal energy can be used anywhere in the world.", answer: "FALSE", explanation: "E абзац: тек белгілі географиялық жерлерде ғана тиімді.", paragraphRef: 4 },
+          ],
+        },
+        {
+          id: "t3p2g3",
+          type: "sentence-completion",
+          instruction: "Complete the sentences. Choose NO MORE THAN TWO WORDS from the passage.",
+          instructionKk: "Сөйлемдерді толықтырыңыз. ЕКІ СӨЗДЕН АСПАЙТЫН сөз таңдаңыз.",
+          wordLimit: 2,
+          questions: [
+            { id: "t3q23", type: "sentence-completion", number: 23, prompt: "Solar power uses _______ cells to convert sunlight into electricity.", answer: "photovoltaic", explanation: "B абзац: фотоэлектрлік жасушалар.", paragraphRef: 1 },
+            { id: "t3q24", type: "sentence-completion", number: 24, prompt: "Wind turbines convert the _______ energy of air into electricity.", answer: "kinetic", explanation: "C абзац: кинетикалық энергия.", paragraphRef: 2 },
+            { id: "t3q25", type: "sentence-completion", number: 25, prompt: "_______ power is the oldest form of renewable energy.", answer: "Hydroelectric", explanation: "D абзац: гидроэлектр — ең көне.", paragraphRef: 3 },
+            { id: "t3q26", type: "sentence-completion", number: 26, prompt: "Intermittent energy creates a need for energy _______.", answer: "storage", explanation: "F абзац: энергия сақтау қажеттілігі.", paragraphRef: 5 },
+          ],
+        },
+      ],
+    },
+    // ═══════════ PASSAGE 3 ═══════════
+    {
+      id: "t3p3",
+      number: 3,
+      title: "The Science of Memory",
+      titleKk: "Жады ғылымы",
+      topic: "Science",
+      difficulty: "hard",
+      wordCount: 930,
+      paragraphs: [
+        { label: "A", text: "Memory is one of the most remarkable functions of the human brain, allowing us to retain and recall information, learn from experience, and maintain a continuous sense of identity over time. Without memory, every moment would be experienced as if for the first time, and learning of any kind would be impossible. Despite its fundamental importance, the workings of memory have long puzzled scientists, and many aspects of how memories are formed, stored, and retrieved remain only partially understood." },
+        { label: "B", text: "Psychologists traditionally distinguish between several different types of memory. Sensory memory holds information from the senses for a very brief period, often less than a second. Short-term memory, also known as working memory, holds a limited amount of information for a matter of seconds or minutes, and is used for tasks such as remembering a telephone number long enough to dial it. Long-term memory, by contrast, can store vast amounts of information for periods ranging from hours to a lifetime." },
+        { label: "C", text: "The process by which short-term memories are converted into long-term memories is known as consolidation. This process is not instantaneous; rather, memories become more stable over time as they are gradually consolidated. Research has shown that sleep plays a crucial role in this process, with the brain replaying and strengthening newly formed memories during certain stages of sleep. This is one reason why a good night's sleep is so important for learning." },
+        { label: "D", text: "Long-term memory is itself divided into different categories. Explicit, or declarative, memory refers to the conscious recollection of facts and events, and can be further divided into semantic memory (general knowledge about the world) and episodic memory (memory of specific personal experiences). Implicit, or non-declarative, memory, by contrast, refers to unconscious memories that influence behaviour, such as the skills involved in riding a bicycle or playing a musical instrument." },
+        { label: "E", text: "One of the most important discoveries in memory research concerns the role of a brain structure called the hippocampus. Studies of patients with damage to this region have revealed that the hippocampus is essential for the formation of new long-term memories, although it does not appear to be the site where these memories are ultimately stored. Perhaps the most famous case was that of a patient known as H.M., who, after surgery to his hippocampus, was unable to form new long-term memories, despite retaining memories from before the operation." },
+        { label: "F", text: "Memory is far from perfect, and it is subject to various forms of distortion and error. Contrary to the popular belief that memory works like a video recording, faithfully preserving events exactly as they occurred, research has shown that memory is reconstructive. Each time a memory is recalled, it is effectively rebuilt, and in the process it can be altered or distorted. This helps to explain why eyewitness testimony, once considered highly reliable, is now known to be susceptible to significant errors." },
+        { label: "G", text: "Understanding how memory works has important practical implications. In education, insights from memory research can inform more effective teaching and study methods. In medicine, research into memory is essential for developing treatments for conditions such as Alzheimer's disease, which involves the progressive loss of memory. As our understanding of this complex and fascinating faculty continues to deepen, it promises to yield benefits in many areas of human life." },
+      ],
+      groups: [
+        {
+          id: "t3p3g1",
+          type: "multiple-choice",
+          instruction: "Choose the correct letter, A, B, C or D.",
+          instructionKk: "Дұрыс әріпті таңдаңыз: A, B, C немесе D.",
+          questions: [
+            { id: "t3q27", type: "multiple-choice", number: 27, prompt: "How long does sensory memory typically last?", options: ["A lifetime", "Several minutes", "Less than a second", "A few hours"], answer: "2", explanation: "B абзац: сенсорлық жады секундтан аз (индекс 2).", paragraphRef: 1 },
+            { id: "t3q28", type: "multiple-choice", number: 28, prompt: "What is consolidation?", options: ["Forgetting information", "Converting short-term memories into long-term ones", "A type of sensory memory", "Recalling a phone number"], answer: "1", explanation: "C абзац: қысқа мерзімді жадыны ұзақ мерзімдіге айналдыру (индекс 1).", paragraphRef: 2 },
+            { id: "t3q29", type: "multiple-choice", number: 29, prompt: "What does episodic memory store?", options: ["General knowledge", "Specific personal experiences", "Physical skills", "Sensory information"], answer: "1", explanation: "D абзац: эпизодтық жады — нақты жеке тәжірибелер (индекс 1).", paragraphRef: 3 },
+            { id: "t3q30", type: "multiple-choice", number: 30, prompt: "What did the case of H.M. demonstrate?", options: ["The hippocampus stores all memories", "The hippocampus is essential for forming new long-term memories", "Memory is perfect", "Sleep is unimportant"], answer: "1", explanation: "E абзац: гиппокамп жаңа ұзақ мерзімді жады қалыптастыруға қажет (индекс 1).", paragraphRef: 4 },
+          ],
+        },
+        {
+          id: "t3p3g2",
+          type: "yes-no-notgiven",
+          instruction: "Do the following statements agree with the claims of the writer? Choose YES, NO or NOT GIVEN.",
+          instructionKk: "Тұжырымдар автор пікірімен сәйкес пе? YES, NO немесе NOT GIVEN.",
+          questions: [
+            { id: "t3q31", type: "yes-no-notgiven", number: 31, prompt: "Sleep plays an important role in memory consolidation.", answer: "YES", explanation: "C абзац: ұйқы жадыны бекітуде маңызды рөл атқарады.", paragraphRef: 2 },
+            { id: "t3q32", type: "yes-no-notgiven", number: 32, prompt: "Memory works exactly like a video recording.", answer: "NO", explanation: "F абзац: керісінше, жады қайта құрылады, видео сияқты емес.", paragraphRef: 5 },
+            { id: "t3q33", type: "yes-no-notgiven", number: 33, prompt: "Eyewitness testimony is completely reliable.", answer: "NO", explanation: "F абзац: куәгер айғағы қателерге бейім.", paragraphRef: 5 },
+            { id: "t3q34", type: "yes-no-notgiven", number: 34, prompt: "Memory research has helped cure Alzheimer's disease.", answer: "NOT GIVEN", explanation: "Емдеу әзірлеу маңызды делінген, бірақ емделді деп айтылмаған.", paragraphRef: 6 },
+          ],
+        },
+        {
+          id: "t3p3g3",
+          type: "summary-completion",
+          instruction: "Complete the summary. Choose NO MORE THAN TWO WORDS from the passage.",
+          instructionKk: "Қорытындыны толықтырыңыз. ЕКІ СӨЗДЕН АСПАЙТЫН сөз таңдаңыз.",
+          wordLimit: 2,
+          questions: [
+            { id: "t3q35", type: "summary-completion", number: 35, prompt: "Short-term memory is also known as _______ memory.", answer: "working", explanation: "B абзац: жұмыс жады.", paragraphRef: 1 },
+            { id: "t3q36", type: "summary-completion", number: 36, prompt: "_______ memory is general knowledge about the world.", answer: "Semantic", explanation: "D абзац: семантикалық жады.", paragraphRef: 3 },
+            { id: "t3q37", type: "summary-completion", number: 37, prompt: "The brain structure essential for new memories is the _______.", answer: "hippocampus", explanation: "E абзац: гиппокамп.", paragraphRef: 4 },
+            { id: "t3q38", type: "summary-completion", number: 38, prompt: "Memory is described as _______ rather than like a recording.", answer: "reconstructive", explanation: "F абзац: қайта құрылатын (reconstructive).", paragraphRef: 5 },
+            { id: "t3q39", type: "summary-completion", number: 39, prompt: "Riding a bicycle is an example of _______ memory.", answer: "implicit", acceptableAnswers: ["non-declarative"], explanation: "D абзац: имплицитті жады.", paragraphRef: 3 },
+            { id: "t3q40", type: "summary-completion", number: 40, prompt: "_______ disease involves the progressive loss of memory.", answer: "Alzheimer's", acceptableAnswers: ["alzheimers", "alzheimer"], explanation: "G абзац: Альцгеймер ауруы.", paragraphRef: 6 },
+          ],
+        },
+      ],
+    },
+  ],
+};

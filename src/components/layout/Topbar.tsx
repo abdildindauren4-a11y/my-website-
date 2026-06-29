@@ -4,15 +4,9 @@
 // Десктоп: толық XP жолағы + streak + тіл + хабарлама + профиль.
 
 import { useLang } from "@/contexts/LangContext";
+import { useProgress, levelProgress } from "@/store/progressStore";
+import { useUserPrefs } from "@/store/userPrefs";
 import { Flame, Bell, ChevronDown, Menu } from "lucide-react";
-
-const DEMO = {
-  name: "Aidos",
-  level: 24,
-  xp: 12450,
-  xpMax: 18000,
-  streak: 30,
-};
 
 interface Props {
   onMenuClick: () => void; // гамбургер басылғанда
@@ -20,7 +14,12 @@ interface Props {
 
 export default function Topbar({ onMenuClick }: Props) {
   const { lang, setLang, t } = useLang();
-  const xpPercent = Math.round((DEMO.xp / DEMO.xpMax) * 100);
+  const { progress } = useProgress();
+  const { prefs } = useUserPrefs();
+  // Нақты деңгей мен XP (прогрестен)
+  const lvl = levelProgress(progress.xp);
+  const name = prefs.name || "Aidos";
+  const xpPercent = lvl.percent;
 
   return (
     <header className="h-16 lg:h-20 shrink-0 bg-surface border-b border-border flex items-center justify-between px-3 lg:px-6 gap-2 lg:gap-6">
@@ -41,9 +40,9 @@ export default function Topbar({ onMenuClick }: Props) {
           </div>
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-sm font-semibold">{t("top.level")} {DEMO.level}</span>
+              <span className="text-sm font-semibold">{t("top.level")} {lvl.level}</span>
               <span className="text-xs text-text-secondary font-mono">
-                {DEMO.xp.toLocaleString()} / {DEMO.xpMax.toLocaleString()} XP
+                {lvl.current.toLocaleString()} / {lvl.needed.toLocaleString()} XP
               </span>
             </div>
             <div className="h-2 rounded-full bg-border overflow-hidden">
@@ -55,7 +54,7 @@ export default function Topbar({ onMenuClick }: Props) {
         {/* Мобиль: ықшам деңгей белгісі */}
         <div className="lg:hidden flex items-center gap-2 min-w-0">
           <div className="w-9 h-9 rounded-card bg-accent-blue/15 border border-accent-blue/30 flex items-center justify-center shrink-0">
-            <span className="text-[10px] font-display font-bold text-accent-blue">L{DEMO.level}</span>
+            <span className="text-[10px] font-display font-bold text-accent-blue">L{lvl.level}</span>
           </div>
         </div>
       </div>
@@ -67,13 +66,13 @@ export default function Topbar({ onMenuClick }: Props) {
         </div>
         <div className="hidden sm:block">
           <div className="flex items-baseline gap-1">
-            <span className="text-xl lg:text-2xl font-display font-bold leading-none">{DEMO.streak}</span>
+            <span className="text-xl lg:text-2xl font-display font-bold leading-none">{progress.streakDays}</span>
             <span className="text-xs text-text-secondary">{t("top.days")}</span>
           </div>
           <span className="text-xs text-accent-green font-medium">{t("top.streak")}</span>
         </div>
         {/* Мобильде тек сан */}
-        <span className="sm:hidden text-lg font-display font-bold">{DEMO.streak}</span>
+        <span className="sm:hidden text-lg font-display font-bold">{progress.streakDays}</span>
       </div>
 
       {/* Оң жақ: тіл + хабарлама + профиль */}
@@ -103,9 +102,9 @@ export default function Topbar({ onMenuClick }: Props) {
         {/* Профиль — мобильде тек аватар */}
         <button className="flex items-center gap-2 hover:bg-surface-2 rounded-btn p-1 lg:p-1.5 transition-all">
           <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-gradient-to-br from-accent-blue to-accent-purple flex items-center justify-center text-white font-semibold border-2 border-accent-blue/30 text-sm">
-            {DEMO.name[0]}
+            {name[0]}
           </div>
-          <span className="hidden md:inline text-sm font-medium">{DEMO.name}</span>
+          <span className="hidden md:inline text-sm font-medium">{name}</span>
           <ChevronDown className="hidden md:inline w-4 h-4 text-text-secondary" />
         </button>
       </div>

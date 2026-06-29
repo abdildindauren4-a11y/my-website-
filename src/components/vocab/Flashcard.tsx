@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
+import { speak } from "@/lib/speech";
 import { Volume2, RotateCw } from "lucide-react";
 import type { VocabCard, ReviewResult } from "@/types/vocabulary";
 
@@ -63,7 +64,7 @@ export default function Flashcard({ card, onReview }: Props) {
             <h2 className="text-4xl font-display font-bold mb-3">{card.term}</h2>
             {card.phonetic && <p className="text-text-secondary font-mono mb-2">{card.phonetic}</p>}
             <button
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); speak(card.term, card.lang); }}
               className="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center text-text-secondary hover:text-accent-blue transition-colors mt-2"
             >
               <Volume2 className="w-5 h-5" />

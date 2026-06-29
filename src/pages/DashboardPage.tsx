@@ -4,15 +4,27 @@
 
 import { useNavigate } from "react-router-dom";
 import { useLang } from "@/contexts/LangContext";
+import { useUserPrefs } from "@/store/userPrefs";
+import { useProgress } from "@/store/progressStore";
+import { useVocab } from "@/store/vocabStore";
+import { calcStats } from "@/lib/srs";
 import LessonSteps from "@/components/shared/LessonSteps";
 import { Film, MessageSquare, RotateCcw, TrendingUp, Clock, BookA, Flame, ArrowRight } from "lucide-react";
-
-const DEMO = { name: "Aidos", minutesToday: 25, minutesGoal: 30, wordsLearned: 342, streak: 30 };
 
 export default function DashboardPage() {
   const { t } = useLang();
   const navigate = useNavigate();
-  const minPercent = Math.round((DEMO.minutesToday / DEMO.minutesGoal) * 100);
+  const { prefs } = useUserPrefs();
+  const { progress } = useProgress();
+  const { cards } = useVocab();
+  // Нақты сандар
+  const vocabStats = calcStats(cards);
+  const minutesGoal = prefs.dailyGoalMin;
+  const name = prefs.name || "Aidos";
+  const minutesToday = progress.minutesToday;
+  const wordsLearned = vocabStats.mastered;  // нақты меңгерілген сөз
+  const streak = progress.streakDays;
+  const minPercent = Math.min(100, Math.round((minutesToday / minutesGoal) * 100));
 
   const quickActions = [
     { icon: Film, titleKey: "dash.watchMovies", descKey: "dash.watchMoviesDesc", color: "pink", path: "/cinema" },
@@ -32,7 +44,7 @@ export default function DashboardPage() {
       {/* Сәлемдесу */}
       <div>
         <h1 className="text-3xl font-display font-bold">
-          {t("dash.greeting")}, {DEMO.name}! 👋
+          {t("dash.greeting")}, {name}! 👋
         </h1>
         <p className="text-text-secondary mt-1">{t("dash.welcomeBack")}</p>
       </div>
@@ -46,8 +58,8 @@ export default function DashboardPage() {
             <span className="text-sm text-text-secondary">{t("dash.todayGoal")}</span>
           </div>
           <div className="flex items-baseline gap-1 mb-2">
-            <span className="text-2xl font-display font-bold">{DEMO.minutesToday}</span>
-            <span className="text-text-secondary text-sm">/ {DEMO.minutesGoal} мин</span>
+            <span className="text-2xl font-display font-bold">{minutesToday}</span>
+            <span className="text-text-secondary text-sm">/ {minutesGoal} мин</span>
           </div>
           <div className="h-2 rounded-full bg-border overflow-hidden">
             <div className="h-full bg-accent-blue rounded-full transition-all" style={{ width: `${minPercent}%` }} />
@@ -61,7 +73,7 @@ export default function DashboardPage() {
             <span className="text-sm text-text-secondary">{t("dash.wordsLearned")}</span>
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-display font-bold">{DEMO.wordsLearned}</span>
+            <span className="text-2xl font-display font-bold">{wordsLearned}</span>
             <span className="text-accent-green text-sm">+12 бүгін</span>
           </div>
         </div>
@@ -73,7 +85,7 @@ export default function DashboardPage() {
             <span className="text-sm text-text-secondary">{t("top.streak")}</span>
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-display font-bold">{DEMO.streak}</span>
+            <span className="text-2xl font-display font-bold">{streak}</span>
             <span className="text-text-secondary text-sm">{t("top.days")}</span>
           </div>
         </div>

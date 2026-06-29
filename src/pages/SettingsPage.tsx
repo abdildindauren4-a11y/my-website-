@@ -111,6 +111,19 @@ export default function SettingsPage() {
         </div>
 
         <div className="space-y-5">
+          {/* Аты */}
+          <div>
+            <label className="text-sm font-medium mb-2 block">{t("set.yourName")}</label>
+            <input
+              type="text"
+              value={prefs.name || ""}
+              onChange={(e) => update({ name: e.target.value })}
+              placeholder={t("onb.namePlaceholder")}
+              maxLength={30}
+              className="w-full bg-surface-2 border border-border rounded-card px-3 py-2.5 text-sm focus:outline-none focus:border-accent-green/50"
+            />
+          </div>
+
           {/* Үйрену тілі */}
           <div>
             <label className="text-sm font-medium mb-2 block">{t("set.learningLang")}</label>

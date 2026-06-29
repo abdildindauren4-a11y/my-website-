@@ -1,0 +1,200 @@
+// filepath: src/lib/ielts/test2.ts
+// IELTS Reading — 2-тест. Жаңа тақырыптар, 40 сұрақ.
+
+import type { ReadingTest } from "@/types/ielts";
+
+export const test2: ReadingTest = {
+  id: "reading-test-2",
+  title: "Academic Reading — Test 2",
+  titleKk: "Академиялық оқу — 2-тест",
+  timeMinutes: 60,
+  totalQuestions: 40,
+  passages: [
+    // ═══════════ PASSAGE 1 ═══════════
+    {
+      id: "t2p1",
+      number: 1,
+      title: "The Honey Bee",
+      titleKk: "Бал арасы",
+      topic: "Nature",
+      difficulty: "easy",
+      wordCount: 720,
+      paragraphs: [
+        { label: "A", text: "Honey bees are among the most important insects on Earth, playing a vital role in the pollination of countless plant species. These remarkable creatures live in highly organised colonies that can contain tens of thousands of individuals. Each colony functions as a single unit, with different bees performing specialised tasks. The survival of the entire colony depends on this division of labour and the ability of its members to communicate effectively with one another." },
+        { label: "B", text: "A typical honey bee colony consists of three types of bees: a single queen, thousands of female worker bees, and a smaller number of male drones. The queen is the only bee capable of laying eggs, and she can produce up to 2,000 eggs per day during peak season. Worker bees, which are all female, perform virtually all the tasks necessary for the colony's survival, including gathering food, building the honeycomb, and caring for the young. Drones have only one purpose: to mate with a queen from another colony." },
+        { label: "C", text: "One of the most fascinating aspects of honey bee behaviour is their method of communication. When a worker bee discovers a good source of nectar, she returns to the hive and performs what is known as a 'waggle dance'. The direction and duration of this dance convey precise information about the location of the food source, including its distance and direction relative to the sun. This sophisticated form of communication allows other bees to locate the food quickly and efficiently." },
+        { label: "D", text: "Honey production is one of the bee's most well-known activities. Bees collect nectar from flowers and store it in a special stomach. Back at the hive, the nectar is passed between bees and gradually transformed into honey through a process of regurgitation and evaporation. The honey is then stored in the honeycomb and sealed with wax. A single bee produces only a tiny amount of honey in its lifetime, yet a strong colony can produce many kilograms in a single year." },
+        { label: "E", text: "In recent years, honey bee populations have declined dramatically in many parts of the world, a phenomenon that has alarmed scientists and farmers alike. This decline has been attributed to a combination of factors, including the use of pesticides, the spread of diseases and parasites, habitat loss, and climate change. The loss of bees poses a serious threat to global food production, as many crops depend on bees for pollination." },
+        { label: "F", text: "Efforts to protect honey bees have intensified as awareness of their importance has grown. Scientists are working to develop bee populations that are more resistant to disease, while farmers are being encouraged to reduce their use of harmful pesticides. Individuals can also help by planting bee-friendly flowers and avoiding chemicals in their gardens. The future of these remarkable insects, and the many plants and animals that depend on them, may well depend on such efforts." },
+      ],
+      groups: [
+        {
+          id: "t2p1g1",
+          type: "true-false-notgiven",
+          instruction: "Do the following statements agree with the information in the passage? Choose TRUE, FALSE or NOT GIVEN.",
+          instructionKk: "Тұжырымдар мәтінмен сәйкес пе? TRUE, FALSE немесе NOT GIVEN таңдаңыз.",
+          questions: [
+            { id: "t2q1", type: "true-false-notgiven", number: 1, prompt: "A honey bee colony can contain tens of thousands of bees.", answer: "TRUE", explanation: "A абзац: колонияда ондаған мың ара болуы мүмкін.", paragraphRef: 0 },
+            { id: "t2q2", type: "true-false-notgiven", number: 2, prompt: "Drones are responsible for gathering food for the colony.", answer: "FALSE", explanation: "B абзац: еркек аралардың бір ғана мақсаты — ұрықтандыру, тамақ жинамайды.", paragraphRef: 1 },
+            { id: "t2q3", type: "true-false-notgiven", number: 3, prompt: "The queen bee lives longer than worker bees.", answer: "NOT GIVEN", explanation: "Аралардың өмір ұзақтығы салыстырылмаған.", paragraphRef: 1 },
+            { id: "t2q4", type: "true-false-notgiven", number: 4, prompt: "The waggle dance shows the distance and direction of food.", answer: "TRUE", explanation: "C абзац: би қашықтық пен бағытты көрсетеді.", paragraphRef: 2 },
+            { id: "t2q5", type: "true-false-notgiven", number: 5, prompt: "A single bee produces a large amount of honey.", answer: "FALSE", explanation: "D абзац: бір ара өмірінде өте аз бал жасайды.", paragraphRef: 3 },
+          ],
+        },
+        {
+          id: "t2p1g2",
+          type: "sentence-completion",
+          instruction: "Complete the sentences. Choose NO MORE THAN TWO WORDS from the passage.",
+          instructionKk: "Сөйлемдерді толықтырыңыз. Мәтіннен ЕКІ СӨЗДЕН АСПАЙТЫН сөз таңдаңыз.",
+          wordLimit: 2,
+          questions: [
+            { id: "t2q6", type: "sentence-completion", number: 6, prompt: "The queen can lay up to _______ eggs per day.", answer: "2000", acceptableAnswers: ["2,000", "two thousand"], explanation: "B абзац: күніне 2000 жұмыртқаға дейін.", paragraphRef: 1 },
+            { id: "t2q7", type: "sentence-completion", number: 7, prompt: "Bees store nectar in a special _______.", answer: "stomach", explanation: "D абзац: нектарды арнайы қарында сақтайды.", paragraphRef: 3 },
+            { id: "t2q8", type: "sentence-completion", number: 8, prompt: "Honey is sealed in the honeycomb with _______.", answer: "wax", explanation: "D абзац: балауызбен бекітіледі.", paragraphRef: 3 },
+            { id: "t2q9", type: "sentence-completion", number: 9, prompt: "The waggle dance gives information relative to the _______.", answer: "sun", explanation: "C абзац: күнге қатысты бағыт.", paragraphRef: 2 },
+            { id: "t2q10", type: "sentence-completion", number: 10, prompt: "People can help bees by planting bee-friendly _______.", answer: "flowers", explanation: "F абзац: араға ыңғайлы гүлдер егу.", paragraphRef: 5 },
+          ],
+        },
+        {
+          id: "t2p1g3",
+          type: "multiple-choice",
+          instruction: "Choose the correct letter, A, B, C or D.",
+          instructionKk: "Дұрыс әріпті таңдаңыз: A, B, C немесе D.",
+          questions: [
+            { id: "t2q11", type: "multiple-choice", number: 11, prompt: "What is the main role of worker bees?", options: ["To lay eggs", "To mate with the queen", "To perform tasks for the colony's survival", "To lead the colony"], answer: "2", explanation: "B абзац: жұмысшы аралар колония тіршілігі үшін барлық жұмысты атқарады (индекс 2).", paragraphRef: 1 },
+            { id: "t2q12", type: "multiple-choice", number: 12, prompt: "What causes the decline in bee populations?", options: ["Only pesticides", "A combination of several factors", "Only climate change", "Too much honey production"], answer: "1", explanation: "E абзац: бірнеше фактордың жиынтығы (индекс 1).", paragraphRef: 4 },
+            { id: "t2q13", type: "multiple-choice", number: 13, prompt: "Why is the decline of bees a serious problem?", options: ["Bees are beautiful insects", "Many crops depend on bees for pollination", "Bees produce honey", "Bees are rare"], answer: "1", explanation: "E абзац: көп дақыл тозаңдану үшін араға тәуелді (индекс 1).", paragraphRef: 4 },
+          ],
+        },
+      ],
+    },
+    // ═══════════ PASSAGE 2 ═══════════
+    {
+      id: "t2p2",
+      number: 2,
+      title: "The Origins of Writing",
+      titleKk: "Жазудың пайда болуы",
+      topic: "History",
+      difficulty: "medium",
+      wordCount: 880,
+      paragraphs: [
+        { label: "A", text: "Writing is one of humanity's most significant inventions, fundamentally transforming the way information is recorded and transmitted across generations. Before the development of writing, all knowledge had to be memorised and passed on orally, a method that was both unreliable and limited in scope. The invention of writing allowed human societies to store vast amounts of information, keep records, and communicate across both time and distance in ways that had never before been possible." },
+        { label: "B", text: "The earliest known writing system emerged in ancient Mesopotamia, in the region known as Sumer, around 3400 BC. This system, called cuneiform, began as a series of simple pictures representing objects and quantities. Over time, these pictures became increasingly abstract, evolving into a set of wedge-shaped marks made by pressing a reed stylus into soft clay tablets. Cuneiform was used to record everything from business transactions and legal codes to literature and historical events." },
+        { label: "C", text: "Independently of developments in Mesopotamia, the ancient Egyptians developed their own writing system, known as hieroglyphics, at around the same time. Hieroglyphics combined logographic elements, in which symbols represented words or concepts, with phonetic elements representing sounds. This complex system was used primarily for religious texts and monumental inscriptions, and it remained in use for over three thousand years before eventually falling out of use." },
+        { label: "D", text: "The writing systems of Mesopotamia and Egypt were enormously influential, but they were complex and difficult to learn, requiring years of study to master. A major breakthrough came with the development of the alphabet, which is thought to have originated among Semitic peoples in the Middle East around 1800 BC. Unlike earlier systems, the alphabet used a small number of symbols, each representing a single sound, making it far easier to learn and use." },
+        { label: "E", text: "The alphabet was adopted and adapted by many different cultures. The Phoenicians, a seafaring people, spread their alphabet throughout the Mediterranean world through their extensive trade networks. The Greeks adopted the Phoenician alphabet and made a crucial modification: they added symbols for vowel sounds, which the Phoenician system had lacked. The Greek alphabet, in turn, gave rise to the Latin alphabet, which is used by many languages today, including English." },
+        { label: "F", text: "Writing systems continued to develop in other parts of the world as well. In China, a writing system emerged around 1200 BC that was logographic in nature, with each character representing a word or concept rather than a sound. This system, which has evolved over time, is still in use today, making Chinese writing one of the oldest continuously used writing systems in the world. Other writing systems developed independently in Mesoamerica, demonstrating that the invention of writing occurred multiple times in human history." },
+        { label: "G", text: "The impact of writing on human civilisation cannot be overstated. It made possible the keeping of detailed records, the codification of laws, the preservation of literature, and the accumulation of knowledge across generations. Many historians regard the invention of writing as marking the boundary between prehistory and history, since it is only with written records that we can directly access the thoughts and events of past societies." },
+      ],
+      groups: [
+        {
+          id: "t2p2g1",
+          type: "matching-headings",
+          instruction: "Choose the correct heading for paragraphs B, C, D, E and F from the list below.",
+          instructionKk: "B, C, D, E және F абзацтарына сәйкес тақырыпты таңдаңыз.",
+          headings: [
+            { id: "i", text: "The spread and adaptation of the alphabet" },
+            { id: "ii", text: "The first writing system" },
+            { id: "iii", text: "Writing in China and beyond" },
+            { id: "iv", text: "The Egyptian writing system" },
+            { id: "v", text: "The invention of the alphabet" },
+            { id: "vi", text: "Why writing matters" },
+            { id: "vii", text: "Writing before history" },
+          ],
+          questions: [
+            { id: "t2q14", type: "matching-headings", number: 14, prompt: "Paragraph B", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "ii", explanation: "B абзац: алғашқы жазу жүйесі (cuneiform).", paragraphRef: 1 },
+            { id: "t2q15", type: "matching-headings", number: 15, prompt: "Paragraph C", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "iv", explanation: "C абзац: египет жазуы (иероглиф).", paragraphRef: 2 },
+            { id: "t2q16", type: "matching-headings", number: 16, prompt: "Paragraph D", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "v", explanation: "D абзац: алфавиттің пайда болуы.", paragraphRef: 3 },
+            { id: "t2q17", type: "matching-headings", number: 17, prompt: "Paragraph E", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "i", explanation: "E абзац: алфавиттің таралуы мен бейімделуі.", paragraphRef: 4 },
+            { id: "t2q18", type: "matching-headings", number: 18, prompt: "Paragraph F", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], answer: "iii", explanation: "F абзац: Қытай және басқа жердегі жазу.", paragraphRef: 5 },
+          ],
+        },
+        {
+          id: "t2p2g2",
+          type: "true-false-notgiven",
+          instruction: "Do the following statements agree with the information? Choose TRUE, FALSE or NOT GIVEN.",
+          instructionKk: "Тұжырымдар сәйкес пе? TRUE, FALSE немесе NOT GIVEN.",
+          questions: [
+            { id: "t2q19", type: "true-false-notgiven", number: 19, prompt: "Cuneiform began as abstract wedge-shaped marks.", answer: "FALSE", explanation: "B абзац: ол алдымен қарапайым суреттер ретінде басталды, кейін абстракт болды.", paragraphRef: 1 },
+            { id: "t2q20", type: "true-false-notgiven", number: 20, prompt: "Egyptian hieroglyphics were used mainly for religious texts.", answer: "TRUE", explanation: "C абзац: негізінен діни мәтіндер үшін.", paragraphRef: 2 },
+            { id: "t2q21", type: "true-false-notgiven", number: 21, prompt: "The Greeks added vowel symbols to the alphabet.", answer: "TRUE", explanation: "E абзац: гректер дауысты дыбыс таңбаларын қосты.", paragraphRef: 4 },
+            { id: "t2q22", type: "true-false-notgiven", number: 22, prompt: "Chinese writing is no longer used today.", answer: "FALSE", explanation: "F абзац: қытай жазуы әлі қолданылады.", paragraphRef: 5 },
+          ],
+        },
+        {
+          id: "t2p2g3",
+          type: "sentence-completion",
+          instruction: "Complete the sentences. Choose NO MORE THAN TWO WORDS from the passage.",
+          instructionKk: "Сөйлемдерді толықтырыңыз. ЕКІ СӨЗДЕН АСПАЙТЫН сөз таңдаңыз.",
+          wordLimit: 2,
+          questions: [
+            { id: "t2q23", type: "sentence-completion", number: 23, prompt: "The earliest writing emerged in the region of _______.", answer: "Sumer", explanation: "B абзац: Шумер аймағында.", paragraphRef: 1 },
+            { id: "t2q24", type: "sentence-completion", number: 24, prompt: "Cuneiform marks were made using a reed _______.", answer: "stylus", explanation: "B абзац: қамыс стилусымен.", paragraphRef: 1 },
+            { id: "t2q25", type: "sentence-completion", number: 25, prompt: "The _______ spread their alphabet through trade.", answer: "Phoenicians", explanation: "E абзац: финикиялықтар сауда арқылы таратты.", paragraphRef: 4 },
+            { id: "t2q26", type: "sentence-completion", number: 26, prompt: "The Greek alphabet gave rise to the _______ alphabet.", answer: "Latin", explanation: "E абзац: грек алфавиті латын алфавитіне әкелді.", paragraphRef: 4 },
+          ],
+        },
+      ],
+    },
+    // ═══════════ PASSAGE 3 ═══════════
+    {
+      id: "t2p3",
+      number: 3,
+      title: "The Psychology of Decision Making",
+      titleKk: "Шешім қабылдау психологиясы",
+      topic: "Psychology",
+      difficulty: "hard",
+      wordCount: 920,
+      paragraphs: [
+        { label: "A", text: "Every day, people make countless decisions, ranging from the trivial to the life-changing. For a long time, economists and philosophers assumed that human beings were fundamentally rational, carefully weighing the costs and benefits of each option before choosing the one that maximised their interests. However, research in psychology over the past few decades has revealed that human decision making is far more complex, and often far less rational, than this traditional view suggests." },
+        { label: "B", text: "A pioneering figure in this field was the psychologist Daniel Kahneman, who, along with his colleague Amos Tversky, demonstrated that people frequently rely on mental shortcuts, known as heuristics, when making decisions. These shortcuts allow people to make quick judgements without expending excessive mental effort. While heuristics are often useful, they can also lead to systematic errors in judgement, known as cognitive biases. Kahneman's work in this area was so influential that he was awarded the Nobel Prize in Economics in 2002." },
+        { label: "C", text: "One well-known cognitive bias is the availability heuristic, which describes the tendency to judge the likelihood of an event based on how easily examples come to mind. For instance, people often overestimate the danger of dramatic but rare events, such as plane crashes, while underestimating the risk of more common but less memorable dangers, such as car accidents. This bias occurs because vivid, emotionally charged events are more easily recalled than mundane ones." },
+        { label: "D", text: "Another important concept is loss aversion, which refers to the tendency for people to feel the pain of a loss more strongly than the pleasure of an equivalent gain. Studies have shown that, for most people, the negative feeling associated with losing a sum of money is roughly twice as powerful as the positive feeling associated with gaining the same amount. This asymmetry has profound implications for how people make decisions involving risk, often leading them to avoid potential losses even when taking a risk would be advantageous." },
+        { label: "E", text: "The way in which choices are presented, or 'framed', can also have a significant impact on the decisions people make. Research has demonstrated that people often respond differently to the same information depending on whether it is presented in terms of potential gains or potential losses. For example, people are more likely to choose a medical treatment described as having a 90 per cent survival rate than one described as having a 10 per cent mortality rate, even though these two descriptions are mathematically identical." },
+        { label: "F", text: "Understanding these psychological principles has practical applications in many areas of life. Governments and organisations have begun to use insights from behavioural psychology to design policies and environments that encourage people to make better decisions, an approach sometimes called 'nudging'. For example, automatically enrolling employees in pension schemes, while allowing them to opt out, has been shown to dramatically increase savings rates, simply by changing the default option." },
+        { label: "G", text: "While the study of decision making has revealed many ways in which human judgement can go astray, it has also deepened our understanding of how the mind works. Rather than viewing human irrationality as a flaw to be corrected, many researchers now see these mental shortcuts as adaptations that, on the whole, serve people well in a complex and uncertain world. The challenge lies in recognising when these shortcuts are likely to lead us astray, and in designing systems that help us make better choices." },
+      ],
+      groups: [
+        {
+          id: "t2p3g1",
+          type: "multiple-choice",
+          instruction: "Choose the correct letter, A, B, C or D.",
+          instructionKk: "Дұрыс әріпті таңдаңыз: A, B, C немесе D.",
+          questions: [
+            { id: "t2q27", type: "multiple-choice", number: 27, prompt: "What did traditional economists assume about human beings?", options: ["That they were irrational", "That they were fundamentally rational", "That they made random choices", "That they could not make decisions"], answer: "1", explanation: "A абзац: дәстүрлі көзқарас адам рационал деп есептеді (индекс 1).", paragraphRef: 0 },
+            { id: "t2q28", type: "multiple-choice", number: 28, prompt: "What are heuristics?", options: ["Complex calculations", "Mental shortcuts", "Economic theories", "Types of biases"], answer: "1", explanation: "B абзац: эвристика — ойлау жолдары (mental shortcuts) (индекс 1).", paragraphRef: 1 },
+            { id: "t2q29", type: "multiple-choice", number: 29, prompt: "Why do people overestimate the danger of plane crashes?", options: ["Plane crashes are very common", "Dramatic events are easily recalled", "Planes are dangerous", "Cars are safe"], answer: "1", explanation: "C абзац: драмалық оқиғалар оңай еске түседі (индекс 1).", paragraphRef: 2 },
+            { id: "t2q30", type: "multiple-choice", number: 30, prompt: "What is 'nudging'?", options: ["Forcing people to make decisions", "Designing environments to encourage better decisions", "A type of cognitive bias", "A mathematical formula"], answer: "1", explanation: "F абзац: жақсы шешімге ынталандыратын орта құру (индекс 1).", paragraphRef: 5 },
+          ],
+        },
+        {
+          id: "t2p3g2",
+          type: "yes-no-notgiven",
+          instruction: "Do the following statements agree with the claims of the writer? Choose YES, NO or NOT GIVEN.",
+          instructionKk: "Тұжырымдар автор пікірімен сәйкес пе? YES, NO немесе NOT GIVEN.",
+          questions: [
+            { id: "t2q31", type: "yes-no-notgiven", number: 31, prompt: "Kahneman's work was highly influential.", answer: "YES", explanation: "B абзац: оның жұмысы өте ықпалды болды, Нобель сыйлығын алды.", paragraphRef: 1 },
+            { id: "t2q32", type: "yes-no-notgiven", number: 32, prompt: "Loss aversion means gains feel stronger than losses.", answer: "NO", explanation: "D абзац: керісінше, шығын ауырлығы пайдадан күштірек.", paragraphRef: 3 },
+            { id: "t2q33", type: "yes-no-notgiven", number: 33, prompt: "The way choices are framed affects decisions.", answer: "YES", explanation: "E абзац: таңдаудың ұсынылу тәсілі шешімге әсер етеді.", paragraphRef: 4 },
+            { id: "t2q34", type: "yes-no-notgiven", number: 34, prompt: "Kahneman is still actively researching today.", answer: "NOT GIVEN", explanation: "Оның қазіргі қызметі туралы айтылмаған.", paragraphRef: 1 },
+          ],
+        },
+        {
+          id: "t2p3g3",
+          type: "sentence-completion",
+          instruction: "Complete the sentences. Choose NO MORE THAN TWO WORDS from the passage.",
+          instructionKk: "Сөйлемдерді толықтырыңыз. ЕКІ СӨЗДЕН АСПАЙТЫН сөз таңдаңыз.",
+          wordLimit: 2,
+          questions: [
+            { id: "t2q35", type: "sentence-completion", number: 35, prompt: "Mental shortcuts that lead to errors are called cognitive _______.", answer: "biases", explanation: "B абзац: когнитивтік қателер (biases).", paragraphRef: 1 },
+            { id: "t2q36", type: "sentence-completion", number: 36, prompt: "Kahneman won the Nobel Prize in _______.", answer: "2002", explanation: "B абзац: 2002 жылы.", paragraphRef: 1 },
+            { id: "t2q37", type: "sentence-completion", number: 37, prompt: "The pain of loss is about _______ as powerful as an equivalent gain.", answer: "twice", explanation: "D абзац: шамамен екі есе күшті.", paragraphRef: 3 },
+            { id: "t2q38", type: "sentence-completion", number: 38, prompt: "The presentation of choices is also called _______.", answer: "framing", acceptableAnswers: ["framed"], explanation: "E абзац: таңдауды ұсыну — framing.", paragraphRef: 4 },
+            { id: "t2q39", type: "sentence-completion", number: 39, prompt: "Automatically enrolling employees in _______ schemes increases savings.", answer: "pension", explanation: "F абзац: зейнетақы схемалары.", paragraphRef: 5 },
+            { id: "t2q40", type: "sentence-completion", number: 40, prompt: "Researchers now see mental shortcuts as _______ that serve people well.", answer: "adaptations", explanation: "G абзац: бейімделулер ретінде қарайды.", paragraphRef: 6 },
+          ],
+        },
+      ],
+    },
+  ],
+};

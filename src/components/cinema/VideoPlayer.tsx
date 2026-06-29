@@ -20,9 +20,10 @@ interface Props {
   lesson: CinemaLesson;
   onSaveWord?: () => void;
   onShowTranscript?: () => void;
+  onAddWord?: (word: string, definition: string, phonetic?: string) => void;
 }
 
-export default function VideoPlayer({ lesson, onShowTranscript }: Props) {
+export default function VideoPlayer({ lesson, onShowTranscript, onAddWord }: Props) {
   const { t } = useLang();
   const playerRef = useRef<any>(null);
   const containerId = "yt-player";
@@ -109,7 +110,7 @@ export default function VideoPlayer({ lesson, onShowTranscript }: Props) {
         <div id={containerId} className="w-full h-full" />
 
         {/* Субтитр overlay */}
-        <SubtitleOverlay line={currentLine} />
+        <SubtitleOverlay line={currentLine} lang={lesson.lang} onAddWord={onAddWord} />
 
         {/* Жоғарғы оң: CC + баптау */}
         <div className="absolute top-3 right-3 flex gap-2">
