@@ -130,7 +130,7 @@ export async function sendChatMessage(
       "═══════════════════════════════════════\n" + knowledge;
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash", // тегін, жылдам әрі қазіргі (1.5 ескірген)
+      model: "gemini-2.5-flash", // қазіргі тұрақты тегін модель (1.5 және 2.0 жабылған)
       systemInstruction: fullSystemPrompt,
     });
 
@@ -151,13 +151,17 @@ export async function sendChatMessage(
     return { ok: true, text };
   } catch (e) {
     const msg = (e as Error)?.message || "";
+    console.error("Gemini қатесі:", e);
     if (msg.includes("API_KEY") || msg.includes("API key")) {
       return { ok: false, error: "bad-key" };
     }
-    if (msg.includes("quota") || msg.includes("RATE")) {
+    // Модель жоқ/ескірген (404) — "лимит" деп шатастырмау үшін бөлек тексереміз
+    if (msg.includes("404") || msg.includes("not found") || msg.includes("not supported") || msg.includes("is not found")) {
+      return { ok: false, error: "general" };
+    }
+    if (msg.includes("quota") || msg.includes("RATE") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("429")) {
       return { ok: false, error: "quota" };
     }
-    console.error("Gemini қатесі:", e);
     return { ok: false, error: "general" };
   }
 }
