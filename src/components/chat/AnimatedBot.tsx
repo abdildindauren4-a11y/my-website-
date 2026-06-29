@@ -14,6 +14,9 @@ interface Props {
 
 export default function AnimatedBot({ state = "idle", size = 80 }: Props) {
   const glowing = state === "thinking" || state === "happy";
+  // Жауап жазып жатқанда — анимациялық бот (мөлдір WebP), әйтпесе тұрақты сурет
+  const responding = state === "thinking" || state === "talking";
+  const src = responding ? "/bot-typing.webp" : "/bot.png";
 
   // Күйге қарай қалқу/секіру қозғалысы
   const motionByState =
@@ -42,9 +45,10 @@ export default function AnimatedBot({ state = "idle", size = 80 }: Props) {
         />
       )}
 
-      {/* Бот суреті — қалқу/секіру анимациясымен */}
+      {/* Бот суреті — жауап жазғанда анимациялық WebP, әйтпесе тұрақты сурет */}
       <motion.img
-        src="/bot.png"
+        key={src}
+        src={src}
         alt="LinguaFast bot"
         draggable={false}
         animate={motionByState}
