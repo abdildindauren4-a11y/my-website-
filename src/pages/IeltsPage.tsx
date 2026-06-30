@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { useLang } from "@/contexts/LangContext";
 import { useProgress } from "@/store/progressStore";
 import { readingTests } from "@/lib/ieltsData";
@@ -16,8 +17,8 @@ import AudioPlayer from "@/components/ielts/AudioPlayer";
 import WritingModule from "@/components/ielts/WritingModule";
 import SpeakingModule from "@/components/ielts/SpeakingModule";
 import {
-  GraduationCap, BookOpen, Headphones, PenTool, Mic, Clock, ArrowLeft,
-  CheckCircle2, XCircle, Trophy, ChevronRight, Lock,
+  GraduationCap, Clock, ArrowLeft,
+  CheckCircle2, XCircle, Trophy, ChevronRight, Target, TrendingUp,
 } from "lucide-react";
 
 type View = "hub" | "test" | "result" | "listen-test" | "listen-result" | "writing" | "speaking";
@@ -27,6 +28,7 @@ const listeningTests: ListeningTest[] = [listeningTest1];
 export default function IeltsPage() {
   const { t, lang } = useLang();
   const { addXP } = useProgress();
+  const navigate = useNavigate();
   const [view, setView] = useState<View>("hub");
   const [activeTest, setActiveTest] = useState<ReadingTest | null>(null);
   const [activeListening, setActiveListening] = useState<ListeningTest | null>(null);
@@ -88,106 +90,115 @@ export default function IeltsPage() {
     setView("listen-result");
   };
 
-  // ── ХАБ (бөлім таңдау) ──
+  // ── ХАБ (бөлім таңдау) — карточкалы дизайн ──
   if (view === "hub") {
-    const sections = [
-      { id: "reading", label: t("ielts.reading"), icon: BookOpen, color: "accent-green", available: true, desc: t("ielts.readingDesc"), onClick: null },
-      { id: "listening", label: t("ielts.listening"), icon: Headphones, color: "accent-blue", available: true, desc: "4 " + t("listen.section").toLowerCase() + " · 40 " + t("ielts.questions"), onClick: null },
-      { id: "writing", label: t("ielts.writing"), icon: PenTool, color: "accent-purple", available: true, desc: "Task 2 · AI " + (lang === "kk" ? "бағалау" : "scoring"), onClick: () => setView("writing") },
-      { id: "speaking", label: t("ielts.speaking"), icon: Mic, color: "accent-gold", available: true, desc: "3 " + t("speak.part").toLowerCase() + " · AI " + (lang === "kk" ? "бағалау" : "scoring"), onClick: () => setView("speaking") },
+    const firstReading = readingTests[0];
+    const firstListening = listeningTests[0];
+    // Литералды Tailwind кластары (динамикалық кластар JIT-те генерацияланбайды)
+    const arrowCls: Record<string, string> = {
+      "accent-green": "text-accent-green group-hover:bg-accent-green/10 group-hover:border-accent-green/40",
+      "accent-blue": "text-accent-blue group-hover:bg-accent-blue/10 group-hover:border-accent-blue/40",
+      "accent-purple": "text-accent-purple group-hover:bg-accent-purple/10 group-hover:border-accent-purple/40",
+      "accent-gold": "text-accent-gold group-hover:bg-accent-gold/10 group-hover:border-accent-gold/40",
+    };
+    const modules = [
+      {
+        id: "reading", img: "/ielts/reading.png", kk: "Оқу", en: "Reading", accent: "accent-green",
+        meta1: `${firstReading.passages.length} ${lang === "kk" ? "мәтін" : "passages"} · ${firstReading.totalQuestions} ${lang === "kk" ? "сұрақ" : "questions"}`,
+        meta2: `${firstReading.timeMinutes} ${lang === "kk" ? "минут" : "min"}`,
+        onClick: () => startTest(firstReading),
+      },
+      {
+        id: "listening", img: "/ielts/listening.png", kk: "Тыңдау", en: "Listening", accent: "accent-blue",
+        meta1: `${firstListening.sections.length} ${lang === "kk" ? "бөлім" : "sections"} · ${firstListening.totalQuestions} ${lang === "kk" ? "сұрақ" : "questions"}`,
+        meta2: `30 ${lang === "kk" ? "минут" : "min"}`,
+        onClick: () => startListening(firstListening),
+      },
+      {
+        id: "writing", img: "/ielts/writing.png", kk: "Жазу", en: "Writing", accent: "accent-purple",
+        meta1: `Task 2 · AI ${lang === "kk" ? "бағалау" : "scoring"}`,
+        meta2: `60 ${lang === "kk" ? "минут" : "min"}`,
+        onClick: () => setView("writing"),
+      },
+      {
+        id: "speaking", img: "/ielts/speaking.png", kk: "Сөйлеу", en: "Speaking", accent: "accent-gold",
+        meta1: `3 ${lang === "kk" ? "бөлім" : "parts"} · AI ${lang === "kk" ? "бағалау" : "scoring"}`,
+        meta2: `11–14 ${lang === "kk" ? "минут" : "min"}`,
+        onClick: () => setView("speaking"),
+      },
     ];
+
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-3xl mx-auto">
+        {/* Тақырып */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-11 h-11 rounded-card bg-accent-green/15 flex items-center justify-center">
-            <GraduationCap className="w-6 h-6 text-accent-green" />
+          <div className="w-12 h-12 rounded-card bg-accent-green/15 flex items-center justify-center">
+            <GraduationCap className="w-7 h-7 text-accent-green" />
           </div>
           <div>
-            <h1 className="text-2xl font-display font-bold">{t("ielts.title")}</h1>
+            <h1 className="text-3xl font-display font-bold">{t("ielts.title")}</h1>
             <p className="text-sm text-text-secondary">{t("ielts.subtitle")}</p>
           </div>
         </div>
 
-        {/* 4 бөлім */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          {sections.map((s) => {
-            const Icon = s.icon;
-            const clickable = s.available && s.onClick;
-            return (
-              <div
-                key={s.id}
-                onClick={() => s.onClick?.()}
-                className={`card p-5 ${s.available ? "" : "opacity-60"} ${clickable ? "cursor-pointer hover:border-accent-purple/40 transition-colors" : ""}`}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className={`w-11 h-11 rounded-card bg-${s.color}/15 flex items-center justify-center`}>
-                    <Icon className={`w-6 h-6 text-${s.color}`} />
-                  </div>
-                  {s.available ? (
-                    <span className="text-[10px] font-bold bg-accent-green/15 text-accent-green px-2 py-1 rounded-full">
-                      {t("ielts.available")}
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-medium bg-surface-2 text-text-muted px-2 py-1 rounded-full flex items-center gap-1">
-                      <Lock className="w-3 h-3" /> {t("ielts.comingSoon")}
-                    </span>
-                  )}
-                </div>
-                <h3 className="font-display font-bold mb-1">{s.label}</h3>
-                {s.desc && <p className="text-xs text-text-secondary">{s.desc}</p>}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Reading тесттері */}
-        <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-accent-green" /> {t("ielts.reading")}
-        </h2>
-        <div className="space-y-3 mb-8">
-          {readingTests.map((test) => (
+        {/* 4 модуль карточкасы */}
+        <div className="space-y-4">
+          {modules.map((m, i) => (
             <motion.button
-              key={test.id}
-              whileHover={{ y: -2 }}
-              onClick={() => startTest(test)}
-              className="card p-5 w-full text-left flex items-center justify-between hover:border-accent-green/40 transition-colors"
+              key={m.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.06 }}
+              whileHover={{ y: -3 }}
+              whileTap={{ scale: 0.99 }}
+              onClick={m.onClick}
+              className="card p-4 sm:p-5 w-full text-left flex items-center gap-4 hover:shadow-lg transition-shadow group"
             >
-              <div>
-                <h3 className="font-display font-bold mb-1">{lang === "kk" ? test.titleKk : test.title}</h3>
-                <p className="text-sm text-text-secondary">
-                  {test.passages.length} {t("ielts.passages")} · {test.totalQuestions} {t("ielts.questions")} · {test.timeMinutes} {t("ielts.minutes")}
-                </p>
+              {/* 3D сурет */}
+              <img src={m.img} alt="" aria-hidden="true" draggable={false}
+                className="w-20 h-20 sm:w-24 sm:h-24 object-contain shrink-0 drop-shadow-md group-hover:scale-105 transition-transform" />
+
+              {/* Орта: атауы + метадеректер */}
+              <div className="flex-1 min-w-0">
+                <h3 className="font-display font-bold text-lg leading-tight">
+                  {lang === "kk" ? m.kk : m.en}
+                  {lang === "kk" && <span className="text-text-secondary font-normal"> ({m.en})</span>}
+                </h3>
+                <p className="text-sm text-text-secondary mt-1.5">{m.meta1}</p>
+                <p className="text-sm text-text-secondary">{m.meta2}</p>
               </div>
-              <div className="flex items-center gap-2 text-accent-green font-medium text-sm shrink-0">
-                {t("ielts.startTest")} <ChevronRight className="w-4 h-4" />
+
+              {/* Оң жақ: белгі + көрсеткі */}
+              <div className="flex flex-col items-end justify-between self-stretch shrink-0">
+                <span className="text-[11px] font-bold bg-accent-green/15 text-accent-green px-2.5 py-1 rounded-full">
+                  {t("ielts.available")}
+                </span>
+                <span className={`w-10 h-10 rounded-full border border-border flex items-center justify-center transition-colors ${arrowCls[m.accent]}`}>
+                  <ChevronRight className="w-5 h-5" />
+                </span>
               </div>
             </motion.button>
           ))}
         </div>
 
-        {/* Listening тесттері */}
-        <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
-          <Headphones className="w-5 h-5 text-accent-blue" /> {t("ielts.listening")}
-        </h2>
-        <div className="space-y-3">
-          {listeningTests.map((test) => (
-            <motion.button
-              key={test.id}
-              whileHover={{ y: -2 }}
-              onClick={() => startListening(test)}
-              className="card p-5 w-full text-left flex items-center justify-between hover:border-accent-blue/40 transition-colors"
-            >
-              <div>
-                <h3 className="font-display font-bold mb-1">{lang === "kk" ? test.titleKk : test.title}</h3>
-                <p className="text-sm text-text-secondary">
-                  {test.sections.length} {t("listen.section").toLowerCase()} · {test.totalQuestions} {t("ielts.questions")}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 text-accent-blue font-medium text-sm shrink-0">
-                {t("ielts.startTest")} <ChevronRight className="w-4 h-4" />
-              </div>
-            </motion.button>
-          ))}
+        {/* Мақсат баннері */}
+        <div className="card p-4 sm:p-5 mt-6 flex items-center gap-4 bg-gradient-to-br from-accent-green/5 to-accent-blue/5">
+          <div className="w-12 h-12 rounded-card bg-accent-green/15 flex items-center justify-center shrink-0">
+            <Target className="w-7 h-7 text-accent-green" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-display font-bold">{lang === "kk" ? "Мақсатыңызға бірге жетеміз!" : "Let's reach your goal together!"}</h3>
+            <p className="text-xs text-text-secondary mt-0.5">
+              {lang === "kk" ? "Жоспар құрыңыз, прогресті бақылаңыз және жоғары балл алыңыз." : "Make a plan, track your progress and score higher."}
+            </p>
+          </div>
+          <button
+            onClick={() => navigate("/progress")}
+            className="w-11 h-11 rounded-full bg-surface border border-border flex items-center justify-center text-accent-green hover:bg-accent-green/10 hover:border-accent-green/40 transition-colors shrink-0"
+            title={lang === "kk" ? "Прогресс" : "Progress"}
+          >
+            <TrendingUp className="w-5 h-5" />
+          </button>
         </div>
       </div>
     );
