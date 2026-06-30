@@ -24,6 +24,7 @@ export class ListeningPlayer {
   private voices: SpeechSynthesisVoice[] = [];
   private goodVoices: SpeechSynthesisVoice[] = [];
   private speakerVoice: Record<string, SpeechSynthesisVoice> = {};
+  private preferredVoiceName: string | null = null;
 
   constructor(lines: AudioLine[], rate = 0.95) {
     this.lines = lines;
@@ -73,8 +74,25 @@ export class ListeningPlayer {
     this.speakerVoice = {};
   }
 
+  // Қолжетімді сапалы дауыстар тізімі (UI таңдағышы үшін)
+  getVoiceList(): { name: string; lang: string }[] {
+    const pool = this.goodVoices.length ? this.goodVoices : this.voices.filter((v) => v.lang.toLowerCase().startsWith("en"));
+    return pool.map((v) => ({ name: v.name, lang: v.lang }));
+  }
+
+  // Қолданушы таңдаған дауысты бекіту (барлық жолға қолданылады)
+  setPreferredVoice(name: string | null) {
+    this.preferredVoiceName = name;
+    this.speakerVoice = {};
+  }
+
   // Әр сөйлеушіге тұрақты, сапалы дауыс (диалогты ажырату үшін кезек-кезек)
   private pickVoice(speaker?: string): SpeechSynthesisVoice | null {
+    // Қолданушы дауыс таңдаса — бәріне сол қолданылады
+    if (this.preferredVoiceName) {
+      const v = this.voices.find((x) => x.name === this.preferredVoiceName);
+      if (v) return v;
+    }
     const pool = this.goodVoices.length ? this.goodVoices : this.voices.filter((v) => v.lang.toLowerCase().startsWith("en"));
     if (pool.length === 0) return null;
     const key = speaker || "__narrator__";

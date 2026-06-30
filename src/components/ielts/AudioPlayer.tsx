@@ -16,9 +16,14 @@ export default function AudioPlayer({ audioLines }: Props) {
   const playerRef = useRef<ListeningPlayer | null>(null);
   const [state, setState] = useState<AudioPlayerState>({ playing: false, currentLine: 0, totalLines: audioLines.length, finished: false });
   const [rate, setRate] = useState(0.95);
+  const [voiceList, setVoiceList] = useState<{ name: string; lang: string }[]>([]);
+  const [voiceName, setVoiceName] = useState<string>(() => {
+    try { return localStorage.getItem("linguafast_tts_voice") || ""; } catch { return ""; }
+  });
 
   useEffect(() => {
     const player = new ListeningPlayer(audioLines, rate);
+    if (voiceName) player.setPreferredVoice(voiceName);
     playerRef.current = player;
     const unsub = player.subscribe(setState);
     return () => {
@@ -27,6 +32,35 @@ export default function AudioPlayer({ audioLines }: Props) {
     };
     // eslint-disable-next-line
   }, [audioLines]);
+
+  // Қолжетімді дауыстарды жинау (таңдағыш үшін)
+  useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const refresh = () => {
+      const list = playerRef.current?.getVoiceList() || [];
+      if (list.length) setVoiceList(list);
+    };
+    refresh();
+    window.speechSynthesis.onvoiceschanged = refresh;
+    const t = setTimeout(refresh, 300);
+    return () => clearTimeout(t);
+  }, []);
+
+  const changeVoice = (name: string) => {
+    setVoiceName(name);
+    try { localStorage.setItem("linguafast_tts_voice", name); } catch { /* */ }
+    playerRef.current?.setPreferredVoice(name || null);
+  };
+
+  const testVoice = () => {
+    playerRef.current?.restart();
+    const u = new SpeechSynthesisUtterance("Hello, this is how the listening voice sounds.");
+    const v = (window.speechSynthesis.getVoices() || []).find((x) => x.name === voiceName);
+    if (v) { u.voice = v; u.lang = v.lang; }
+    u.rate = rate; u.pitch = 1;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  };
 
   const togglePlay = () => {
     if (!playerRef.current) return;
@@ -96,6 +130,26 @@ export default function AudioPlayer({ audioLines }: Props) {
           </button>
         ))}
       </div>
+
+      {/* Дауыс таңдағыш */}
+      {voiceList.length > 0 && (
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xs text-text-muted shrink-0">{t("listen.voice")}:</span>
+          <select
+            value={voiceName}
+            onChange={(e) => changeVoice(e.target.value)}
+            className="flex-1 min-w-0 bg-surface-2 border border-border rounded-btn px-2 py-1.5 text-xs focus:outline-none focus:border-accent-green/50"
+          >
+            <option value="">{t("listen.voiceAuto")}</option>
+            {voiceList.map((v) => (
+              <option key={v.name} value={v.name}>{v.name} ({v.lang})</option>
+            ))}
+          </select>
+          <button onClick={testVoice} className="text-xs px-2 py-1.5 rounded-btn bg-surface-2 text-text-secondary hover:bg-surface shrink-0">
+            {t("listen.testVoice")}
+          </button>
+        </div>
+      )}
 
       {/* TTS ескерту */}
       <div className="flex items-start gap-2 text-xs text-text-muted bg-surface-2/50 rounded-card p-2">

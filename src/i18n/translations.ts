@@ -194,6 +194,9 @@ export const translations = {
   "listen.progress": { kk: "Аудио барысы", en: "Audio progress" },
   "listen.bySection": { kk: "Бөлім бойынша", en: "By section" },
   "listen.robotNote": { kk: "Дауыс компьютерлік (TTS). Нағыз емтиханда — адам дауысы.", en: "Voice is computer-generated (TTS). Real exam uses human voices." },
+  "listen.voice": { kk: "Дауыс", en: "Voice" },
+  "listen.voiceAuto": { kk: "Авто (ең жақсысы)", en: "Auto (best available)" },
+  "listen.testVoice": { kk: "Тыңдау", en: "Test" },
   // ── Writing ──
   "write.task": { kk: "Тапсырма", en: "Task" },
   "write.yourEssay": { kk: "Эссеңіз", en: "Your essay" },
