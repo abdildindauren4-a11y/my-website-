@@ -18,6 +18,7 @@ import IeltsPage from "@/pages/IeltsPage";
 import CoursesPage from "@/pages/CoursesPage";
 import PracticePage from "@/pages/PracticePage";
 import ProgressPage from "@/pages/ProgressPage";
+import LeaderboardPage from "@/pages/LeaderboardPage";
 
 // Маршруттар (кейін placeholder-лер нақты беттерге ауысады)
 const routes: [string, string][] = [
@@ -63,7 +64,8 @@ function AppContent() {
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/practice" element={<PracticePage />} />
           <Route path="/progress" element={<ProgressPage />} />
-          {routes.filter(([p]) => p !== "/" && p !== "/cinema" && p !== "/chat" && p !== "/dictionary" && p !== "/settings" && p !== "/games" && p !== "/ielts" && p !== "/courses" && p !== "/practice" && p !== "/progress").map(([path, title]) => (
+          <Route path="/leaderboard" element={<LeaderboardPage />} />
+          {routes.filter(([p]) => !["/", "/cinema", "/chat", "/dictionary", "/settings", "/games", "/ielts", "/courses", "/practice", "/progress", "/leaderboard"].includes(p)).map(([path, title]) => (
             <Route key={path} path={path} element={<PlaceholderPage title={title} />} />
           ))}
         </Route>
