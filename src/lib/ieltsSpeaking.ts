@@ -62,6 +62,8 @@ export function createRecognition(
   recognition.interimResults = true;
 
   let finalTranscript = "";
+  let manualStop = false;   // қолданушы өзі тоқтатты ма
+  let running = false;
 
   recognition.onresult = (event: any) => {
     let interim = "";
@@ -78,16 +80,24 @@ export function createRecognition(
   };
 
   recognition.onerror = (event: any) => {
+    // "no-speech"/"aborted" — үнсіздік, қате емес: жалғастырамыз
+    if (event.error === "no-speech" || event.error === "aborted") return;
     if (onError) onError(event.error);
   };
 
+  // Үнсіздікте браузер тоқтатса — автоматты қайта қосу (жауап үзілмеуі үшін)
   recognition.onend = () => {
-    onEnd();
+    if (manualStop) {
+      running = false;
+      onEnd();
+    } else {
+      try { recognition.start(); } catch { /* кейде "already started" — елемейміз */ }
+    }
   };
 
   return {
-    start: () => { finalTranscript = ""; recognition.start(); },
-    stop: () => recognition.stop(),
+    start: () => { manualStop = false; if (running) return; running = true; finalTranscript = ""; try { recognition.start(); } catch { /* */ } },
+    stop: () => { manualStop = true; try { recognition.stop(); } catch { /* */ } },
   };
 }
 

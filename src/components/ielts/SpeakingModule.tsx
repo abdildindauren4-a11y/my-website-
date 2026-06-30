@@ -29,7 +29,9 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
   const [evaluation, setEvaluation] = useState<SpeakingEvaluation | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [prepTime, setPrepTime] = useState(0);
+  const [recSeconds, setRecSeconds] = useState(0);
   const recognitionRef = useRef<RecognitionController | null>(null);
+  const speechSupported = isSpeechRecognitionSupported();
 
   const question = test?.questions[qIdx];
 
@@ -39,6 +41,13 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
     const timer = setTimeout(() => setPrepTime((t) => t - 1), 1000);
     return () => clearTimeout(timer);
   }, [prepTime]);
+
+  // Сөйлеу таймері (жазу кезінде өсіп отырады)
+  useEffect(() => {
+    if (!recording) return;
+    const timer = setInterval(() => setRecSeconds((s) => s + 1), 1000);
+    return () => clearInterval(timer);
+  }, [recording]);
 
   // Сұрақ өзгергенде дауыстап оқу + дайындық
   useEffect(() => {
@@ -52,7 +61,7 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
   }, [qIdx, view]);
 
   const startTest = (tk: SpeakingTest) => {
-    if (!isSpeechRecognitionSupported()) { setError("NOT_SUPPORTED"); return; }
+    // Микрофон болмаса да — жазып жауап беруге болады
     setTest(tk);
     setQIdx(0);
     setAnswers([]);
@@ -67,7 +76,6 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
       recognitionRef.current?.stop();
       setRecording(false);
     } else {
-      setTranscript("");
       const rec = createRecognition(
         (text) => setTranscript(text),
         () => setRecording(false),
@@ -75,6 +83,7 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
       );
       if (rec) {
         recognitionRef.current = rec;
+        setRecSeconds(0);
         rec.start();
         setRecording(true);
       }
@@ -85,6 +94,7 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
     if (!question) return;
     recognitionRef.current?.stop();
     setRecording(false);
+    setRecSeconds(0);
     // Жауапты сақтау
     const newAnswers = [...answers, { question: question.question, answer: transcript || "(no answer)" }];
     setAnswers(newAnswers);
@@ -128,10 +138,10 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        {!isSpeechRecognitionSupported() && (
-          <div className="card p-4 mb-4 border-accent-red/30 bg-accent-red/5 flex items-start gap-2">
-            <AlertCircle className="w-5 h-5 text-accent-red shrink-0 mt-0.5" />
-            <p className="text-sm text-text-secondary">{t("speak.notSupported")}</p>
+        {!speechSupported && (
+          <div className="card p-4 mb-4 border-accent-gold/30 bg-accent-gold/5 flex items-start gap-2">
+            <AlertCircle className="w-5 h-5 text-accent-gold shrink-0 mt-0.5" />
+            <p className="text-sm text-text-secondary">{t("speak.typeInstead")}</p>
           </div>
         )}
         {!isGeminiConfigured() && (
@@ -213,30 +223,59 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
           )}
         </div>
 
-        {/* Микрофон */}
-        <div className="card p-6 text-center mb-4">
-          <button
-            onClick={toggleRecording}
-            className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-3 transition-all ${
-              recording ? "bg-accent-red text-white animate-pulse shadow-card-hover" : "bg-accent-gold text-white hover:bg-accent-gold/90 shadow-card"
-            }`}
-          >
-            {recording ? <MicOff className="w-8 h-8" /> : <Mic className="w-8 h-8" />}
-          </button>
-          <p className="text-sm font-medium mb-1">
-            {recording ? t("speak.recording") : t("speak.startRecording")}
-          </p>
+        {/* Микрофон + жауап */}
+        <div className="card p-6 mb-4">
+          {speechSupported && (
+            <div className="flex flex-col items-center mb-4">
+              <button
+                onClick={toggleRecording}
+                className={`w-20 h-20 rounded-full flex items-center justify-center mb-3 transition-all ${
+                  recording ? "bg-accent-red text-white shadow-card-hover" : "bg-accent-gold text-white hover:bg-accent-gold/90 shadow-card"
+                }`}
+              >
+                {recording ? <MicOff className="w-8 h-8" /> : <Mic className="w-8 h-8" />}
+              </button>
 
-          {/* Транскрипт */}
-          {transcript && (
-            <div className="mt-4 p-3 rounded-card bg-surface-2 text-left">
-              <p className="text-xs text-text-muted mb-1">{t("speak.yourAnswer")}:</p>
-              <p className="text-sm">{transcript}</p>
+              {/* Тірі индикатор + таймер */}
+              {recording ? (
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="flex items-end gap-1 h-5">
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <motion.span
+                        key={i}
+                        className="w-1.5 rounded-full bg-accent-red"
+                        animate={{ height: ["6px", "20px", "6px"] }}
+                        transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.12 }}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-medium text-accent-red tabular-nums">
+                    {Math.floor(recSeconds / 60)}:{String(recSeconds % 60).padStart(2, "0")} · {t("speak.recording")}
+                  </span>
+                </div>
+              ) : (
+                <p className="text-sm font-medium">{transcript ? t("speak.tapToContinue") : t("speak.startRecording")}</p>
+              )}
             </div>
           )}
+
+          {/* Жауап мәтіні — өңдеуге/жазуға болады */}
+          <label className="text-xs text-text-muted mb-1.5 block">
+            {speechSupported ? t("speak.yourAnswerEditable") : t("speak.typeAnswer")}
+          </label>
+          <textarea
+            value={transcript}
+            onChange={(e) => setTranscript(e.target.value)}
+            rows={5}
+            placeholder={speechSupported ? t("speak.answerPlaceholder") : t("speak.typePlaceholder")}
+            className="w-full bg-surface-2 border border-border rounded-card px-3 py-2.5 text-sm focus:outline-none focus:border-accent-gold/50 resize-y leading-relaxed"
+          />
+          <p className="text-[11px] text-text-muted mt-1.5">
+            {transcript.trim() ? `${transcript.trim().split(/\s+/).length} ${lang === "kk" ? "сөз" : "words"}` : ""}
+          </p>
         </div>
 
-        <button onClick={nextQuestion} disabled={!transcript && !recording} className="btn-primary w-full disabled:opacity-40">
+        <button onClick={nextQuestion} disabled={!transcript.trim()} className="btn-primary w-full disabled:opacity-40">
           {qIdx + 1 >= (test?.questions.length || 0) ? t("speak.finish") : t("speak.nextQuestion")}
         </button>
       </div>

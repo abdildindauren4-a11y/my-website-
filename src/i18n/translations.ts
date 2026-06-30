@@ -235,6 +235,12 @@ export const translations = {
   "speak.transcriptNote": { kk: "Сөйлеуіңіз мәтінге айналдырылды. Тану дәл болмауы мүмкін.", en: "Your speech was transcribed. Recognition may be imperfect." },
   "speak.speakNow": { kk: "Енді сөйлеңіз", en: "Speak now" },
   "speak.questionsAnswered": { kk: "сұраққа жауап берілді", en: "questions answered" },
+  "speak.tapToContinue": { kk: "Жалғастыру үшін микрофонды басыңыз", en: "Tap the mic to keep speaking" },
+  "speak.yourAnswerEditable": { kk: "Жауабыңыз (қаласаңыз түзете аласыз)", en: "Your answer (you can edit it)" },
+  "speak.typeAnswer": { kk: "Жауабыңызды жазыңыз", en: "Type your answer" },
+  "speak.answerPlaceholder": { kk: "Микрофонды басып сөйлеңіз — мәтін осында шығады. Қаласаңыз түзетіңіз.", en: "Tap the mic and speak — your words appear here. Edit if needed." },
+  "speak.typePlaceholder": { kk: "Жауабыңызды осында жазыңыз…", en: "Type your answer here…" },
+  "speak.typeInstead": { kk: "Браузеріңіз микрофон тануды қолдамайды — жауабыңызды жазып бере аласыз.", en: "Your browser doesn't support speech recognition — you can type your answer instead." },
   "nav.hsk": { kk: "HSK", en: "HSK" },
   "nav.progress": { kk: "Прогресс", en: "Progress" },
   // ── Прогресс беті ──
