@@ -9,6 +9,7 @@ import { useLang } from "@/contexts/LangContext";
 import { useProgress } from "@/store/progressStore";
 import { readingTests } from "@/lib/ieltsData";
 import { listeningTest1 } from "@/lib/ielts/listening1";
+import { listeningTest2 } from "@/lib/ielts/listening2";
 import { gradeTest, resultByPassage, resultByQuestionType, gradeListeningTest, listeningResultBySection } from "@/lib/ieltsGrading";
 import { bandDescription } from "@/types/ielts";
 import type { ReadingTest, UserAnswers, TestResult, ListeningTest } from "@/types/ielts";
@@ -25,7 +26,7 @@ import {
 
 type View = "hub" | "reading-list" | "listening-list" | "test" | "result" | "listen-test" | "listen-result" | "writing" | "speaking" | "quick";
 
-const listeningTests: ListeningTest[] = [listeningTest1];
+const listeningTests: ListeningTest[] = [listeningTest1, listeningTest2];
 
 export default function IeltsPage() {
   const { t, lang } = useLang();

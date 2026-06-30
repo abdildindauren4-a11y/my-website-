@@ -49,7 +49,7 @@ export async function evaluateWriting(
 
   const systemPrompt = `You are an experienced IELTS examiner. Evaluate the following IELTS Writing Task ${task.taskType} response according to the official IELTS band descriptors.
 
-TASK PROMPT: ${task.prompt}
+TASK PROMPT: ${task.prompt}${task.taskType === 1 && task.imageDescription ? `\nCHART/DIAGRAM DATA (the student described this): ${task.imageDescription}\nFor Task 1, check the student accurately reports the key data and makes relevant comparisons.` : ""}
 MINIMUM WORDS: ${task.minWords}
 STUDENT'S WORD COUNT: ${wordCount}
 
@@ -141,5 +141,83 @@ export const writingTasks: WritingTask[] = [
     promptKk: "Кейбіреулер жеке адамдар қоршаған ортаны қорғауда аз нәрсе істей алады, тек үкімет пен ірі компаниялар нақты өзгеріс жасай алады деп санайды. Қаншалықты келісесіз? Дәлелдеңіз.",
     minWords: 250,
     timeMinutes: 40,
+  },
+  // ── Task 2 (қосымша эссе тақырыптары) ──
+  {
+    id: "w-t2-4", taskType: 2, title: "Work–Life Balance", titleKk: "Жұмыс пен өмір тепе-теңдігі",
+    prompt: "In many countries, people are working longer hours and have less free time. What are the causes of this, and what effects does it have on individuals and society? Give reasons and examples.",
+    promptKk: "Көп елде адамдар ұзағырақ жұмыс істеп, бос уақыты азайды. Мұның себептері қандай және ол адамдар мен қоғамға қалай әсер етеді? Дәлелдеп жазыңыз.",
+    minWords: 250, timeMinutes: 40,
+  },
+  {
+    id: "w-t2-5", taskType: 2, title: "Crime and Punishment", titleKk: "Қылмыс пен жаза",
+    prompt: "Some people think that the best way to reduce crime is to give longer prison sentences. Others believe there are better alternatives. Discuss both views and give your own opinion.",
+    promptKk: "Кейбіреулер қылмысты азайтудың ең жақсы жолы — ұзақ түрме жазасы дейді. Басқалар жақсырақ балама бар деп санайды. Екі көзқарасты талқылап, өз пікіріңізді беріңіз.",
+    minWords: 250, timeMinutes: 40,
+  },
+  {
+    id: "w-t2-6", taskType: 2, title: "Tourism", titleKk: "Туризм",
+    prompt: "International tourism has brought enormous benefits to many places, but it has also damaged the environment and local cultures. Do the advantages of tourism outweigh the disadvantages? Give reasons and examples.",
+    promptKk: "Халықаралық туризм көп жерге зор пайда әкелді, бірақ қоршаған орта мен жергілікті мәдениетке зиян да келтірді. Туризмнің пайдасы зиянынан басым ба? Дәлелдеңіз.",
+    minWords: 250, timeMinutes: 40,
+  },
+  {
+    id: "w-t2-7", taskType: 2, title: "Health", titleKk: "Денсаулық",
+    prompt: "Prevention is better than cure. Some argue that governments should spend more money on health education and prevention than on treatment of illnesses. To what extent do you agree or disagree?",
+    promptKk: "Алдын алу емдеуден жақсы. Кейбіреулер үкімет ауруды емдеуге қарағанда денсаулық біліміне көбірек қаражат бөлуі керек дейді. Қаншалықты келісесіз?",
+    minWords: 250, timeMinutes: 40,
+  },
+  {
+    id: "w-t2-8", taskType: 2, title: "Technology and Jobs", titleKk: "Технология және жұмыс",
+    prompt: "Automation and artificial intelligence are replacing many jobs traditionally done by humans. Is this a positive or negative development? Give reasons for your answer and include relevant examples.",
+    promptKk: "Автоматтандыру мен жасанды интеллект адам атқаратын көп жұмыс орнын алмастыруда. Бұл оң ба, әлде теріс құбылыс па? Дәлелдеп, мысал келтіріңіз.",
+    minWords: 250, timeMinutes: 40,
+  },
+  {
+    id: "w-t2-9", taskType: 2, title: "Children and Media", titleKk: "Балалар және медиа",
+    prompt: "Many children today spend a lot of time watching television and playing video games. Some people think this is harmful, while others believe it has benefits. Discuss both views and give your opinion.",
+    promptKk: "Бүгінде көп бала теледидар көріп, видеоойын ойнауға көп уақыт жұмсайды. Кейбіреулер мұны зиянды дейді, басқалары пайдасы бар дейді. Екі көзқарасты талқылап, пікіріңізді беріңіз.",
+    minWords: 250, timeMinutes: 40,
+  },
+  {
+    id: "w-t2-10", taskType: 2, title: "Globalization and Languages", titleKk: "Жаһандану және тілдер",
+    prompt: "As the world becomes more globalized, many minority languages are disappearing. Some people think this does not matter, while others believe we should protect them. Discuss both views and give your opinion.",
+    promptKk: "Әлем жаһанданған сайын көп аз тіл жойылып барады. Кейбіреулер бұл маңызды емес дейді, басқалары оларды қорғау керек дейді. Екі көзқарасты талқылап, пікіріңізді беріңіз.",
+    minWords: 250, timeMinutes: 40,
+  },
+  {
+    id: "w-t2-11", taskType: 2, title: "Public Transport", titleKk: "Қоғамдық көлік",
+    prompt: "Some people believe that governments should invest heavily in public transport rather than building more roads for cars. To what extent do you agree or disagree? Give reasons and examples.",
+    promptKk: "Кейбіреулер үкімет жаңа жолдар салғаннан гөрі қоғамдық көлікке көбірек инвестиция салуы керек дейді. Қаншалықты келісесіз? Дәлелдеңіз.",
+    minWords: 250, timeMinutes: 40,
+  },
+  // ── Task 1 (Academic — график/диаграмма сипаттамасы) ──
+  {
+    id: "w-t1-1", taskType: 1, title: "Line Graph — Internet Users", titleKk: "Сызықтық график — интернет қолданушылары",
+    prompt: "The line graph below shows the percentage of the population using the internet in four countries from 2000 to 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.",
+    promptKk: "Төмендегі сызықтық график 2000–2020 жылдары төрт елде интернет қолданушы халықтың пайызын көрсетеді. Негізгі ерекшеліктерді таңдап сипаттаңыз және салыстырыңыз.",
+    minWords: 150, timeMinutes: 20,
+    imageDescription: "Data: USA rose from 43% (2000) to 90% (2020); South Korea from 40% to 96%; Brazil from 3% to 74%; Kazakhstan from 1% to 86%. All four show steady upward trends, with Kazakhstan and Brazil growing fastest from low starting points.",
+  },
+  {
+    id: "w-t1-2", taskType: 1, title: "Bar Chart — Energy Sources", titleKk: "Баған диаграмма — энергия көздері",
+    prompt: "The bar chart below compares the proportion of electricity generated from different sources in three countries in 2022. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.",
+    promptKk: "Төмендегі баған диаграмма 2022 жылы үш елде түрлі көзден өндірілген электр энергиясының үлесін салыстырады. Негізгі ерекшеліктерді сипаттап, салыстырыңыз.",
+    minWords: 150, timeMinutes: 20,
+    imageDescription: "Data (coal/gas/nuclear/renewables): Country A 50/20/10/20; Country B 15/25/30/30; Country C 5/10/15/70. Country C relies mostly on renewables, Country A mostly on coal, Country B is the most balanced.",
+  },
+  {
+    id: "w-t1-3", taskType: 1, title: "Pie Charts — Household Spending", titleKk: "Дөңгелек диаграмма — отбасы шығыны",
+    prompt: "The two pie charts below show how an average household spent its monthly income in 1990 and 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.",
+    promptKk: "Төмендегі екі дөңгелек диаграмма орташа отбасының айлық табысын 1990 және 2020 жылдары қалай жұмсағанын көрсетеді. Негізгі ерекшеліктерді сипаттап, салыстырыңыз.",
+    minWords: 150, timeMinutes: 20,
+    imageDescription: "1990: food 35%, housing 25%, transport 10%, leisure 10%, other 20%. 2020: food 20%, housing 35%, transport 15%, leisure 18%, other 12%. Housing and leisure rose; food fell sharply.",
+  },
+  {
+    id: "w-t1-4", taskType: 1, title: "Process — Water Cycle", titleKk: "Процесс — су айналымы",
+    prompt: "The diagram below illustrates the process of the natural water cycle. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.",
+    promptKk: "Төмендегі диаграмма табиғи су айналымы процесін көрсетеді. Негізгі кезеңдерді таңдап сипаттаңыз.",
+    minWords: 150, timeMinutes: 20,
+    imageDescription: "Stages: 1) the sun heats oceans causing evaporation; 2) water vapour rises and cools, forming clouds (condensation); 3) clouds release water as precipitation (rain/snow); 4) water flows over land as runoff into rivers; 5) rivers return water to the ocean, and the cycle repeats.",
   },
 ];

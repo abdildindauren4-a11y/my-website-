@@ -138,6 +138,13 @@ export default function WritingModule({ onBack }: { onBack: () => void }) {
             <h2 className="font-display font-bold">{lang === "kk" ? task.titleKk : task.title}</h2>
           </div>
           <p className="text-sm leading-relaxed mb-2">{task.prompt}</p>
+          {/* Task 1 — график/диаграмма деректері */}
+          {task.taskType === 1 && task.imageDescription && (
+            <div className="mt-2 mb-2 p-3 rounded-card bg-surface-2 border border-border">
+              <p className="text-[11px] font-semibold text-text-muted mb-1">📊 {lang === "kk" ? "Деректер (график орнына)" : "Data (in place of the chart)"}</p>
+              <p className="text-sm leading-relaxed">{task.imageDescription}</p>
+            </div>
+          )}
           <details className="text-xs text-text-muted">
             <summary className="cursor-pointer">{lang === "kk" ? "Қазақша аударма" : "Translation"}</summary>
             <p className="mt-2 leading-relaxed">{task.promptKk}</p>
