@@ -16,12 +16,14 @@ import QuestionInput from "@/components/ielts/QuestionInput";
 import AudioPlayer from "@/components/ielts/AudioPlayer";
 import WritingModule from "@/components/ielts/WritingModule";
 import SpeakingModule from "@/components/ielts/SpeakingModule";
+import QuickTest from "@/components/ielts/QuickTest";
+import { BANK_SIZE } from "@/lib/ielts/questionBank";
 import {
   GraduationCap, Clock, ArrowLeft,
-  CheckCircle2, XCircle, Trophy, ChevronRight, Target, TrendingUp,
+  CheckCircle2, XCircle, Trophy, ChevronRight, Target, TrendingUp, Zap,
 } from "lucide-react";
 
-type View = "hub" | "reading-list" | "listening-list" | "test" | "result" | "listen-test" | "listen-result" | "writing" | "speaking";
+type View = "hub" | "reading-list" | "listening-list" | "test" | "result" | "listen-test" | "listen-result" | "writing" | "speaking" | "quick";
 
 const listeningTests: ListeningTest[] = [listeningTest1];
 
@@ -181,8 +183,31 @@ export default function IeltsPage() {
           ))}
         </div>
 
+        {/* Жылдам тест картасы (1000+ сұрақ) */}
+        <motion.button
+          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}
+          whileHover={{ y: -3 }} whileTap={{ scale: 0.99 }}
+          onClick={() => setView("quick")}
+          className="card p-4 sm:p-5 w-full text-left flex items-center gap-4 mt-4 hover:shadow-lg transition-shadow group bg-gradient-to-br from-accent-purple/10 to-accent-blue/5 border-accent-purple/30"
+        >
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-card bg-accent-purple/15 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <Zap className="w-9 h-9 text-accent-purple" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-display font-bold text-lg leading-tight">
+              {lang === "kk" ? "Жылдам тест" : "Quick Test"}
+              <span className="text-text-secondary font-normal"> ({lang === "kk" ? "ауыспалы" : "rotating"})</span>
+            </h3>
+            <p className="text-sm text-text-secondary mt-1.5">{BANK_SIZE}+ {lang === "kk" ? "сұрақ базасы" : "question bank"}</p>
+            <p className="text-sm text-text-secondary">{lang === "kk" ? "Лексика · грамматика · предлог · тіркес" : "Vocabulary · grammar · prepositions"}</p>
+          </div>
+          <span className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-accent-purple group-hover:bg-accent-purple/10 group-hover:border-accent-purple/40 transition-colors shrink-0">
+            <ChevronRight className="w-5 h-5" />
+          </span>
+        </motion.button>
+
         {/* Мақсат баннері */}
-        <div className="card p-4 sm:p-5 mt-6 flex items-center gap-4 bg-gradient-to-br from-accent-green/5 to-accent-blue/5">
+        <div className="card p-4 sm:p-5 mt-4 flex items-center gap-4 bg-gradient-to-br from-accent-green/5 to-accent-blue/5">
           <div className="w-12 h-12 rounded-card bg-accent-green/15 flex items-center justify-center shrink-0">
             <Target className="w-7 h-7 text-accent-green" />
           </div>
@@ -663,6 +688,11 @@ export default function IeltsPage() {
   // ── SPEAKING модулі ──
   if (view === "speaking") {
     return <SpeakingModule onBack={() => setView("hub")} />;
+  }
+
+  // ── ЖЫЛДАМ ТЕСТ (1000+ сұрақ) ──
+  if (view === "quick") {
+    return <QuickTest onBack={() => setView("hub")} />;
   }
 
   return null;
