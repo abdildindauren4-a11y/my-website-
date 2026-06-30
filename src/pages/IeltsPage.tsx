@@ -21,7 +21,7 @@ import {
   CheckCircle2, XCircle, Trophy, ChevronRight, Target, TrendingUp,
 } from "lucide-react";
 
-type View = "hub" | "test" | "result" | "listen-test" | "listen-result" | "writing" | "speaking";
+type View = "hub" | "reading-list" | "listening-list" | "test" | "result" | "listen-test" | "listen-result" | "writing" | "speaking";
 
 const listeningTests: ListeningTest[] = [listeningTest1];
 
@@ -104,15 +104,15 @@ export default function IeltsPage() {
     const modules = [
       {
         id: "reading", img: "/ielts/reading.png", kk: "Оқу", en: "Reading", accent: "accent-green",
-        meta1: `${firstReading.passages.length} ${lang === "kk" ? "мәтін" : "passages"} · ${firstReading.totalQuestions} ${lang === "kk" ? "сұрақ" : "questions"}`,
-        meta2: `${firstReading.timeMinutes} ${lang === "kk" ? "минут" : "min"}`,
-        onClick: () => startTest(firstReading),
+        meta1: `${readingTests.length} ${lang === "kk" ? "тест" : "tests"} · ${firstReading.totalQuestions} ${lang === "kk" ? "сұрақ" : "questions"}`,
+        meta2: `${firstReading.timeMinutes} ${lang === "kk" ? "минут/тест" : "min/test"}`,
+        onClick: () => setView("reading-list"),
       },
       {
         id: "listening", img: "/ielts/listening.png", kk: "Тыңдау", en: "Listening", accent: "accent-blue",
-        meta1: `${firstListening.sections.length} ${lang === "kk" ? "бөлім" : "sections"} · ${firstListening.totalQuestions} ${lang === "kk" ? "сұрақ" : "questions"}`,
-        meta2: `30 ${lang === "kk" ? "минут" : "min"}`,
-        onClick: () => startListening(firstListening),
+        meta1: `${listeningTests.length} ${lang === "kk" ? "тест" : "tests"} · ${firstListening.totalQuestions} ${lang === "kk" ? "сұрақ" : "questions"}`,
+        meta2: `30 ${lang === "kk" ? "минут/тест" : "min/test"}`,
+        onClick: () => setView("listening-list"),
       },
       {
         id: "writing", img: "/ielts/writing.png", kk: "Жазу", en: "Writing", accent: "accent-purple",
@@ -199,6 +199,82 @@ export default function IeltsPage() {
           >
             <TrendingUp className="w-5 h-5" />
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── READING тесттер тізімі ──
+  if (view === "reading-list") {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <button onClick={() => setView("hub")} className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary mb-4">
+          <ArrowLeft className="w-4 h-4" /> {t("ielts.title")}
+        </button>
+        <div className="flex items-center gap-3 mb-5">
+          <img src="/ielts/reading.png" alt="" aria-hidden="true" className="w-14 h-14 object-contain drop-shadow" />
+          <div>
+            <h1 className="text-2xl font-display font-bold">{lang === "kk" ? "Оқу" : "Reading"} <span className="text-text-secondary font-normal">(Reading)</span></h1>
+            <p className="text-sm text-text-secondary">{readingTests.length} {lang === "kk" ? "толық тест · әрқайсысы 3 мәтін, 40 сұрақ" : "full tests · 3 passages, 40 questions each"}</p>
+          </div>
+        </div>
+        <div className="space-y-3">
+          {readingTests.map((test, i) => (
+            <motion.button
+              key={test.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+              whileHover={{ y: -2 }} onClick={() => startTest(test)}
+              className="card p-4 w-full text-left flex items-center gap-4 hover:border-accent-green/40 transition-colors group"
+            >
+              <div className="w-11 h-11 rounded-card bg-accent-green/15 flex items-center justify-center font-display font-bold text-accent-green shrink-0">{i + 1}</div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-display font-bold truncate">{lang === "kk" ? test.titleKk : test.title}</h3>
+                <p className="text-sm text-text-secondary">
+                  {test.passages.length} {t("ielts.passages")} · {test.totalQuestions} {t("ielts.questions")} · {test.timeMinutes} {t("ielts.minutes")}
+                </p>
+              </div>
+              <span className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-accent-green group-hover:bg-accent-green/10 group-hover:border-accent-green/40 transition-colors shrink-0">
+                <ChevronRight className="w-5 h-5" />
+              </span>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ── LISTENING тесттер тізімі ──
+  if (view === "listening-list") {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <button onClick={() => setView("hub")} className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary mb-4">
+          <ArrowLeft className="w-4 h-4" /> {t("ielts.title")}
+        </button>
+        <div className="flex items-center gap-3 mb-5">
+          <img src="/ielts/listening.png" alt="" aria-hidden="true" className="w-14 h-14 object-contain drop-shadow" />
+          <div>
+            <h1 className="text-2xl font-display font-bold">{lang === "kk" ? "Тыңдау" : "Listening"} <span className="text-text-secondary font-normal">(Listening)</span></h1>
+            <p className="text-sm text-text-secondary">{listeningTests.length} {lang === "kk" ? "толық тест · 4 бөлім, 40 сұрақ" : "full tests · 4 sections, 40 questions"}</p>
+          </div>
+        </div>
+        <div className="space-y-3">
+          {listeningTests.map((test, i) => (
+            <motion.button
+              key={test.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+              whileHover={{ y: -2 }} onClick={() => startListening(test)}
+              className="card p-4 w-full text-left flex items-center gap-4 hover:border-accent-blue/40 transition-colors group"
+            >
+              <div className="w-11 h-11 rounded-card bg-accent-blue/15 flex items-center justify-center font-display font-bold text-accent-blue shrink-0">{i + 1}</div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-display font-bold truncate">{lang === "kk" ? test.titleKk : test.title}</h3>
+                <p className="text-sm text-text-secondary">
+                  {test.sections.length} {t("listen.section").toLowerCase()} · {test.totalQuestions} {t("ielts.questions")}
+                </p>
+              </div>
+              <span className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-accent-blue group-hover:bg-accent-blue/10 group-hover:border-accent-blue/40 transition-colors shrink-0">
+                <ChevronRight className="w-5 h-5" />
+              </span>
+            </motion.button>
+          ))}
         </div>
       </div>
     );
