@@ -15,28 +15,82 @@
     @apply bg-background text-text-primary font-sans antialiased;
     margin: 0;
     min-height: 100vh;
+    /* Жұмсақ, көзге жайлы фон градиенті */
+    background-color: #F7F9F7;
+    background-image:
+      radial-gradient(60rem 60rem at 110% -10%, rgba(14, 165, 233, 0.06), transparent 60%),
+      radial-gradient(50rem 50rem at -10% 10%, rgba(22, 163, 74, 0.06), transparent 55%),
+      radial-gradient(40rem 40rem at 50% 120%, rgba(139, 92, 246, 0.05), transparent 60%);
+    background-attachment: fixed;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
+    letter-spacing: -0.01em;
   }
 }
 
 @layer components {
-  /* Шыны эффекті (жеңіл) */
+  /* Шыны эффекті */
   .glass {
-    @apply bg-surface/90 backdrop-blur-sm border border-border;
+    @apply bg-surface/70 backdrop-blur-xl border border-white/40;
   }
-  /* Карточка — жұмсақ көлеңкемен (шынайы, glow жоқ) */
+  /* Карточка — жұмсақ көлеңке + жұмсақ өту */
   .card {
-    @apply bg-surface border border-border rounded-card shadow-card;
+    @apply bg-surface border border-border rounded-card shadow-card transition-all duration-200;
   }
-  /* Негізгі батырма — жасыл, жұмсақ */
+  /* Көтерілу эффекті (hover) */
+  .hover-lift {
+    @apply transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover;
+  }
+  /* Негізгі батырма — жасыл градиент, жұмсақ glow, басқанда кішірею */
   .btn-primary {
-    @apply bg-accent-green text-white rounded-btn px-4 py-2 font-medium transition-all hover:brightness-105 shadow-soft disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply text-white rounded-btn px-4 py-2 font-medium transition-all shadow-soft
+           hover:shadow-glow hover:brightness-[1.03] active:scale-[0.98]
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-soft;
+    background-image: linear-gradient(135deg, #1FB255 0%, #16A34A 60%, #0E9F6E 100%);
   }
   /* Екінші батырма */
   .btn-ghost {
-    @apply bg-surface-2 text-text-secondary rounded-btn px-4 py-2 font-medium transition-all hover:text-text-primary hover:bg-border;
+    @apply bg-surface-2 text-text-secondary rounded-btn px-4 py-2 font-medium transition-all
+           hover:text-text-primary hover:bg-border active:scale-[0.98];
+  }
+  /* Градиент мәтін */
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(120deg, #16A34A 0%, #0EA5E9 100%);
+  }
+}
+
+@layer utilities {
+  /* Кіру анимациясы */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-up { animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  /* Жұмсақ қалқу */
+  @keyframes float-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .animate-float-soft { animation: float-soft 6s ease-in-out infinite; }
+
+  /* Жылтырау (shimmer) — жүктелу/екпін */
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
+  }
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    animation: shimmer 2.2s infinite;
   }
 }
 
@@ -46,13 +100,15 @@
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #F0F4F1;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: #D1DAD3;
   border-radius: 5px;
-  border: 2px solid #F0F4F1;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #16A34A;
+  background-clip: padding-box;
 }

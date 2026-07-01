@@ -52,7 +52,7 @@ export default function Sidebar({ isOpen, onClose }: Props) {
       {/* Sidebar */}
       <aside
         className={`
-          w-64 shrink-0 bg-surface border-r border-border flex flex-col h-screen z-50
+          w-64 shrink-0 glass border-r border-border flex flex-col h-screen z-50
           fixed lg:sticky top-0 left-0
           transition-transform duration-300 ease-in-out
           ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0
@@ -61,10 +61,11 @@ export default function Sidebar({ isOpen, onClose }: Props) {
         {/* Логотип + жабу (мобиль) */}
         <div className="flex items-center justify-between px-6 h-20 border-b border-border shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-card bg-accent-blue/20 flex items-center justify-center shadow-glow">
-              <Zap className="w-6 h-6 text-accent-blue" fill="currentColor" />
+            <div className="w-10 h-10 rounded-card flex items-center justify-center shadow-glow"
+              style={{ backgroundImage: "linear-gradient(135deg, #16A34A, #0EA5E9)" }}>
+              <Zap className="w-6 h-6 text-white" fill="currentColor" />
             </div>
-            <span className="text-xl font-display font-bold">LinguaFast</span>
+            <span className="text-xl font-display font-bold gradient-text">LinguaFast</span>
           </div>
           {/* Жабу (тек мобиль) */}
           <button onClick={onClose} className="lg:hidden text-text-secondary hover:text-text-primary p-1">
@@ -82,17 +83,18 @@ export default function Sidebar({ isOpen, onClose }: Props) {
                 to={item.path}
                 onClick={onClose}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-btn transition-all group ${
+                  `relative flex items-center gap-3 px-3 py-2.5 rounded-btn transition-all group ${
                     isActive
-                      ? "bg-accent-blue/10 border border-accent-blue/30"
-                      : "border border-transparent hover:bg-surface-2"
+                      ? "bg-gradient-to-r from-accent-green/10 to-accent-blue/10 border border-accent-green/30 shadow-soft"
+                      : "border border-transparent hover:bg-surface-2 hover:translate-x-0.5"
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
+                    {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-accent-green" />}
                     <Icon className={`w-5 h-5 transition-colors ${isActive ? item.color : "text-text-secondary group-hover:text-text-primary"}`} />
-                    <span className={`text-sm font-medium transition-colors ${isActive ? "text-text-primary" : "text-text-secondary group-hover:text-text-primary"}`}>
+                    <span className={`text-sm font-medium transition-colors ${isActive ? "text-text-primary font-semibold" : "text-text-secondary group-hover:text-text-primary"}`}>
                       {t(item.key)}
                     </span>
                   </>

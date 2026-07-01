@@ -22,7 +22,7 @@ export default function Topbar({ onMenuClick }: Props) {
   const xpPercent = lvl.percent;
 
   return (
-    <header className="h-16 lg:h-20 shrink-0 bg-surface border-b border-border flex items-center justify-between px-3 lg:px-6 gap-2 lg:gap-6">
+    <header className="h-16 lg:h-20 shrink-0 sticky top-0 z-30 glass border-b border-border flex items-center justify-between px-3 lg:px-6 gap-2 lg:gap-6">
       {/* Сол жақ: гамбургер (мобиль) + XP жолағы (десктоп) */}
       <div className="flex items-center gap-3 flex-1 min-w-0 lg:max-w-xl">
         {/* Гамбургер — тек мобиль */}
