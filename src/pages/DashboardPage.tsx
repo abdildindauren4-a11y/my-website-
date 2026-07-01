@@ -7,9 +7,10 @@ import { useLang } from "@/contexts/LangContext";
 import { useUserPrefs } from "@/store/userPrefs";
 import { useProgress, levelProgress } from "@/store/progressStore";
 import { useVocab } from "@/store/vocabStore";
+import { useCourseProgress } from "@/store/courseStore";
+import { getCoursesByLang } from "@/data/courses";
 import { calcStats } from "@/lib/srs";
-import LessonSteps from "@/components/shared/LessonSteps";
-import { Film, MessageSquare, RotateCcw, TrendingUp, Clock, BookA, Flame, ArrowRight, Sparkles } from "lucide-react";
+import { Film, MessageSquare, RotateCcw, TrendingUp, Clock, BookA, Flame, ArrowRight, Sparkles, GraduationCap } from "lucide-react";
 
 // Staggered контейнер
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
@@ -29,6 +30,20 @@ export default function DashboardPage() {
   const streak = progress.streakDays;
   const minPercent = Math.min(100, Math.round((minutesToday / minutesGoal) * 100));
   const lvl = levelProgress(progress.xp);
+
+  // Нақты «жалғастыру» курсы (прогресс бойынша)
+  const { isLessonCompleted } = useCourseProgress();
+  const courses = getCoursesByLang(prefs.learningLang);
+  const coursePct = (c: (typeof courses)[number]) => {
+    const all = c.units.flatMap((u) => u.lessons);
+    const done = all.filter((l) => isLessonCompleted(l.id)).length;
+    return all.length ? Math.round((done / all.length) * 100) : 0;
+  };
+  const currentCourse =
+    courses.find((c) => { const p = coursePct(c); return p > 0 && p < 100; }) ||
+    courses.find((c) => coursePct(c) < 100) ||
+    courses[0];
+  const currentPct = currentCourse ? coursePct(currentCourse) : 0;
 
   const quickActions = [
     { icon: Film, titleKey: "dash.watchMovies", descKey: "dash.watchMoviesDesc", grad: "from-accent-pink to-accent-purple", path: "/cinema" },
@@ -64,7 +79,7 @@ export default function DashboardPage() {
               {t("dash.continue")} <ArrowRight className="w-4 h-4" />
             </button>
           </div>
-          <img src="/bot.png" alt="" aria-hidden="true" className="hidden sm:block w-28 h-28 lg:w-36 lg:h-36 object-contain drop-shadow-xl animate-float-soft shrink-0" />
+          <img src="/bot.png" alt="" aria-hidden="true" className="block w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36 object-contain drop-shadow-xl animate-float-soft shrink-0" />
         </div>
       </motion.div>
 
@@ -120,25 +135,30 @@ export default function DashboardPage() {
         </div>
       </motion.div>
 
-      {/* ── АҒЫМДАҒЫ САБАҚ ── */}
-      <motion.div variants={item} className="card p-6 hover-lift">
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-card bg-accent-blue/15 flex items-center justify-center shrink-0">
-              <TrendingUp className="w-6 h-6 text-accent-blue" />
+      {/* ── КУРСТЫ ЖАЛҒАСТЫРУ (нақты прогресс) ── */}
+      {currentCourse && (
+        <motion.button variants={item} onClick={() => navigate("/courses")}
+          className="card p-5 sm:p-6 hover-lift w-full text-left group">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-card bg-accent-green/15 flex items-center justify-center text-3xl shrink-0">
+              {currentCourse.emoji || <GraduationCap className="w-7 h-7 text-accent-green" />}
             </div>
-            <div>
-              <span className="text-sm text-text-secondary">{t("dash.currentLesson")}</span>
-              <h3 className="font-display font-bold">The Power of Mindset</h3>
+            <div className="flex-1 min-w-0">
+              <span className="text-xs text-text-secondary">{currentPct > 0 ? t("dash.currentLesson") : (t("top.days") === "days" ? "Start a course" : "Курсты бастау")}</span>
+              <h3 className="font-display font-bold truncate">{prefs.learningLang === "zh" ? currentCourse.titleKk : currentCourse.title}</h3>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex-1 h-2 rounded-full bg-border overflow-hidden">
+                  <motion.div className="h-full bg-gradient-to-r from-accent-green to-accent-blue rounded-full" initial={{ width: 0 }} animate={{ width: `${currentPct}%` }} transition={{ duration: 0.8, ease: "easeOut" }} />
+                </div>
+                <span className="text-sm font-display font-bold gradient-text shrink-0">{currentPct}%</span>
+              </div>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-accent-green/10 flex items-center justify-center shrink-0 group-hover:bg-accent-green group-hover:text-white text-accent-green transition-colors">
+              <ArrowRight className="w-5 h-5" />
             </div>
           </div>
-          <div className="text-right">
-            <span className="text-sm text-text-secondary">{t("dash.lessonProgress")}</span>
-            <p className="text-2xl font-display font-bold gradient-text">50%</p>
-          </div>
-        </div>
-        <LessonSteps />
-      </motion.div>
+        </motion.button>
+      )}
     </motion.div>
   );
 }
