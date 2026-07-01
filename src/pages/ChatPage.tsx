@@ -6,7 +6,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useLang } from "@/contexts/LangContext";
 import { useUserPrefs } from "@/store/userPrefs";
-import { sendChatMessage, isGeminiConfigured, type ChatMessage } from "@/lib/gemini";
+import { sendChatMessage, isGeminiConfigured, type ChatMessage, type ChatMode } from "@/lib/gemini";
 import AnimatedBot, { type BotState } from "@/components/chat/AnimatedBot";
 import { knowledgeStats } from "@/lib/knowledge";
 import { Send, Key, ExternalLink, AlertCircle, Trash2, RotateCcw } from "lucide-react";
@@ -25,7 +25,15 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [botState, setBotState] = useState<BotState>("idle");
   const [lastFailed, setLastFailed] = useState<string | null>(null); // қате болған хабарлама (retry үшін)
+  const [mode, setMode] = useState<ChatMode>(() => {
+    try { return localStorage.getItem("linguafast_chat_mode") === "teacher" ? "teacher" : "immersion"; } catch { return "immersion"; }
+  });
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const changeMode = (m: ChatMode) => {
+    setMode(m);
+    try { localStorage.setItem("linguafast_chat_mode", m); } catch { /* */ }
+  };
 
   // Чат тарихын сақтау кілті (тілге қарай бөлек)
   const storageKey = `linguafast_chat_${prefs.learningLang}`;
@@ -91,7 +99,11 @@ export default function ChatPage() {
       .map((m) => ({ role: m.role, text: m.text }));
 
     const learnLangName = prefs.learningLang === "zh" ? "Chinese" : "English";
-    const res = await sendChatMessage(history, trimmed, learnLangName, lang, prefs.level);
+    const t0 = Date.now();
+    const res = await sendChatMessage(history, trimmed, learnLangName, lang, prefs.level, mode);
+    // Кемінде 1,5 секунд «жазып жатыр» анимациясы көрінсін
+    const elapsed = Date.now() - t0;
+    if (elapsed < 1500) await new Promise((r) => setTimeout(r, 1500 - elapsed));
     setLoading(false);
 
     if (res.ok) {
@@ -184,6 +196,25 @@ export default function ChatPage() {
             <Trash2 className="w-5 h-5" />
           </button>
         )}
+      </div>
+
+      {/* Режим ауыстырғышы: Иммерсия / Мұғалім */}
+      <div className="flex items-center gap-1.5 py-2.5 shrink-0">
+        <span className="text-xs text-text-muted mr-1">{lang === "kk" ? "Режим:" : "Mode:"}</span>
+        <div className="flex bg-surface-2 rounded-btn p-0.5 border border-border">
+          <button
+            onClick={() => changeMode("immersion")}
+            className={`px-3 py-1 rounded text-xs font-medium transition-all ${mode === "immersion" ? "bg-accent-blue text-white shadow-soft" : "text-text-secondary hover:text-text-primary"}`}
+          >
+            🌍 {lang === "kk" ? "Иммерсия" : "Immersion"}
+          </button>
+          <button
+            onClick={() => changeMode("teacher")}
+            className={`px-3 py-1 rounded text-xs font-medium transition-all ${mode === "teacher" ? "bg-accent-green text-white shadow-soft" : "text-text-secondary hover:text-text-primary"}`}
+          >
+            👨‍🏫 {lang === "kk" ? "Мұғалім" : "Teacher"}
+          </button>
+        </div>
       </div>
 
       {/* Хабарламалар */}

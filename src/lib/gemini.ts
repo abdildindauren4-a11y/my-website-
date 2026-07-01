@@ -45,8 +45,34 @@ export const geminiConfigured = isGeminiConfigured();
 
 // ── AI тәлімгердің мінез-құлқы (system instruction) ──
 // Тіл үйретудің ең күшті әдістеріне негізделген: Krashen, Swain, Vygotsky, SRS.
-function buildSystemPrompt(learningLang: string, uiLang: "kk" | "en", level: string): string {
+export type ChatMode = "immersion" | "teacher";
+
+function buildSystemPrompt(learningLang: string, uiLang: "kk" | "en", level: string, mode: ChatMode = "immersion"): string {
   const explainIn = uiLang === "kk" ? "Kazakh" : "English";
+
+  // ── МҰҒАЛІМ РЕЖИМІ — қазақшаны араластырып түсіндіреді ──
+  if (mode === "teacher") {
+    return `You are LinguaFast AI in TEACHER MODE — a warm, patient bilingual ${learningLang} teacher for a Kazakh-speaking student (level: ${level}).
+
+═══════════════════════════════════════
+TEACHER MODE — HOW YOU SPEAK
+═══════════════════════════════════════
+- You are a real teacher explaining a lesson. Speak MAINLY in KAZAKH, mixing in ${learningLang} for the words/phrases being taught (code-switching).
+- Give a short ${learningLang} example, then EXPLAIN it in Kazakh so the student truly understands.
+- Whenever you use a new ${learningLang} word, put the Kazakh meaning right after it in brackets, e.g. "improve (жақсарту)".
+- Explain grammar rules and corrections clearly in KAZAKH.
+- Structure a reply like a mini-lesson: (1) warm Kazakh comment, (2) the ${learningLang} language point with example, (3) Kazakh explanation, (4) a question or small task to practise.
+
+═══════════════════════════════════════
+TEACHING METHOD
+═══════════════════════════════════════
+- Correct the 1–2 most important mistakes; show the correct ${learningLang} form, then explain WHY in Kazakh.
+- Adapt to a ${level} learner: ${level === "beginner" ? "very simple, lots of Kazakh support." : level === "advanced" ? "more ${learningLang}, deeper explanations." : "balance Kazakh explanation with ${learningLang} practice."}
+- Be encouraging and clear. Keep it focused (3–6 sentences).
+- ALWAYS end by inviting the student to try something in ${learningLang}.`;
+  }
+
+  // ── ИММЕРСИЯ РЕЖИМІ (әдепкі) — негізінен ${learningLang} ──
   return `You are LinguaFast AI — an expert, warm, and encouraging ${learningLang} tutor. You are powered by the most effective, research-backed language teaching methods. The student's level is: ${level}.
 
 ═══════════════════════════════════════
@@ -111,7 +137,8 @@ export async function sendChatMessage(
   newMessage: string,
   learningLang: string,
   uiLang: "kk" | "en",
-  level: string = "intermediate"
+  level: string = "intermediate",
+  mode: ChatMode = "immersion"
 ): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
   // Кілтті әр шақыруда тексереміз (баптаулардан өзгеруі мүмкін)
   const key = getGeminiKey();
@@ -124,7 +151,7 @@ export async function sendChatMessage(
     // Қолданушы хабарламасына қарай ҚАЖЕТТІ білімді таңдау (тіл + деңгей)
     const langForKb = learningLang.includes("Chinese") || learningLang.includes("中") ? "Chinese" : "English";
     const knowledge = buildKnowledgeContext(newMessage, level as any, langForKb);
-    const fullSystemPrompt = buildSystemPrompt(learningLang, uiLang, level) +
+    const fullSystemPrompt = buildSystemPrompt(learningLang, uiLang, level, mode) +
       "\n\n═══════════════════════════════════════\n" +
       "YOUR KNOWLEDGE BASE (use the most relevant parts for THIS message):\n" +
       "═══════════════════════════════════════\n" + knowledge;
