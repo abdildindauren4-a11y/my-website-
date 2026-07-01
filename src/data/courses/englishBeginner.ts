@@ -9,9 +9,13 @@ export const englishBeginner: CourseLevel = {
   level: "beginner",
   title: "English for Beginners",
   titleKk: "Бастауышқа арналған ағылшын",
-  description: "Start your English journey with the basics",
-  descriptionKk: "Ағылшын тілін негізден бастаңыз",
+  description: "Start your English journey with the basics: greetings, family, numbers and daily life.",
+  descriptionKk: "Ағылшын тілін негізден бастаңыз: сәлемдесу, отбасы, сандар және күнделікті өмір.",
   lang: "en",
+  category: "Foundations", categoryKk: "Негіздер", emoji: "🌱", color: "accent-green",
+  hours: 3, instructor: "LinguaFast Academy", certificate: true,
+  skills: ["Greet people and introduce yourself", "Talk about family and numbers", "Use everyday vocabulary confidently", "Build a foundation for real conversations"],
+  skillsKk: ["Сәлемдесіп, өзіңізді таныстыру", "Отбасы мен сандар туралы айту", "Күнделікті сөздерді сенімді қолдану", "Нақты әңгімеге негіз қалау"],
   units: [
     // ═══════════ БӨЛІМ 1: Сәлемдесу ═══════════
     {

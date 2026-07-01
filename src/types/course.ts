@@ -46,11 +46,14 @@ export interface Lesson {
   description: string;
   descriptionKk: string;
   xpReward: number;        // аяқтағанда берілетін XP
-  // Грамматика сабағы үшін — теория
+  // Теория / оқу материалы (кез келген сабақ түрі үшін)
   theory?: {
     explanation: string;
     explanationKk: string;
     examples: { text: string; translation: string }[];
+    // Кәсіби материал — бөлімдерге бөлінген мазмұн
+    sections?: { heading: string; body: string }[];
+    keyPoints?: string[];   // негізгі тұжырымдар
   };
   // Жаттығулар
   exercises: Exercise[];
@@ -70,7 +73,7 @@ export interface Unit {
   lessons: Lesson[];
 }
 
-// Курс деңгейі
+// Курс (кәсіби, Coursera тәрізді)
 export interface CourseLevel {
   id: string;
   level: "beginner" | "intermediate" | "advanced";
@@ -80,6 +83,16 @@ export interface CourseLevel {
   descriptionKk: string;
   lang: LearnLang;
   units: Unit[];
+  // Кәсіби курс метадеректері
+  category?: string;         // "Business", "Grammar", "Exam prep", "Conversation"
+  categoryKk?: string;
+  emoji?: string;            // курс белгісі
+  color?: string;            // тема түсі (accent-*)
+  hours?: number;            // жалпы ұзақтық (сағат)
+  instructor?: string;       // "автор"
+  skills?: string[];         // не үйренесіз (en)
+  skillsKk?: string[];       // не үйренесіз (kk)
+  certificate?: boolean;     // аяқтағанда сертификат беріле ме
 }
 
 // Прогресс (localStorage)

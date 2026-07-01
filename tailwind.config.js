@@ -1,6 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  // Динамикалық құрылатын accent-класстарды сақтау (JIT purge-тен қорғау)
+  safelist: [
+    {
+      pattern: /(bg|text|border|from|to)-accent-(green|blue|purple|gold|pink|cyan|red)(\/(5|10|15|20|30|40))?/,
+      variants: ["hover", "group-hover"],
+    },
+  ],
   theme: {
     extend: {
       colors: {

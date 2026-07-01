@@ -24,8 +24,8 @@ export default function LessonPlayer({ lesson, onClose, onComplete }: Props) {
   const { addXP } = useProgress();
   const { completeLesson } = useCourseProgress();
 
-  // Грамматика сабағы — алдымен теория
-  const [showTheory, setShowTheory] = useState(lesson.type === "grammar" && !!lesson.theory);
+  // Алдымен оқу материалы (теория бар болса — кез келген сабақ түрінде)
+  const [showTheory, setShowTheory] = useState(!!lesson.theory);
   const [exerciseIdx, setExerciseIdx] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [finished, setFinished] = useState(false);
@@ -75,6 +75,32 @@ export default function LessonPlayer({ lesson, onClose, onComplete }: Props) {
             <p className="leading-relaxed mb-2">{lesson.theory.explanation}</p>
             <p className="text-sm text-text-secondary leading-relaxed pt-2 border-t border-border">{lesson.theory.explanationKk}</p>
           </div>
+
+          {/* Кәсіби материал бөлімдері */}
+          {lesson.theory.sections && lesson.theory.sections.length > 0 && (
+            <div className="space-y-3 mb-4">
+              {lesson.theory.sections.map((s, i) => (
+                <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="card p-5">
+                  <h4 className="font-display font-bold mb-2">{s.heading}</h4>
+                  <p className="text-sm leading-relaxed text-text-secondary whitespace-pre-line">{s.body}</p>
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          {/* Негізгі тұжырымдар */}
+          {lesson.theory.keyPoints && lesson.theory.keyPoints.length > 0 && (
+            <div className="card p-5 mb-4 bg-accent-green/5 border-accent-green/20">
+              <h4 className="font-display font-semibold mb-2 text-sm flex items-center gap-2">
+                <Star className="w-4 h-4 text-accent-green" /> {lang === "kk" ? "Негізгі тұжырымдар" : "Key takeaways"}
+              </h4>
+              <ul className="space-y-1.5">
+                {lesson.theory.keyPoints.map((k, i) => (
+                  <li key={i} className="text-sm text-text-secondary flex gap-2"><span className="text-accent-green shrink-0">✓</span> {k}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Мысалдар */}
           <h3 className="font-display font-semibold mb-3 text-sm">{lang === "kk" ? "Мысалдар" : "Examples"}</h3>
