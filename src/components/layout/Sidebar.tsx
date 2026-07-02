@@ -5,8 +5,9 @@
 import { NavLink } from "react-router-dom";
 import { useLang } from "@/contexts/LangContext";
 import type { TransKey } from "@/i18n/translations";
+import Logo from "@/components/shared/Logo";
 import {
-  Zap, Home, BookOpen, Film, MessageSquare, BookA,
+  Home, BookOpen, Film, MessageSquare, BookA,
   Dumbbell, Gamepad2, GraduationCap, BarChart3, Trophy, Settings, X,
 } from "lucide-react";
 
@@ -60,13 +61,7 @@ export default function Sidebar({ isOpen, onClose }: Props) {
       >
         {/* Логотип + жабу (мобиль) */}
         <div className="flex items-center justify-between px-6 h-20 border-b border-border shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-card flex items-center justify-center shadow-glow"
-              style={{ backgroundImage: "linear-gradient(135deg, #16A34A, #0EA5E9)" }}>
-              <Zap className="w-6 h-6 text-white" fill="currentColor" />
-            </div>
-            <span className="text-xl font-display font-bold gradient-text">LinguaFast</span>
-          </div>
+          <Logo size={40} showText />         {/* public/logo.png болса — сол қолданылады */}
           {/* Жабу (тек мобиль) */}
           <button onClick={onClose} className="lg:hidden text-text-secondary hover:text-text-primary p-1">
             <X className="w-5 h-5" />
