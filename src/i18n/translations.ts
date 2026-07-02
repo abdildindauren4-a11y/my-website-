@@ -491,7 +491,8 @@ export const translations = {
   "chat.modeTeacherLong": { kk: "Бот мұғалім сияқты қазақша түсіндіріп, мысалдармен қадам-қадам үйретеді.", en: "The bot teaches like a teacher: explains in Kazakh step by step with examples." },
   "chat.voiceReply": { kk: "Дауысты жауап", en: "Voice reply" },
   "chat.voiceInput": { kk: "Дауыспен жазу", en: "Voice input" },
-  "chat.listening": { kk: "Тыңдап тұрмын… сөйлей беріңіз", en: "Listening… keep talking" },
+  "chat.listening": { kk: "Тыңдап тұрмын… (қазақша/ағылшынша/қытайша сөйлей беріңіз)", en: "Listening… (speak Kazakh, English or Chinese)" },
+  "chat.transcribing": { kk: "Дауыс танылуда…", en: "Transcribing…" },
   "chat.speakReply": { kk: "Дауыстап оқу", en: "Read aloud" },
 
   // ── Сөздік (Dictionary + SRS) ──

@@ -7,14 +7,15 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { useUserPrefs } from "@/store/userPrefs";
-import { sendChatMessage, updateStudentMemory, isGeminiConfigured, type ChatMessage, type ChatMode } from "@/lib/gemini";
+import { sendChatMessage, updateStudentMemory, transcribeAudio, isGeminiConfigured, type ChatMessage, type ChatMode } from "@/lib/gemini";
+import { startMicRecording, isMicSupported, type MicRecorder } from "@/lib/micRecorder";
 import {
   loadChats, saveChats, loadActiveChatId, saveActiveChatId,
   titleFromMessages, newChatId, loadMemory, saveMemory,
   type ChatSession, type ChatMsg,
 } from "@/lib/chatStore";
 import { createRecognition, isSpeechRecognitionSupported, type RecognitionController } from "@/lib/ieltsSpeaking";
-import { speak, stopSpeaking } from "@/lib/speech";
+import { speakSmart, stopSpeaking } from "@/lib/speech";
 import AnimatedBot, { type BotState } from "@/components/chat/AnimatedBot";
 import Markdown from "@/components/chat/Markdown";
 import { knowledgeStats } from "@/lib/knowledge";
@@ -119,10 +120,12 @@ export default function ChatPage() {
   const [modeModalOpen, setModeModalOpen] = useState(false);
   // Дауыс: енгізу (микрофон) + жауап (TTS)
   const [micOn, setMicOn] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
   const [voiceReply, setVoiceReply] = useState(() => {
     try { return localStorage.getItem("linguafast_chat_voice") === "1"; } catch { return false; }
   });
   const recognitionRef = useRef<RecognitionController | null>(null);
+  const micRecRef = useRef<MicRecorder | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const memoryRef = useRef<string>("");
 
@@ -196,14 +199,41 @@ export default function ChatPage() {
     try { localStorage.setItem("linguafast_chat_voice", next ? "1" : "0"); } catch { /* */ }
   };
 
-  // Микрофонмен жазу: сөйлеген мәтін енгізу өрісіне түседі
-  const toggleMic = () => {
+  // Микрофонмен жазу.
+  // Gemini кілті болса: аудио жазылып, AI ТІЛДІ АВТОМАТТЫ АНЫҚТАП таниды
+  // (қазақша/ағылшынша/қытайша — қайсысында сөйлесеңіз, сол тілде жазады).
+  // Кілт жоқ болса: браузер тануы (үйрену тілінде).
+  const toggleMic = async () => {
     if (micOn) {
-      recognitionRef.current?.stop();
+      // ── Тоқтату ──
       setMicOn(false);
+      recognitionRef.current?.stop();
+      recognitionRef.current = null;
+      if (micRecRef.current) {
+        const rec = await micRecRef.current.stop();
+        micRecRef.current = null;
+        if (rec) {
+          setTranscribing(true);
+          const text = await transcribeAudio(rec.blob, rec.mimeType);
+          setTranscribing(false);
+          URL.revokeObjectURL(rec.url);
+          if (text) setInput((prev) => (prev ? prev + " " : "") + text);
+        }
+      }
       return;
     }
+
+    // ── Бастау ──
     stopSpeaking();
+    if (isGeminiConfigured() && isMicSupported()) {
+      // Автоматты тіл анықтау режимі (Gemini)
+      try {
+        micRecRef.current = await startMicRecording();
+        setMicOn(true);
+      } catch { micRecRef.current = null; }
+      if (micRecRef.current) return;
+    }
+    // Қосалқы: браузер тануы (үйрену тілінде)
     const recLang = learningLang === "zh" ? "zh-CN" : "en-US";
     const rec = createRecognition(
       (text) => setInput(text),
@@ -220,7 +250,11 @@ export default function ChatPage() {
   };
 
   // Беттен шыққанда микрофон мен дауысты тоқтату
-  useEffect(() => () => { recognitionRef.current?.stop(); stopSpeaking(); }, []);
+  useEffect(() => () => {
+    recognitionRef.current?.stop();
+    micRecRef.current?.cancel();
+    stopSpeaking();
+  }, []);
 
   // ── Жаңа чат ──
   const startNewChat = () => {
@@ -289,9 +323,9 @@ export default function ChatPage() {
       setBotState("happy");
       setTimeout(() => setBotState("idle"), 2500);
 
-      // Дауысты жауап қосулы болса — жауапты дауыстап оқу
+      // Дауысты жауап қосулы болса — әр тілдік бөлікті өз дауысымен оқу
       if (voiceReply) {
-        speak(stripMarkdown(res.text), learningLang === "zh" ? "zh" : "en");
+        speakSmart(stripMarkdown(res.text));
       }
 
       // Жадыны фонда жаңарту — әр 6 қолданушы хабарламасы сайын
@@ -494,7 +528,7 @@ export default function ChatPage() {
       {/* Хабарламалар */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto py-5 space-y-4">
         {messages.map((m) => (
-          <MessageBubble key={m.id} message={m} speakLang={learningLang === "zh" ? "zh" : "en"} onRetry={m.error && lastFailed ? () => send(lastFailed) : undefined} />
+          <MessageBubble key={m.id} message={m} onRetry={m.error && lastFailed ? () => send(lastFailed) : undefined} />
         ))}
         {loading && (
           <div className="flex items-start gap-3">
@@ -531,24 +565,27 @@ export default function ChatPage() {
       {/* Енгізу өрісі */}
       <div className="shrink-0 pt-3">
         <div className={`card p-2 flex items-center gap-2 transition-all ${micOn ? "border-accent-red/50" : "border-border focus-within:border-accent-blue/40"}`}>
-          {/* Дауыспен жазу */}
-          {isSpeechRecognitionSupported() && (
+          {/* Дауыспен жазу (тіл автоматты анықталады) */}
+          {(isSpeechRecognitionSupported() || isMicSupported()) && (
             <button
               onClick={toggleMic}
+              disabled={transcribing}
               title={t("chat.voiceInput")}
               className={`relative w-10 h-10 rounded-btn flex items-center justify-center shrink-0 transition-all ${
-                micOn ? "bg-accent-red text-white" : "bg-surface-2 text-text-secondary hover:text-accent-blue"
+                micOn ? "bg-accent-red text-white" : "bg-surface-2 text-text-secondary hover:text-accent-blue disabled:opacity-50"
               }`}
             >
               {micOn && <span className="absolute inset-0 rounded-btn bg-accent-red/40 animate-ping" />}
-              <Mic className="w-4 h-4 relative" />
+              {transcribing
+                ? <span className="w-4 h-4 relative rounded-full border-2 border-accent-blue border-t-transparent animate-spin" />
+                : <Mic className="w-4 h-4 relative" />}
             </button>
           )}
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send(input)}
-            placeholder={micOn ? t("chat.listening") : t("chat.placeholder")}
+            placeholder={micOn ? t("chat.listening") : transcribing ? t("chat.transcribing") : t("chat.placeholder")}
             className="flex-1 bg-transparent px-3 py-2 text-text-primary placeholder:text-text-muted focus:outline-none min-w-0"
           />
           <button
@@ -565,7 +602,7 @@ export default function ChatPage() {
 }
 
 // ── Хабарлама көпіршігі ──
-function MessageBubble({ message, speakLang = "en", onRetry }: { message: DisplayMessage; speakLang?: "en" | "zh"; onRetry?: () => void }) {
+function MessageBubble({ message, onRetry }: { message: DisplayMessage; onRetry?: () => void }) {
   const { t } = useLang();
   const isUser = message.role === "user";
 
@@ -601,7 +638,7 @@ function MessageBubble({ message, speakLang = "en", onRetry }: { message: Displa
           {/* Жауапты дауыстап оқу */}
           {!message.error && (
             <button
-              onClick={() => speak(stripMarkdown(message.text), speakLang)}
+              onClick={() => speakSmart(stripMarkdown(message.text))}
               title={t("chat.speakReply")}
               className="text-text-muted hover:text-accent-blue transition-colors"
             >

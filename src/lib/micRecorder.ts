@@ -2,10 +2,16 @@
 // Микрофон жазу — MediaRecorder + нақты дауыс деңгейі (AnalyserNode).
 // Speaking модулінде қолданылады: жазу → тыңдау → қайта жазу.
 
+export interface MicRecording {
+  url: string;       // ойнатуға дайын object URL
+  blob: Blob;        // аудио дерек (транскрипцияға жіберуге)
+  mimeType: string;
+}
+
 export interface MicRecorder {
-  stop: () => Promise<string | null>; // тоқтатып, аудио URL алу (null — жазба жоқ)
-  cancel: () => void;                 // тоқтатып, ештеңе сақтамау
-  getLevel: () => number;             // ағымдағы дауыс деңгейі 0..1
+  stop: () => Promise<MicRecording | null>; // тоқтатып, жазбаны алу (null — жазба жоқ)
+  cancel: () => void;                       // тоқтатып, ештеңе сақтамау
+  getLevel: () => number;                   // ағымдағы дауыс деңгейі 0..1
 }
 
 export type MicError = "not-allowed" | "no-device" | "not-supported" | "unknown";
@@ -71,8 +77,9 @@ export async function startMicRecording(): Promise<MicRecorder> {
         recorder.onstop = () => {
           cleanup();
           if (chunks.length === 0) { resolve(null); return; }
-          const blob = new Blob(chunks, { type: mime || "audio/webm" });
-          resolve(URL.createObjectURL(blob));
+          const mimeType = mime || "audio/webm";
+          const blob = new Blob(chunks, { type: mimeType });
+          resolve({ url: URL.createObjectURL(blob), blob, mimeType });
         };
         try { recorder.stop(); } catch { cleanup(); resolve(null); }
       }),
