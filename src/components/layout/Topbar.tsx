@@ -3,6 +3,7 @@
 // Мобиль: гамбургер + ықшам streak + тіл + профиль.
 // Десктоп: толық XP жолағы + streak + тіл + хабарлама + профиль.
 
+import { useNavigate } from "react-router-dom";
 import { useLang } from "@/contexts/LangContext";
 import { useProgress, levelProgress } from "@/store/progressStore";
 import { useUserPrefs } from "@/store/userPrefs";
@@ -16,6 +17,7 @@ export default function Topbar({ onMenuClick }: Props) {
   const { lang, setLang, t } = useLang();
   const { progress } = useProgress();
   const { prefs } = useUserPrefs();
+  const navigate = useNavigate();
   // Нақты деңгей мен XP (прогрестен)
   const lvl = levelProgress(progress.xp);
   const name = prefs.name || "Aidos";
@@ -100,7 +102,7 @@ export default function Topbar({ onMenuClick }: Props) {
         </button>
 
         {/* Профиль — мобильде тек аватар */}
-        <button className="flex items-center gap-2 hover:bg-surface-2 rounded-btn p-1 lg:p-1.5 transition-all">
+        <button onClick={() => navigate("/profile")} className="flex items-center gap-2 hover:bg-surface-2 rounded-btn p-1 lg:p-1.5 transition-all">
           <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-gradient-to-br from-accent-blue to-accent-purple flex items-center justify-center text-white font-semibold border-2 border-accent-blue/30 text-sm">
             {name[0]}
           </div>

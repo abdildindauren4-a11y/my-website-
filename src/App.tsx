@@ -19,6 +19,7 @@ import CoursesPage from "@/pages/CoursesPage";
 import PracticePage from "@/pages/PracticePage";
 import ProgressPage from "@/pages/ProgressPage";
 import LeaderboardPage from "@/pages/LeaderboardPage";
+import ProfilePage from "@/pages/ProfilePage";
 
 // Маршруттар (кейін placeholder-лер нақты беттерге ауысады)
 const routes: [string, string][] = [
@@ -65,6 +66,7 @@ function AppContent() {
           <Route path="/practice" element={<PracticePage />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           {routes.filter(([p]) => !["/", "/cinema", "/chat", "/dictionary", "/settings", "/games", "/ielts", "/courses", "/practice", "/progress", "/leaderboard"].includes(p)).map(([path, title]) => (
             <Route key={path} path={path} element={<PlaceholderPage title={title} />} />
           ))}
