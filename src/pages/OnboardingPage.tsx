@@ -6,7 +6,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { useUserPrefs, type LearningLanguage, type ProficiencyLevel } from "@/store/userPrefs";
-import { Zap, ArrowRight, ArrowLeft, Check, Sparkles, GraduationCap, Target, Globe } from "lucide-react";
+import Logo from "@/components/shared/Logo";
+import { ArrowRight, ArrowLeft, Check, Sparkles, GraduationCap, Target, Globe } from "lucide-react";
 
 interface Props {
   onComplete: () => void;
@@ -64,9 +65,9 @@ export default function OnboardingPage({ onComplete }: Props) {
             <motion.div key="welcome" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center">
               <motion.div
                 initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", delay: 0.1 }}
-                className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent-blue to-accent-purple flex items-center justify-center mx-auto mb-6"
+                className="w-20 h-20 mx-auto mb-6 flex items-center justify-center"
               >
-                <Zap className="w-10 h-10 text-white" />
+                <Logo size={80} />
               </motion.div>
               <h1 className="text-3xl font-display font-bold mb-3">{t("onb.welcome")}</h1>
               <p className="text-text-secondary mb-8 max-w-md mx-auto leading-relaxed">{t("onb.welcomeDesc")}</p>

@@ -26,9 +26,14 @@ export function generateVocabQuestions(
   count: number,
   userCards: VocabCard[] = []
 ): PracticeQuestion[] {
-  // Дайын сөздер + қолданушы сөздері
+  // Дайын сөздер + қолданушы сөздері.
+  // Аудармасы қазақша емес карталар (мыс. ағылшын анықтама болып қалғандар)
+  // жаттығуға алынбайды — нұсқаларда ағылшын мәтін шықпауы үшін.
+  const hasKk = (s: string) => /[Ѐ-ӿ]/.test(s);
   const seedWords = vocabSeed.filter((w) => w.lang === lang).map((w) => ({ term: w.term, translation: w.translation }));
-  const userWords = userCards.filter((c) => c.lang === lang).map((c) => ({ term: c.term, translation: c.translation }));
+  const userWords = userCards
+    .filter((c) => c.lang === lang && hasKk(c.translation))
+    .map((c) => ({ term: c.term, translation: c.translation }));
   const allWords = [...userWords, ...seedWords];
 
   if (allWords.length < 4) return [];

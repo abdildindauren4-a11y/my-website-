@@ -10,6 +10,7 @@ import { useProgress } from "@/store/progressStore";
 import { useCinemaProgress } from "@/store/cinemaProgressStore";
 import { useCustomVideos } from "@/store/customVideoStore";
 import { isGeminiConfigured } from "@/lib/gemini";
+import { getCachedKk, translateBatchToKk } from "@/lib/translate";
 import { translateSubtitlesToKk, generateLessonFromSubtitles } from "@/lib/cinemaAI";
 import { celebrateBig } from "@/lib/celebrate";
 import VideoPlayer from "@/components/cinema/VideoPlayer";
@@ -28,7 +29,7 @@ type AIStatus = "idle" | "translating" | "building" | "done" | "error";
 
 export default function CinemaPage() {
   const { t, lang } = useLang();
-  const { addCard, cards } = useVocab();
+  const { addCard, cards, patchTranslation } = useVocab();
   const { addMinutes, completeLesson, addXP } = useProgress();
   const { getProgress, updateWatched, setQuizScore, removeProgress } = useCinemaProgress();
   const { videos, addVideo, updateVideo, removeVideo } = useCustomVideos();
@@ -46,16 +47,25 @@ export default function CinemaPage() {
   // Белсенді сабақ — қоймадан алынады (жаңартулар бірден көрінеді)
   const activeLesson = activeId ? videos.find((v) => v.id === activeId) || null : null;
 
-  // Субтитрден сөзді сөздікке (SRS) қосу
+  // Субтитрден сөзді сөздікке (SRS) қосу — қазақша аудармасымен
   const handleAddWordFromSubtitle = (word: string, definition: string, phonetic?: string) => {
     if (cards.some((c) => c.term.toLowerCase() === word.toLowerCase())) return;
+    const wordLang = activeLesson?.lang || "en";
+    const kk = getCachedKk(word, wordLang);
     addCard({
-      lang: activeLesson?.lang || "en",
+      lang: wordLang,
       term: word,
-      translation: definition,
+      translation: kk || definition, // қазақшасы болса — сол, болмаса уақытша анықтама
       phonetic,
       source: "cinema",
     });
+    // Қазақшасы жоқ болса — фонда аударып, картаны жаңарту
+    if (!kk) {
+      translateBatchToKk([{ t: word, d: definition }], wordLang).then((map) => {
+        const translated = map[word];
+        if (translated) patchTranslation(word, wordLang, translated);
+      });
+    }
   };
 
   // Жүктелген субтитрді видеоға ТҰРАҚТЫ сақтау
