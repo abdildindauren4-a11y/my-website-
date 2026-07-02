@@ -131,6 +131,9 @@ export interface ChatMessage {
   text: string;
 }
 
+// Ұзақ әңгімеде API-ға жіберілетін хабарлама шегі
+const MAX_HISTORY = 60;
+
 // AI-ге хабарлама жіберіп, жауап алу
 export async function sendChatMessage(
   history: ChatMessage[],
@@ -138,7 +141,8 @@ export async function sendChatMessage(
   learningLang: string,
   uiLang: "kk" | "en",
   level: string = "intermediate",
-  mode: ChatMode = "immersion"
+  mode: ChatMode = "immersion",
+  memory: string = ""
 ): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
   // Кілтті әр шақыруда тексереміз (баптаулардан өзгеруі мүмкін)
   const key = getGeminiKey();
@@ -151,19 +155,33 @@ export async function sendChatMessage(
     // Қолданушы хабарламасына қарай ҚАЖЕТТІ білімді таңдау (тіл + деңгей)
     const langForKb = learningLang.includes("Chinese") || learningLang.includes("中") ? "Chinese" : "English";
     const knowledge = buildKnowledgeContext(newMessage, level as any, langForKb);
-    const fullSystemPrompt = buildSystemPrompt(learningLang, uiLang, level, mode) +
+    let fullSystemPrompt = buildSystemPrompt(learningLang, uiLang, level, mode) +
       "\n\n═══════════════════════════════════════\n" +
       "YOUR KNOWLEDGE BASE (use the most relevant parts for THIS message):\n" +
       "═══════════════════════════════════════\n" + knowledge;
+
+    // Ұзақ мерзімді жады — өткен әңгімелерден оқушы туралы конспект
+    if (memory) {
+      fullSystemPrompt +=
+        "\n\n═══════════════════════════════════════\n" +
+        "LONG-TERM MEMORY — what you know about THIS student from previous conversations.\n" +
+        "Use it naturally (recall their interests, goals, recurring mistakes). Never say you are reading notes.\n" +
+        "═══════════════════════════════════════\n" + memory;
+    }
+
+    // Форматтау: жауаптар жеңіл Markdown-мен келеді (чат оны әдемі көрсетеді)
+    fullSystemPrompt +=
+      "\n\nFORMATTING: You may use light Markdown — **bold** for key words/corrections, " +
+      "bullet lists for options, `code style` for words being analysed. Keep it minimal and clean.";
 
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash", // қазіргі тұрақты тегін модель (1.5 және 2.0 жабылған)
       systemInstruction: fullSystemPrompt,
     });
 
-    // Тарихты Gemini форматына айналдыру
+    // Тарихты Gemini форматына айналдыру (соңғы MAX_HISTORY хабарлама)
     const chat = model.startChat({
-      history: history.map((m) => ({
+      history: history.slice(-MAX_HISTORY).map((m) => ({
         role: m.role,
         parts: [{ text: m.text }],
       })),
@@ -190,5 +208,49 @@ export async function sendChatMessage(
       return { ok: false, error: "quota" };
     }
     return { ok: false, error: "general" };
+  }
+}
+
+// ── Ұзақ мерзімді жадыны жаңарту ──
+// Соңғы әңгіме үзіндісінен оқушы туралы қысқа конспект жасайды.
+// Фонда шақырылады (әр бірнеше хабарлама сайын); қате болса — үнсіз өтеді.
+export async function updateStudentMemory(
+  recentHistory: ChatMessage[],
+  currentMemory: string,
+  learningLang: string
+): Promise<string | null> {
+  const key = getGeminiKey();
+  if (!key) return null;
+
+  try {
+    const genAI = new GoogleGenerativeAI(key);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const transcript = recentHistory
+      .slice(-16)
+      .map((m) => `${m.role === "user" ? "Student" : "Tutor"}: ${m.text}`)
+      .join("\n");
+
+    const prompt = `You maintain a compact long-term memory about a ${learningLang} student for their AI tutor.
+
+CURRENT MEMORY:
+${currentMemory || "(empty)"}
+
+RECENT CONVERSATION:
+${transcript}
+
+Update the memory. Keep ONLY durable, useful facts:
+- name, interests, goals, profession/studies
+- recurring grammar/vocabulary mistakes
+- topics already covered, words already taught
+- level observations
+
+Rules: max 120 words, plain bullet lines, no commentary, merge with current memory (drop outdated facts). Output ONLY the updated memory.`;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim();
+    return text.length > 0 && text.length < 2000 ? text : null;
+  } catch {
+    return null; // жады жаңармаса — маңызды емес, келесіде қайталанады
   }
 }

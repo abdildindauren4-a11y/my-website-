@@ -3,6 +3,7 @@
 // Деңгей, категория, ұзақтық, сөз саны, прогресс.
 
 import { useLang } from "@/contexts/LangContext";
+import { categoryLabel } from "@/lib/cinemaData";
 import { Play, Clock, BookOpen, CheckCircle2, GraduationCap } from "lucide-react";
 import type { CinemaLesson, LessonProgress } from "@/types/cinema";
 
@@ -78,7 +79,7 @@ export default function LessonCard({ lesson, progress, onClick }: Props) {
           <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${levelColors[lesson.level]}`}>
             {levelLabel}
           </span>
-          <span className="text-[10px] text-text-muted">{lesson.category}</span>
+          <span className="text-[10px] text-text-muted">{categoryLabel(lesson.category, lang)}</span>
         </div>
         <h3 className="font-display font-bold mb-1 group-hover:text-accent-blue transition-colors">{title}</h3>
         {desc && <p className="text-sm text-text-secondary line-clamp-2 mb-3">{desc}</p>}

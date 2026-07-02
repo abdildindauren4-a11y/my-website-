@@ -5,9 +5,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
-import { gamesList } from "@/lib/gamesData";
+import { useUserPrefs } from "@/store/userPrefs";
+import { gamesList, getBestScore, getGameWords } from "@/lib/gamesData";
+import { getSentences } from "@/data/sentenceBank";
 import GameArt from "@/components/games/GameArt";
-import { Gamepad2, Grid3x3, Zap, CloudRain, SpellCheck, ListOrdered, Brain, ArrowLeft } from "lucide-react";
+import { Gamepad2, Grid3x3, Zap, CloudRain, SpellCheck, ListOrdered, Brain, ArrowLeft, Trophy, BookA, ListChecks } from "lucide-react";
 
 // Ойын компоненттері
 import WordMatchGame from "@/components/games/WordMatchGame";
@@ -24,7 +26,10 @@ const iconMap: Record<string, typeof Grid3x3> = {
 
 export default function GamesPage() {
   const { t, lang } = useLang();
+  const { prefs } = useUserPrefs();
   const [activeGame, setActiveGame] = useState<string | null>(null);
+  const wordCount = getGameWords(prefs.learningLang).length;
+  const sentenceCount = getSentences(prefs.learningLang).length;
 
   // Белсенді ойынды көрсету
   const renderGame = () => {
@@ -66,7 +71,7 @@ export default function GamesPage() {
   return (
     <div className="max-w-5xl mx-auto">
       {/* Тақырып */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-4">
         <div className="w-11 h-11 rounded-card bg-accent-purple/15 flex items-center justify-center">
           <Gamepad2 className="w-6 h-6 text-accent-purple" />
         </div>
@@ -76,10 +81,24 @@ export default function GamesPage() {
         </div>
       </div>
 
+      {/* Материалдық қор статистикасы */}
+      <div className="flex flex-wrap items-center gap-2 mb-6">
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-accent-blue/10 text-accent-blue px-3 py-1.5 rounded-full">
+          <BookA className="w-3.5 h-3.5" /> {wordCount}+ {t("games.wordBank")}
+        </span>
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-accent-pink/10 text-accent-pink px-3 py-1.5 rounded-full">
+          <ListChecks className="w-3.5 h-3.5" /> {sentenceCount} {t("games.sentenceBank")}
+        </span>
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-accent-green/10 text-accent-green px-3 py-1.5 rounded-full">
+          {prefs.learningLang === "zh" ? "🇨🇳 中文" : "🇬🇧 English"}
+        </span>
+      </div>
+
       {/* Ойын карточкалары — суретпен (3D-стиль иллюстрация) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {gamesList.map((game, i) => {
           const Icon = iconMap[game.icon] || Gamepad2;
+          const best = getBestScore(game.id, prefs.learningLang);
           return (
             <motion.button
               key={game.id}
@@ -106,8 +125,16 @@ export default function GamesPage() {
 
               {/* Мазмұн (сол жақта) */}
               <div className="relative h-full p-5 flex flex-col justify-between max-w-[62%]">
-                <div className="w-11 h-11 rounded-card bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                  <Icon className="w-5 h-5 text-white" />
+                <div className="flex items-center gap-2">
+                  <div className="w-11 h-11 rounded-card bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                  {/* Рекорд (бар болса) */}
+                  {best > 0 && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-white bg-black/25 backdrop-blur-sm px-2 py-1 rounded-full">
+                      <Trophy className="w-3 h-3 text-yellow-300" /> {best.toLocaleString()}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-white font-display font-bold text-lg mb-0.5 drop-shadow-sm">

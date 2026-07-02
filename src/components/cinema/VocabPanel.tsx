@@ -38,7 +38,11 @@ export default function VocabPanel({ words, onSaveWord, lang = "en" }: Props) {
   const toggleSave = (id: string) => {
     setSaved((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
     onSaveWord?.(id);
@@ -62,6 +66,12 @@ export default function VocabPanel({ words, onSaveWord, lang = "en" }: Props) {
 
       {/* Сөздер тізімі */}
       <div className="flex-1 overflow-y-auto space-y-3 -mr-1 pr-1">
+        {words.length === 0 && (
+          <div className="text-center py-10 px-3">
+            <p className="text-3xl mb-3">✨</p>
+            <p className="text-sm text-text-secondary leading-relaxed">{t("cinema.vocabEmpty")}</p>
+          </div>
+        )}
         {words.map((w) => {
           const isSaved = saved.has(w.id);
           return (

@@ -4,6 +4,7 @@
 
 import { NavLink } from "react-router-dom";
 import { useLang } from "@/contexts/LangContext";
+import { useProgress } from "@/store/progressStore";
 import type { TransKey } from "@/i18n/translations";
 import Logo from "@/components/shared/Logo";
 import {
@@ -39,6 +40,20 @@ interface Props {
 
 export default function Sidebar({ isOpen, onClose }: Props) {
   const { t } = useLang();
+  const { progress } = useProgress();
+
+  // Апталық мақсат: соңғы 7 күннің қаншасында белсенділік болды
+  const activeDays = (() => {
+    let count = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      if ((progress.weeklyMinutes[key] || 0) > 0) count++;
+    }
+    return count;
+  })();
+  const weekPercent = Math.round((activeDays / 7) * 100);
 
   return (
     <>
@@ -106,9 +121,9 @@ export default function Sidebar({ isOpen, onClose }: Props) {
               <Trophy className="w-4 h-4 text-accent-gold" />
               <span className="text-sm font-semibold">{t("dash.weeklyGoal")}</span>
             </div>
-            <p className="text-xs text-text-secondary mb-2">4/7 {t("dash.lessonsCompleted")}</p>
+            <p className="text-xs text-text-secondary mb-2">{activeDays}/7 {t("dash.daysActive")}</p>
             <div className="h-2 rounded-full bg-border overflow-hidden">
-              <div className="h-full bg-accent-green rounded-full" style={{ width: "57%" }} />
+              <div className="h-full bg-accent-green rounded-full transition-all duration-500" style={{ width: `${weekPercent}%` }} />
             </div>
           </div>
         </div>

@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useLang } from "@/contexts/LangContext";
 import { useProgress, levelProgress } from "@/store/progressStore";
 import { useUserPrefs } from "@/store/userPrefs";
-import { Flame, Bell, ChevronDown, Menu } from "lucide-react";
+import { Flame, ChevronDown, Menu } from "lucide-react";
 
 interface Props {
   onMenuClick: () => void; // гамбургер басылғанда
@@ -94,12 +94,6 @@ export default function Topbar({ onMenuClick }: Props) {
             ENG
           </button>
         </div>
-
-        {/* Хабарлама — мобильде жасырын (орын үнемдеу) */}
-        <button className="hidden sm:flex w-10 h-10 rounded-btn items-center justify-center text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-all relative">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-accent-red" />
-        </button>
 
         {/* Профиль — мобильде тек аватар */}
         <button onClick={() => navigate("/profile")} className="flex items-center gap-2 hover:bg-surface-2 rounded-btn p-1 lg:p-1.5 transition-all">
