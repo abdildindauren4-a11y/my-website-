@@ -5,6 +5,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLang } from "@/contexts/LangContext";
 import { searchDictionary, searchFullDictionary, dictStats, type DictEntry } from "@/lib/dictionary";
+import { translateBatchToKk, getCachedKk } from "@/lib/translate";
+import { isGeminiConfigured } from "@/lib/gemini";
 import { speak } from "@/lib/speech";
 import { Search, Plus, Check, Volume2, Database, Loader2 } from "lucide-react";
 import type { LearnLang } from "@/types/vocabulary";
@@ -21,6 +23,26 @@ export default function DictSearch({ onAddWord, existingTerms }: Props) {
   const [results, setResults] = useState<DictEntry[]>([]);
   const [loadingFull, setLoadingFull] = useState(false);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const [kkMap, setKkMap] = useState<Record<string, string>>({});
+  const [translating, setTranslating] = useState(false);
+
+  // Нәтижелерді қазақшаға аудару (кэштен + AI батчпен)
+  useEffect(() => {
+    if (results.length === 0) return;
+    // Кэштегілерді бірден көрсету
+    const pre: Record<string, string> = {};
+    results.forEach((e) => { const c = getCachedKk(e.t, lang); if (c) pre[e.t] = c; });
+    if (Object.keys(pre).length) setKkMap((prev) => ({ ...prev, ...pre }));
+    // Қалғанын аудару
+    const missing = results.filter((e) => !getCachedKk(e.t, lang));
+    if (missing.length && isGeminiConfigured()) {
+      setTranslating(true);
+      translateBatchToKk(missing, lang).then((map) => {
+        setKkMap((prev) => ({ ...prev, ...map }));
+        setTranslating(false);
+      });
+    }
+  }, [results, lang]);
 
   // Іздеу (жиі базадан бірден, толықтан кейін)
   useEffect(() => {
@@ -43,9 +65,11 @@ export default function DictSearch({ onAddWord, existingTerms }: Props) {
   }, [query, lang]);
 
   const handleAdd = useCallback((entry: DictEntry) => {
-    onAddWord(entry, lang);
+    // Қазақша аударма бар болса — соны сақтаймыз (әйтпесе ағылшын анықтама)
+    const kk = kkMap[entry.t] || getCachedKk(entry.t, lang);
+    onAddWord(kk ? { ...entry, d: kk } : entry, lang);
     setAddedIds((prev) => new Set(prev).add(entry.t));
-  }, [onAddWord, lang]);
+  }, [onAddWord, lang, kkMap]);
 
   const isAdded = (entry: DictEntry) => addedIds.has(entry.t) || existingTerms.has(entry.t.toLowerCase());
 
@@ -56,6 +80,12 @@ export default function DictSearch({ onAddWord, existingTerms }: Props) {
         <Database className="w-4 h-4 text-accent-cyan" />
         <span>{dictStats.fullTotal.toLocaleString()} {t("dict.wordsAvailable")}</span>
       </div>
+      {/* AI аударма үшін кілт қажет */}
+      {!isGeminiConfigured() && (
+        <div className="text-xs text-text-muted bg-surface-2 rounded-card p-2.5">
+          {t("dict.needKeyForKk")}
+        </div>
+      )}
 
       {/* Іздеу + тіл */}
       <div className="flex items-center gap-2 flex-wrap">
@@ -108,7 +138,13 @@ export default function DictSearch({ onAddWord, existingTerms }: Props) {
                     {entry.p && <span className="text-xs text-text-muted font-mono">{entry.p}</span>}
                     {entry.pos && <span className="text-[10px] text-text-secondary bg-surface-2 px-1.5 py-0.5 rounded">{entry.pos}</span>}
                   </div>
-                  <p className="text-sm text-text-secondary mt-0.5">{entry.d}</p>
+                  {/* Қазақша аударма (AI) */}
+                  {kkMap[entry.t] ? (
+                    <p className="text-sm font-medium text-accent-green mt-0.5">{kkMap[entry.t]}</p>
+                  ) : translating ? (
+                    <p className="text-xs text-text-muted mt-0.5 italic">{t("dict.translating")}</p>
+                  ) : null}
+                  <p className="text-xs text-text-secondary mt-0.5">{entry.d}</p>
                 </div>
                 {/* Дыбыс */}
                 <button

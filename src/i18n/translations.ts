@@ -472,6 +472,8 @@ export const translations = {
   "dict.searchZh": { kk: "Қытай сөзін іздеу (иероглиф)…", en: "Search Chinese word…" },
   "dict.searchHint": { kk: "Сөз жазып, 168 000 сөздік қордан іздеңіз", en: "Type to search 168,000 words" },
   "dict.noResults": { kk: "Сөз табылмады", en: "No words found" },
+  "dict.translating": { kk: "аударылуда…", en: "translating…" },
+  "dict.needKeyForKk": { kk: "Автоматты қазақша аударма үшін Баптаулардан Gemini API кілтін қосыңыз. Аударылған сөздер сақталады.", en: "Add a Gemini API key in Settings for automatic Kazakh translation. Translations are cached." },
   "dict.add": { kk: "Қосу", en: "Add" },
   "dict.added": { kk: "Қосылды", en: "Added" },
 
