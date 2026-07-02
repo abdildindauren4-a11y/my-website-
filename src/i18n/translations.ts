@@ -437,6 +437,16 @@ export const translations = {
   "chat.errorQuota": { kk: "Күндік лимит бітті. Ертең қайталап көріңіз.", en: "Daily limit reached. Try again tomorrow." },
   "chat.errorGeneral": { kk: "Қате шықты. Қайталап көріңіз.", en: "Something went wrong. Please try again." },
   "chat.errorKey": { kk: "API кілті қате. Тексеріңіз.", en: "Invalid API key. Please check it." },
+  "chat.newChat": { kk: "Жаңа чат", en: "New chat" },
+  "chat.history": { kk: "Чат тарихы", en: "Chat history" },
+  "chat.deleteChat": { kk: "Чатты өшіру", en: "Delete chat" },
+  "chat.deleteConfirm": { kk: "Бұл чат біржола өшеді. Сенімдісіз бе?", en: "This chat will be deleted permanently. Are you sure?" },
+  "chat.untitled": { kk: "Жаңа әңгіме", en: "New conversation" },
+  "chat.memoryOn": { kk: "Жады қосулы", en: "Memory on" },
+  "chat.modeImmersion": { kk: "Иммерсия", en: "Immersion" },
+  "chat.modeTeacher": { kk: "Мұғалім", en: "Teacher" },
+  "chat.modeImmersionDesc": { kk: "Толық тілдік орта", en: "Full language immersion" },
+  "chat.modeTeacherDesc": { kk: "Қазақша түсіндіреді", en: "Explains in Kazakh" },
 
   // ── Сөздік (Dictionary + SRS) ──
   "vocab.title": { kk: "Сөздік", en: "Dictionary" },
