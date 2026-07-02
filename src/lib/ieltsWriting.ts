@@ -85,7 +85,7 @@ Respond ONLY with valid JSON in exactly this format (no markdown, no extra text)
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: systemPrompt + "\n\nSTUDENT'S ESSAY:\n" + essay }] }],
-        generationConfig: { temperature: 0.3, maxOutputTokens: 1500 },
+        generationConfig: { temperature: 0.3, maxOutputTokens: 2500, thinkingConfig: { thinkingBudget: 0 } },
       }),
     }
   );

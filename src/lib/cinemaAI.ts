@@ -18,7 +18,7 @@ async function callGemini(prompt: string, maxTokens = 4000): Promise<string | nu
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.3, maxOutputTokens: maxTokens },
+        generationConfig: { temperature: 0.3, maxOutputTokens: maxTokens, thinkingConfig: { thinkingBudget: 0 } },
       }),
     });
     if (!res.ok) return null;
