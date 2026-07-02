@@ -486,6 +486,13 @@ export const translations = {
   "chat.modeTeacher": { kk: "Мұғалім", en: "Teacher" },
   "chat.modeImmersionDesc": { kk: "Толық тілдік орта", en: "Full language immersion" },
   "chat.modeTeacherDesc": { kk: "Қазақша түсіндіреді", en: "Explains in Kazakh" },
+  "chat.chooseMode": { kk: "Сөйлесу режимін таңдаңыз", en: "Choose a chat mode" },
+  "chat.modeImmersionLong": { kk: "Бот негізінен үйреніп жатқан тілде сөйлейді. Тілге толық ену — ең жылдам үйрену жолы.", en: "The bot speaks mainly in your target language. Full immersion is the fastest way to learn." },
+  "chat.modeTeacherLong": { kk: "Бот мұғалім сияқты қазақша түсіндіріп, мысалдармен қадам-қадам үйретеді.", en: "The bot teaches like a teacher: explains in Kazakh step by step with examples." },
+  "chat.voiceReply": { kk: "Дауысты жауап", en: "Voice reply" },
+  "chat.voiceInput": { kk: "Дауыспен жазу", en: "Voice input" },
+  "chat.listening": { kk: "Тыңдап тұрмын… сөйлей беріңіз", en: "Listening… keep talking" },
+  "chat.speakReply": { kk: "Дауыстап оқу", en: "Read aloud" },
 
   // ── Сөздік (Dictionary + SRS) ──
   "vocab.title": { kk: "Сөздік", en: "Dictionary" },
