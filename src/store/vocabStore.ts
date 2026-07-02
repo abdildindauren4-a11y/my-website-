@@ -40,12 +40,29 @@ function saveCards(cards: VocabCard[]) {
   } catch { /* ignore */ }
 }
 
+// Фондық түзету — бір сессияда бір рет (динамикалық импорт: негізгі бумаға кірмейді)
+let kkFixStarted = false;
+
 // Сөздік hook
 export function useVocab() {
   const [cards, setCards] = useState<VocabCard[]>([]);
 
   useEffect(() => {
-    setCards(loadCards());
+    const loaded = loadCards();
+    setCards(loaded);
+    // Ағылшын анықтама болып қалған аудармаларды фонда қазақшалау
+    if (!kkFixStarted) {
+      kkFixStarted = true;
+      import("@/lib/vocabFix")
+        .then((m) => m.fixEnglishTranslations(loaded))
+        .then((fixed) => {
+          if (fixed) {
+            saveCards(fixed);
+            setCards(fixed);
+          }
+        })
+        .catch(() => { /* желі/кілт жоқ — келесі жолы */ });
+    }
   }, []);
 
   // Карталарды жаңарту әрі сақтау
@@ -58,6 +75,19 @@ export function useVocab() {
   const addCard = useCallback((data: Pick<VocabCard, "lang" | "term" | "translation"> & Partial<VocabCard>) => {
     setCards((prev) => {
       const next = [...prev, createCard(data)];
+      saveCards(next);
+      return next;
+    });
+  }, []);
+
+  // Сөздің аудармасын жаңарту (term бойынша — фондық аударма үшін)
+  const patchTranslation = useCallback((term: string, lang: string, translation: string) => {
+    setCards((prev) => {
+      const next = prev.map((c) =>
+        c.term.toLowerCase() === term.toLowerCase() && c.lang === lang
+          ? { ...c, translation }
+          : c
+      );
       saveCards(next);
       return next;
     });
@@ -81,5 +111,5 @@ export function useVocab() {
     });
   }, []);
 
-  return { cards, update, addCard, removeCard, reviewCard };
+  return { cards, update, addCard, removeCard, reviewCard, patchTranslation };
 }

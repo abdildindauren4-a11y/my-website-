@@ -8,6 +8,8 @@ import { useUserPrefs } from "@/store/userPrefs";
 import { useVocab } from "@/store/vocabStore";
 import { useProgress } from "@/store/progressStore";
 import { getDueCards, calcStats, masteryPercent, timeUntilReview } from "@/lib/srs";
+import { getCachedKk, translateBatchToKk } from "@/lib/translate";
+import { shuffle } from "@/lib/gamesData";
 import { speak } from "@/lib/speech";
 import Flashcard from "@/components/vocab/Flashcard";
 import DictSearch from "@/components/vocab/DictSearch";
@@ -19,7 +21,7 @@ type Mode = "overview" | "review" | "browse" | "search";
 
 export default function DictionaryPage() {
   const { t, lang } = useLang();
-  const { cards, reviewCard, removeCard, addCard } = useVocab();
+  const { cards, reviewCard, removeCard, addCard, patchTranslation } = useVocab();
   const { addXP } = useProgress();
   const { prefs, loaded } = useUserPrefs();
   const [mode, setMode] = useState<Mode>("overview");
@@ -39,26 +41,40 @@ export default function DictionaryPage() {
   // SRS-те бар сөздер (іздеуде қайталап қоспау үшін)
   const existingTerms = useMemo(() => new Set(cards.map((c) => c.term.toLowerCase())), [cards]);
 
-  // Іздеуден сөзді SRS-ке қосу
-  const handleAddFromDict = (entry: DictEntry, lang: "en" | "zh") => {
+  // Іздеуден сөзді SRS-ке қосу — қазақша аудармасымен
+  const handleAddFromDict = (entry: DictEntry, entryLang: "en" | "zh") => {
+    const kk = getCachedKk(entry.t, entryLang);
     addCard({
-      lang,
+      lang: entryLang,
       term: entry.t,
-      translation: entry.d,        // ағылшын анықтама (кейін қазақшаға аударуға болады)
+      translation: kk || entry.d, // қазақшасы кэште болса — сол, болмаса уақытша анықтама
       phonetic: entry.p,
       partOfSpeech: entry.pos,
       source: "dictionary",
     });
+    // Қазақшасы жоқ болса — фонда аударып, картаны жаңарту
+    if (!kk) {
+      translateBatchToKk([{ t: entry.t, d: entry.d }], entryLang).then((map) => {
+        const translated = map[entry.t];
+        if (translated) patchTranslation(entry.t, entryLang, translated);
+      });
+    }
   };
 
   const stats = useMemo(() => calcStats(cards), [cards]);
   const dueCards = useMemo(() => getDueCards(cards), [cards]);
 
-  // Қайталауды бастау
+  // Қайталауды бастау.
+  // Бүгінге сөз жоқ болса да — қосымша жаттығу (ең әлсіз меңгерілген 15 сөз).
   const startReview = () => {
-    const due = getDueCards(cards);
-    if (due.length === 0) return;
-    setReviewQueue(due.map((c) => c.id));
+    let queue = getDueCards(cards);
+    if (queue.length === 0) {
+      queue = shuffle(
+        [...cards].sort((a, b) => masteryPercent(a) - masteryPercent(b)).slice(0, 30)
+      ).slice(0, 15);
+    }
+    if (queue.length === 0) return;
+    setReviewQueue(queue.map((c) => c.id));
     setReviewIndex(0);
     setMode("review");
   };
@@ -162,10 +178,10 @@ export default function DictionaryPage() {
           </div>
           <button
             onClick={startReview}
-            disabled={stats.dueToday === 0}
+            disabled={cards.length === 0}
             className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            <Brain className="w-4 h-4" /> {t("vocab.startReview")}
+            <Brain className="w-4 h-4" /> {stats.dueToday > 0 ? t("vocab.startReview") : t("vocab.extraPractice")}
           </button>
         </div>
       </div>

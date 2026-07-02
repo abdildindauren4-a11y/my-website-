@@ -370,6 +370,7 @@ export const translations = {
   "cinema.quizPassedXp": { kk: "Сабақ аяқталды! +50 XP", en: "Lesson completed! +50 XP" },
   "cinema.regenerate": { kk: "Қайта құру", en: "Regenerate" },
   "cinema.vocabEmpty": { kk: "Субтитр жүктеп, AI-мен сабақ құрсаңыз — негізгі сөздер осында шығады", en: "Upload subtitles and generate the lesson with AI — key words will appear here" },
+  "vocab.extraPractice": { kk: "Қосымша қайталау", en: "Extra practice" },
   "games.wordBank": { kk: "сөз қорда", en: "words in bank" },
   "games.sentenceBank": { kk: "сөйлем", en: "sentences" },
   // Түсіну тесті (Quiz)
