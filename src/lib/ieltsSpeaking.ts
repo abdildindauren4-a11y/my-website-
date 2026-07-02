@@ -147,7 +147,7 @@ Respond ONLY with valid JSON (no markdown):
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: systemPrompt + "\n\nRESPONSES:\n" + qaText }] }],
-        generationConfig: { temperature: 0.3, maxOutputTokens: 1500 },
+        generationConfig: { temperature: 0.3, maxOutputTokens: 2500, thinkingConfig: { thinkingBudget: 0 } },
       }),
     }
   );

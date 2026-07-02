@@ -186,9 +186,12 @@ export async function sendChatMessage(
         parts: [{ text: m.text }],
       })),
       generationConfig: {
-        maxOutputTokens: 500,
+        // 500 аз еді — жауап ортасынан үзілетін. 2048 — толық жауапқа жеткілікті.
+        maxOutputTokens: 2048,
         temperature: 0.7,
-      },
+        // Ішкі «ойлануды» өшіру: ойлану токендері лимитті жемейді, жауап жылдамырақ
+        thinkingConfig: { thinkingBudget: 0 },
+      } as object,
     });
 
     const result = await chat.sendMessage(newMessage);
