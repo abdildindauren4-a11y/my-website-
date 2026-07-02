@@ -123,7 +123,7 @@ export const translations = {
   "build.correct": { kk: "Дұрыс сөйлем!", en: "Correct sentence!" },
   "build.tryAgain": { kk: "Қайта көріңіз", en: "Try again" },
   "build.placeHere": { kk: "Сөздерді осында қойыңыз", en: "Tap words to place them here" },
-  "build.buildThis": { kk: "Осыны ағылшынша құраңыз", en: "Build this in English" },
+  "build.buildThis": { kk: "Осы сөйлемді құраңыз", en: "Build this sentence" },
   "build.progress": { kk: "сөйлем", en: "sentences" },
   "games.memoryRule": { kk: "Карталарды ашып, бірдей жұптарды табыңыз", en: "Flip cards to find matching pairs" },
   // Жады дуэлі — кеңейтілген
@@ -370,6 +370,8 @@ export const translations = {
   "cinema.quizPassedXp": { kk: "Сабақ аяқталды! +50 XP", en: "Lesson completed! +50 XP" },
   "cinema.regenerate": { kk: "Қайта құру", en: "Regenerate" },
   "cinema.vocabEmpty": { kk: "Субтитр жүктеп, AI-мен сабақ құрсаңыз — негізгі сөздер осында шығады", en: "Upload subtitles and generate the lesson with AI — key words will appear here" },
+  "games.wordBank": { kk: "сөз қорда", en: "words in bank" },
+  "games.sentenceBank": { kk: "сөйлем", en: "sentences" },
   // Түсіну тесті (Quiz)
   "quiz.title": { kk: "Түсіну тесті", en: "Comprehension Quiz" },
   "quiz.correct": { kk: "дұрыс", en: "correct" },
