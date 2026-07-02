@@ -136,3 +136,57 @@ Respond ONLY with valid JSON:
   if (vocabulary.length === 0 && questions.length === 0) return null;
   return { vocabulary, questions };
 }
+
+// ── 3. Сөйлем грамматикасын түсіндіру ──
+// Субтитрдегі сөйлем неге солай құрылғанын қазақша түсіндіреді
+// (ереже, шақ, сөз тәртібі + ұқсас мысал). Кэштеледі — қайта сұрау тегін.
+
+const GRAMMAR_CACHE_KEY = "linguafast_grammar_cache";
+const GRAMMAR_CACHE_MAX = 200;
+
+function loadGrammarCache(): Record<string, string> {
+  try { return JSON.parse(localStorage.getItem(GRAMMAR_CACHE_KEY) || "{}"); } catch { return {}; }
+}
+
+function saveGrammarCache(cache: Record<string, string>) {
+  try {
+    const keys = Object.keys(cache);
+    // Кэш тым өссе — ескілерін тастап, жаңаларын қалдырамыз
+    if (keys.length > GRAMMAR_CACHE_MAX) {
+      const trimmed: Record<string, string> = {};
+      keys.slice(-GRAMMAR_CACHE_MAX).forEach((k) => { trimmed[k] = cache[k]; });
+      cache = trimmed;
+    }
+    localStorage.setItem(GRAMMAR_CACHE_KEY, JSON.stringify(cache));
+  } catch { /* */ }
+}
+
+export async function explainSentence(sentence: string, lang: "en" | "zh"): Promise<string | null> {
+  const clean = sentence.trim();
+  if (!clean) return null;
+
+  const cacheId = `${lang}:${clean.toLowerCase()}`;
+  const cache = loadGrammarCache();
+  if (cache[cacheId]) return cache[cacheId];
+
+  const srcLang = lang === "en" ? "English" : "Chinese";
+  const prompt = `You are a ${srcLang} grammar teacher for a Kazakh-speaking student.
+Explain IN KAZAKH why this ${srcLang} sentence is built the way it is:
+
+"${clean}"
+
+Cover briefly:
+- сөйлемнің құрылымы (кім не істейді, сөз тәртібі)
+- қолданылған негізгі грамматикалық ереже (шақ, көмекші етістік, шылау т.б.) және НЕГЕ дәл осы форма
+- 1 ұқсас мысал сөйлем (${srcLang}) қазақша аудармасымен
+
+Rules: explain in simple Kazakh, use light Markdown (**bold** for grammar terms, bullet list), max 130 words. No greetings, start directly.`;
+
+  const text = await callGemini(prompt, 1500);
+  if (!text) return null;
+
+  const result = text.trim();
+  cache[cacheId] = result;
+  saveGrammarCache(cache);
+  return result;
+}

@@ -11,7 +11,7 @@ import { useCinemaProgress } from "@/store/cinemaProgressStore";
 import { useCustomVideos } from "@/store/customVideoStore";
 import { isGeminiConfigured } from "@/lib/gemini";
 import { getCachedKk, translateBatchToKk } from "@/lib/translate";
-import { translateSubtitlesToKk, generateLessonFromSubtitles } from "@/lib/cinemaAI";
+import { translateSubtitlesToKk, generateLessonFromSubtitles, explainSentence } from "@/lib/cinemaAI";
 import { celebrateBig } from "@/lib/celebrate";
 import VideoPlayer from "@/components/cinema/VideoPlayer";
 import VocabPanel from "@/components/cinema/VocabPanel";
@@ -20,6 +20,7 @@ import ComprehensionQuiz from "@/components/cinema/ComprehensionQuiz";
 import SubtitleUpload from "@/components/cinema/SubtitleUpload";
 import AddVideoModal from "@/components/cinema/AddVideoModal";
 import { categories } from "@/lib/cinemaData";
+import Markdown from "@/components/chat/Markdown";
 import { Film, X, ArrowLeft, Play, GraduationCap, Plus, Trash2, Sparkles, Loader2, Check, MonitorPlay, FileUp, Wand2 } from "lucide-react";
 import type { SubtitleLine } from "@/types/cinema";
 
@@ -43,6 +44,21 @@ export default function CinemaPage() {
   const [aiStatus, setAiStatus] = useState<AIStatus>("idle");
   const [aiProgress, setAiProgress] = useState("");
   const lastPctRef = useRef(0);
+  // Транскрипттегі сөйлем түсіндірмесі
+  const [explainLineId, setExplainLineId] = useState<string | null>(null);
+  const [explainText, setExplainText] = useState<string | null>(null);
+  const [explainBusy, setExplainBusy] = useState(false);
+
+  // Транскрипт жолының грамматикасын түсіндіру
+  const handleExplainLine = async (s: SubtitleLine) => {
+    if (explainLineId === s.id) { setExplainLineId(null); return; } // жабу
+    setExplainLineId(s.id);
+    setExplainText(null);
+    setExplainBusy(true);
+    const result = await explainSentence(s.en, activeLesson?.lang || "en");
+    setExplainText(result);
+    setExplainBusy(false);
+  };
 
   // Белсенді сабақ — қоймадан алынады (жаңартулар бірден көрінеді)
   const activeLesson = activeId ? videos.find((v) => v.id === activeId) || null : null;
@@ -305,8 +321,38 @@ export default function CinemaPage() {
               <div className="overflow-y-auto p-4 space-y-3">
                 {activeLesson.subtitles.map((s) => (
                   <div key={s.id} className="card bg-surface-2 p-3 border-border">
-                    <p className="text-text-primary text-sm mb-1">{s.en}</p>
-                    {s.kk && <p className="text-text-secondary text-sm">{s.kk}</p>}
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-text-primary text-sm mb-1">{s.en}</p>
+                        {s.kk && <p className="text-text-secondary text-sm">{s.kk}</p>}
+                      </div>
+                      {/* «Неге бұлай?» — грамматика түсіндірмесі */}
+                      {geminiReady && (
+                        <button
+                          onClick={() => handleExplainLine(s)}
+                          title={t("sub.explain")}
+                          className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
+                            explainLineId === s.id ? "bg-accent-purple text-white" : "text-text-muted hover:text-accent-purple hover:bg-accent-purple/10"
+                          }`}
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                    {/* Түсіндірме */}
+                    {explainLineId === s.id && (
+                      <div className="mt-2 pt-2 border-t border-border">
+                        {explainBusy ? (
+                          <p className="text-sm text-text-secondary flex items-center gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin text-accent-purple" /> {t("sub.explainLoading")}
+                          </p>
+                        ) : explainText ? (
+                          <Markdown text={explainText} />
+                        ) : (
+                          <p className="text-sm text-accent-red">{t("sub.explainError")}</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

@@ -404,6 +404,11 @@ export const translations = {
   "sub.notFound": { kk: "Бұл сөз сөздікте табылмады", en: "Word not found in dictionary" },
   "sub.loading": { kk: "Ізделуде…", en: "Looking up…" },
   // Субтитр жүктеу (.srt)
+  "sub.explain": { kk: "Неге бұлай? (грамматика)", en: "Why is it like this? (grammar)" },
+  "sub.explainTitle": { kk: "Грамматикалық түсіндірме", en: "Grammar explanation" },
+  "sub.explainLoading": { kk: "AI ережені түсіндіруде…", en: "AI is explaining the rule…" },
+  "sub.explainError": { kk: "Түсіндіру сәтсіз болды. Қайталап көріңіз.", en: "Explanation failed. Try again." },
+  "sub.explainNeedKey": { kk: "Түсіндірме үшін Баптауларда Gemini кілтін қосыңыз", en: "Add a Gemini key in Settings for explanations" },
   "sub.upload": { kk: "Субтитр жүктеу (.srt)", en: "Upload subtitles (.srt)" },
   "sub.uploadHint": { kk: "YouTube Studio-дан .srt немесе .vtt файлын жүктеңіз", en: "Upload .srt or .vtt from YouTube Studio" },
   "sub.uploaded": { kk: "Субтитр жүктелді", en: "Subtitles loaded" },

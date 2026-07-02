@@ -181,7 +181,12 @@ export default function VideoPlayer({ lesson, onShowTranscript, onAddWord, onDur
         <div id={containerId} className="w-full h-full" />
 
         {/* Субтитр overlay */}
-        <SubtitleOverlay line={currentLine} lang={lesson.lang} onAddWord={onAddWord} />
+        <SubtitleOverlay
+          line={currentLine}
+          lang={lesson.lang}
+          onAddWord={onAddWord}
+          onPauseRequest={() => playerRef.current?.pauseVideo?.()}
+        />
 
         {/* Жоғарғы оң: CC қосу/өшіру */}
         <div className="absolute top-3 right-3 flex gap-2">
@@ -228,9 +233,9 @@ export default function VideoPlayer({ lesson, onShowTranscript, onAddWord, onDur
           </div>
         </div>
 
-        {/* Жүктелу күйі */}
+        {/* Жүктелу күйі (ақпараттық — астындағы батырмаларға кедергі жасамайды) */}
         {!ready && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 pointer-events-none">
             <div className="text-white/70 text-sm">{t("common.loading")}</div>
           </div>
         )}
