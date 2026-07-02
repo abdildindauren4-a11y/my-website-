@@ -85,3 +85,96 @@ export function speak(text: string, lang: "en" | "zh" = "en"): void {
 export function stopSpeaking(): void {
   if (isSpeechSupported()) window.speechSynthesis.cancel();
 }
+
+// ═══════════════════════════════════════════
+// КӨПТІЛДІ ОҚУ — мәтінді тілдік бөліктерге бөліп,
+// әрқайсысын өз дауысымен оқиды:
+// қазақша (кириллица) → қазақ/орыс дауысы,
+// ағылшынша → ағылшын дауысы, қытайша → қытай дауысы.
+// ═══════════════════════════════════════════
+
+type Script = "latin" | "cyrillic" | "han";
+
+function charScript(ch: string): Script | null {
+  if (/[一-鿿㐀-䶿]/.test(ch)) return "han";
+  if (/[Ѐ-ӿ]/.test(ch)) return "cyrillic";
+  if (/[a-zA-Z]/.test(ch)) return "latin";
+  return null; // тыныс белгісі/сан — ағымдағы бөлікке жалғасады
+}
+
+// Мәтінді тілдік бөліктерге бөлу
+export function splitByScript(text: string): { script: Script; text: string }[] {
+  const segments: { script: Script; text: string }[] = [];
+  let current: Script | null = null;
+  let buf = "";
+
+  for (const ch of text) {
+    const s = charScript(ch);
+    if (s === null || s === current) {
+      buf += ch;
+    } else {
+      if (current !== null && buf.trim()) segments.push({ script: current, text: buf.trim() });
+      // Жаңа бөлік — бейтарап таңбалар алдыңғысында қалады
+      current = s;
+      buf = ch;
+    }
+    if (current === null && s !== null) current = s;
+  }
+  if (current !== null && buf.trim()) segments.push({ script: current, text: buf.trim() });
+
+  // Тым қысқа бөліктерді (1-2 таңба) көршісіне қосу — үзік-үзік оқымау үшін
+  const merged: { script: Script; text: string }[] = [];
+  for (const seg of segments) {
+    const prev = merged[merged.length - 1];
+    if (prev && (seg.text.length <= 2 || prev.script === seg.script)) {
+      prev.text += " " + seg.text;
+    } else {
+      merged.push({ ...seg });
+    }
+  }
+  return merged;
+}
+
+// Кириллица (қазақша) үшін дауыс: алдымен қазақ, сосын орыс дауысы
+function pickCyrillicVoice(): SpeechSynthesisVoice | null {
+  const voices = loadVoices();
+  if (!voices.length) return null;
+  const kk = voices.find((v) => v.lang.toLowerCase().startsWith("kk") || /kazakh/i.test(v.name));
+  if (kk) return kk;
+  const ruPreferred = ["google русский", "milena", "katya", "microsoft svetlana", "microsoft dmitry", "yuri"];
+  const ru = voices.filter((v) => v.lang.toLowerCase().startsWith("ru") && !BAD_VOICES.test(v.name));
+  if (!ru.length) return null;
+  return [...ru].sort((a, b) => {
+    const ai = ruPreferred.findIndex((p) => a.name.toLowerCase().includes(p));
+    const bi = ruPreferred.findIndex((p) => b.name.toLowerCase().includes(p));
+    return (bi >= 0 ? 100 - bi : 0) - (ai >= 0 ? 100 - ai : 0);
+  })[0];
+}
+
+// Аралас тілді мәтінді мәнерлеп оқу — әр бөлік өз дауысымен.
+// speechSynthesis кезекті өзі басқарады (бөліктер бірінен соң бірі оқылады).
+export function speakSmart(text: string): void {
+  if (!isSpeechSupported() || !text.trim()) return;
+  window.speechSynthesis.cancel();
+
+  const segments = splitByScript(text);
+  for (const seg of segments) {
+    const u = new SpeechSynthesisUtterance(seg.text);
+    if (seg.script === "han") {
+      const v = pickBestVoice("zh");
+      if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "zh-CN";
+      u.rate = 0.85;
+    } else if (seg.script === "cyrillic") {
+      const v = pickCyrillicVoice();
+      if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "ru-RU";
+      u.rate = 0.95;
+    } else {
+      const v = pickBestVoice("en");
+      if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "en-US";
+      u.rate = 0.95;
+    }
+    u.pitch = 1.0;
+    u.volume = 1.0;
+    window.speechSynthesis.speak(u); // кезекке қосылады
+  }
+}

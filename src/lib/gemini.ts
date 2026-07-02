@@ -214,6 +214,49 @@ export async function sendChatMessage(
   }
 }
 
+// ── Дауысты тану (транскрипция) ──
+// Аудионы Gemini-ге жібереді — тілді АВТОМАТТЫ анықтайды
+// (қазақша, ағылшынша, қытайша — қайсысында сөйлесе, сол тілде жазады).
+export async function transcribeAudio(blob: Blob, mimeType: string): Promise<string | null> {
+  const key = getGeminiKey();
+  if (!key) return null;
+
+  try {
+    // Blob → base64
+    const buf = await blob.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    let binary = "";
+    const CHUNK = 0x8000;
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+    }
+    const base64 = btoa(binary);
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { inlineData: { mimeType, data: base64 } },
+              { text: "Transcribe this speech EXACTLY as spoken, in the ORIGINAL language (it may be Kazakh, English, or Chinese — detect automatically). Output ONLY the transcription text, nothing else. If there is no speech, output an empty string." },
+            ],
+          }],
+          generationConfig: { temperature: 0, maxOutputTokens: 1000, thinkingConfig: { thinkingBudget: 0 } },
+        }),
+      }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+    return text || null;
+  } catch {
+    return null;
+  }
+}
+
 // ── Ұзақ мерзімді жадыны жаңарту ──
 // Соңғы әңгіме үзіндісінен оқушы туралы қысқа конспект жасайды.
 // Фонда шақырылады (әр бірнеше хабарлама сайын); қате болса — үнсіз өтеді.

@@ -98,9 +98,9 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
       setRecording(false);
       stopLevelLoop();
       recognitionRef.current?.stop();
-      const url = await micRef.current?.stop();
+      const rec = await micRef.current?.stop();
       micRef.current = null;
-      if (url) setAudioUrl(url);
+      if (rec) setAudioUrl(rec.url);
     } else {
       // ── Бастау ──
       setError(null);
