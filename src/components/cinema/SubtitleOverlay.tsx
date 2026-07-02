@@ -6,23 +6,46 @@ import { useState } from "react";
 import { useLang } from "@/contexts/LangContext";
 import { speak } from "@/lib/speech";
 import { lookupWord, searchFullDictionary, type DictEntry } from "@/lib/dictionary";
-import { Volume2, Plus, Check, X } from "lucide-react";
+import { explainSentence } from "@/lib/cinemaAI";
+import { isGeminiConfigured } from "@/lib/gemini";
+import Markdown from "@/components/chat/Markdown";
+import { Volume2, Plus, Check, X, Sparkles, Loader2 } from "lucide-react";
 import type { SubtitleLine } from "@/types/cinema";
 
 interface Props {
   line: SubtitleLine | null;
   lang?: "en" | "zh";
   onAddWord?: (word: string, definition: string, phonetic?: string) => void;
+  onPauseRequest?: () => void; // түсіндірме ашылғанда видеоны тоқтату
 }
 
-export default function SubtitleOverlay({ line, lang = "en", onAddWord }: Props) {
+export default function SubtitleOverlay({ line, lang = "en", onAddWord, onPauseRequest }: Props) {
   const { t } = useLang();
   const [activeWord, setActiveWord] = useState<string | null>(null);
   const [entry, setEntry] = useState<DictEntry | null>(null);
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
+  // Грамматика түсіндірмесі
+  const [explainOpen, setExplainOpen] = useState(false);
+  const [explaining, setExplaining] = useState(false);
+  const [explanation, setExplanation] = useState<string | null>(null);
+  const [explainedFor, setExplainedFor] = useState<string>("");
 
   if (!line) return null;
+
+  // «Неге бұлай?» — сөйлем грамматикасын AI түсіндіреді
+  const handleExplain = async () => {
+    onPauseRequest?.(); // оқып үлгеру үшін видео тоқтайды
+    setActiveWord(null);
+    setExplainOpen(true);
+    if (explainedFor === line.en && explanation) return; // сол сөйлем — кэштен
+    setExplaining(true);
+    setExplanation(null);
+    const result = await explainSentence(line.en, lang);
+    setExplanation(result);
+    setExplainedFor(line.en);
+    setExplaining(false);
+  };
 
   // Сөзді тазалау (тыныс белгілерін алып тастау)
   const cleanWord = (w: string) => w.replace(/[.,!?;:"'()]/g, "").toLowerCase();
@@ -82,6 +105,34 @@ export default function SubtitleOverlay({ line, lang = "en", onAddWord }: Props)
 
   return (
     <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl">
+      {/* Грамматика түсіндірме панелі */}
+      {explainOpen && (
+        <div className="mb-2 bg-surface border border-accent-purple/30 rounded-card shadow-card-hover p-3 relative max-h-64 overflow-y-auto">
+          <button
+            onClick={() => setExplainOpen(false)}
+            className="absolute top-2 right-2 text-text-muted hover:text-text-primary z-10"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          <div className="flex items-center gap-1.5 mb-2 pr-6">
+            <Sparkles className="w-3.5 h-3.5 text-accent-purple" />
+            <span className="text-xs font-semibold text-accent-purple">{t("sub.explainTitle")}</span>
+          </div>
+          <p className="text-xs text-text-muted italic mb-2">"{line.en}"</p>
+          {!isGeminiConfigured() ? (
+            <p className="text-sm text-text-secondary">{t("sub.explainNeedKey")}</p>
+          ) : explaining ? (
+            <p className="text-sm text-text-secondary flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin text-accent-purple" /> {t("sub.explainLoading")}
+            </p>
+          ) : explanation ? (
+            <Markdown text={explanation} />
+          ) : (
+            <p className="text-sm text-accent-red">{t("sub.explainError")}</p>
+          )}
+        </div>
+      )}
+
       {/* Сөз попабы (мағына) */}
       {activeWord && (
         <div className="mb-2 bg-surface border border-border rounded-card shadow-card-hover p-3 relative">
@@ -128,12 +179,21 @@ export default function SubtitleOverlay({ line, lang = "en", onAddWord }: Props)
 
       {/* Субтитр */}
       <div className="bg-black/75 backdrop-blur-sm rounded-card px-5 py-4 border border-white/10">
-        {/* Ағылшынша — интерактив */}
+        {/* Ағылшынша — интерактив + «Неге бұлай?» */}
         <div className="flex items-start gap-2.5">
           <span className="text-[10px] font-bold text-accent-blue bg-accent-blue/20 px-1.5 py-0.5 rounded shrink-0 mt-1">EN</span>
           <p className="text-white text-lg leading-relaxed text-center flex-1">
             {renderInteractiveText(line.en)}
           </p>
+          <button
+            onClick={handleExplain}
+            title={t("sub.explain")}
+            className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all mt-0.5 ${
+              explainOpen ? "bg-accent-purple text-white" : "bg-white/10 text-white/70 hover:text-white hover:bg-accent-purple/60"
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+          </button>
         </div>
         {/* Бөлгіш */}
         <div className="h-px bg-white/15 my-2.5" />
