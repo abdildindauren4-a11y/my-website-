@@ -51,13 +51,14 @@ export interface RecognitionController {
 export function createRecognition(
   onResult: (transcript: string, isFinal: boolean) => void,
   onEnd: () => void,
-  onError?: (error: string) => void
+  onError?: (error: string) => void,
+  lang: string = "en-US"
 ): RecognitionController | null {
   if (!isSpeechRecognitionSupported()) return null;
 
   const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
   const recognition = new SpeechRecognition();
-  recognition.lang = "en-US";
+  recognition.lang = lang;
   recognition.continuous = true;
   recognition.interimResults = true;
 

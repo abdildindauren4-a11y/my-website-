@@ -4,6 +4,7 @@
 // Markdown-форматталған жауаптар, суретті режим ауыстырғыш.
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { useUserPrefs } from "@/store/userPrefs";
 import { sendChatMessage, updateStudentMemory, isGeminiConfigured, type ChatMessage, type ChatMode } from "@/lib/gemini";
@@ -12,13 +13,24 @@ import {
   titleFromMessages, newChatId, loadMemory, saveMemory,
   type ChatSession, type ChatMsg,
 } from "@/lib/chatStore";
+import { createRecognition, isSpeechRecognitionSupported, type RecognitionController } from "@/lib/ieltsSpeaking";
+import { speak, stopSpeaking } from "@/lib/speech";
 import AnimatedBot, { type BotState } from "@/components/chat/AnimatedBot";
 import Markdown from "@/components/chat/Markdown";
 import { knowledgeStats } from "@/lib/knowledge";
 import {
   Send, Key, ExternalLink, AlertCircle, RotateCcw,
   History, MessageSquarePlus, Trash2, Brain, X,
+  Mic, Volume2, VolumeX, SlidersHorizontal, Check,
 } from "lucide-react";
+
+// Markdown белгілерін алып тастау (дауыстап оқу үшін таза мәтін)
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*|\*|`|_{1,2}/g, "")
+    .replace(/^#+\s*/gm, "")
+    .replace(/^\s*[-•]\s*/gm, "");
+}
 
 type DisplayMessage = ChatMsg;
 
@@ -26,44 +38,67 @@ function now() {
   return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-// ── Режим батырмасы: арнайы сурет (жоқ болса — эмодзи қоры) ──
-function ModeButton({ mode, active, onClick }: { mode: ChatMode; active: boolean; onClick: () => void }) {
+// ── Режим таңдау терезесі — үлкен, анық суреттермен ──
+function ModePickerModal({ current, onSelect, onClose }: {
+  current: ChatMode;
+  onSelect: (m: ChatMode) => void;
+  onClose: () => void;
+}) {
   const { t } = useLang();
-  const [imgError, setImgError] = useState(false);
-  const isImmersion = mode === "immersion";
-  const accent = isImmersion ? "accent-blue" : "accent-green";
+  const modes: { id: ChatMode; emoji: string; accent: string; title: string; desc: string }[] = [
+    { id: "immersion", emoji: "🌍", accent: "accent-blue", title: t("chat.modeImmersion"), desc: t("chat.modeImmersionLong") },
+    { id: "teacher", emoji: "👨‍🏫", accent: "accent-green", title: t("chat.modeTeacher"), desc: t("chat.modeTeacherLong") },
+  ];
 
   return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-2.5 px-3 py-1.5 rounded-btn border transition-all text-left ${
-        active
-          ? `border-${accent}/50 bg-${accent}/10 shadow-soft`
-          : "border-border bg-surface hover:bg-surface-2"
-      }`}
-    >
-      {/* Режим суреті: public/modes/{mode}.png (жоқ болса — эмодзи) */}
-      {imgError ? (
-        <span className={`w-9 h-9 rounded-full bg-${accent}/15 flex items-center justify-center text-lg shrink-0`}>
-          {isImmersion ? "🌍" : "👨‍🏫"}
-        </span>
-      ) : (
-        <img
-          src={`/modes/${mode}.png`}
-          alt=""
-          onError={() => setImgError(true)}
-          className={`w-9 h-9 rounded-full object-cover shrink-0 ${active ? `ring-2 ring-${accent}` : "opacity-80"}`}
-        />
-      )}
-      <span className="hidden sm:block">
-        <span className={`block text-xs font-semibold ${active ? `text-${accent}` : "text-text-primary"}`}>
-          {isImmersion ? t("chat.modeImmersion") : t("chat.modeTeacher")}
-        </span>
-        <span className="block text-[10px] text-text-muted leading-tight">
-          {isImmersion ? t("chat.modeImmersionDesc") : t("chat.modeTeacherDesc")}
-        </span>
-      </span>
-    </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.94, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="card w-full max-w-2xl max-h-[88vh] overflow-y-auto p-5 sm:p-7"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-xl font-display font-bold">{t("chat.chooseMode")}</h3>
+          <button onClick={onClose} className="text-text-secondary hover:text-text-primary p-1">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {modes.map((m) => {
+            const active = current === m.id;
+            return (
+              <button
+                key={m.id}
+                onClick={() => { onSelect(m.id); onClose(); }}
+                className={`relative rounded-card border-2 p-5 text-center transition-all hover:shadow-card-hover ${
+                  active ? `border-${m.accent} bg-${m.accent}/5` : "border-border hover:border-border"
+                }`}
+              >
+                {/* Таңдалған белгі */}
+                {active && (
+                  <span className={`absolute top-3 right-3 w-7 h-7 rounded-full bg-${m.accent} text-white flex items-center justify-center`}>
+                    <Check className="w-4 h-4" />
+                  </span>
+                )}
+                {/* Үлкен, анық сурет */}
+                <img
+                  src={`/modes/${m.id}.png`}
+                  alt=""
+                  className="w-36 h-36 sm:w-44 sm:h-44 rounded-2xl object-cover mx-auto mb-4 shadow-card"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).outerHTML = `<div class="w-36 h-36 sm:w-44 sm:h-44 rounded-2xl mx-auto mb-4 flex items-center justify-center text-6xl bg-surface-2">${m.emoji}</div>`;
+                  }}
+                />
+                <h4 className={`font-display font-bold text-lg mb-1.5 ${active ? `text-${m.accent}` : ""}`}>{m.title}</h4>
+                <p className="text-sm text-text-secondary leading-relaxed">{m.desc}</p>
+              </button>
+            );
+          })}
+        </div>
+      </motion.div>
+    </div>
   );
 }
 
@@ -81,6 +116,13 @@ export default function ChatPage() {
   const [mode, setMode] = useState<ChatMode>(() => {
     try { return localStorage.getItem("linguafast_chat_mode") === "teacher" ? "teacher" : "immersion"; } catch { return "immersion"; }
   });
+  const [modeModalOpen, setModeModalOpen] = useState(false);
+  // Дауыс: енгізу (микрофон) + жауап (TTS)
+  const [micOn, setMicOn] = useState(false);
+  const [voiceReply, setVoiceReply] = useState(() => {
+    try { return localStorage.getItem("linguafast_chat_voice") === "1"; } catch { return false; }
+  });
+  const recognitionRef = useRef<RecognitionController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const memoryRef = useRef<string>("");
 
@@ -145,6 +187,40 @@ export default function ChatPage() {
     setMode(m);
     try { localStorage.setItem("linguafast_chat_mode", m); } catch { /* */ }
   };
+
+  // Дауысты жауапты қосу/өшіру
+  const toggleVoiceReply = () => {
+    const next = !voiceReply;
+    setVoiceReply(next);
+    if (!next) stopSpeaking();
+    try { localStorage.setItem("linguafast_chat_voice", next ? "1" : "0"); } catch { /* */ }
+  };
+
+  // Микрофонмен жазу: сөйлеген мәтін енгізу өрісіне түседі
+  const toggleMic = () => {
+    if (micOn) {
+      recognitionRef.current?.stop();
+      setMicOn(false);
+      return;
+    }
+    stopSpeaking();
+    const recLang = learningLang === "zh" ? "zh-CN" : "en-US";
+    const rec = createRecognition(
+      (text) => setInput(text),
+      () => setMicOn(false),
+      () => setMicOn(false),
+      recLang
+    );
+    if (rec) {
+      recognitionRef.current = rec;
+      setInput("");
+      rec.start();
+      setMicOn(true);
+    }
+  };
+
+  // Беттен шыққанда микрофон мен дауысты тоқтату
+  useEffect(() => () => { recognitionRef.current?.stop(); stopSpeaking(); }, []);
 
   // ── Жаңа чат ──
   const startNewChat = () => {
@@ -212,6 +288,11 @@ export default function ChatPage() {
       setMessages((prev) => [...prev, { id: "m" + Date.now(), role: "model", text: res.text, time: now() }]);
       setBotState("happy");
       setTimeout(() => setBotState("idle"), 2500);
+
+      // Дауысты жауап қосулы болса — жауапты дауыстап оқу
+      if (voiceReply) {
+        speak(stripMarkdown(res.text), learningLang === "zh" ? "zh" : "en");
+      }
 
       // Жадыны фонда жаңарту — әр 6 қолданушы хабарламасы сайын
       const userCount = history.filter((m) => m.role === "user").length + 1;
@@ -372,16 +453,48 @@ export default function ChatPage() {
         </>
       )}
 
-      {/* Режим ауыстырғышы: Иммерсия / Мұғалім (суретпен) */}
+      {/* Режим + дауыс баптаулары */}
       <div className="flex items-center gap-2 py-2.5 shrink-0">
-        <ModeButton mode="immersion" active={mode === "immersion"} onClick={() => changeMode("immersion")} />
-        <ModeButton mode="teacher" active={mode === "teacher"} onClick={() => changeMode("teacher")} />
+        {/* Режим батырмасы → үлкен таңдау терезесі */}
+        <button
+          onClick={() => setModeModalOpen(true)}
+          className="flex items-center gap-2 px-3 py-2 rounded-btn border border-border bg-surface hover:bg-surface-2 transition-all"
+        >
+          <SlidersHorizontal className="w-4 h-4 text-accent-purple" />
+          <span className="text-xs font-medium">
+            {lang === "kk" ? "Режим:" : "Mode:"}{" "}
+            <span className={mode === "immersion" ? "text-accent-blue font-semibold" : "text-accent-green font-semibold"}>
+              {mode === "immersion" ? t("chat.modeImmersion") : t("chat.modeTeacher")}
+            </span>
+          </span>
+        </button>
+
+        {/* Дауысты жауап қосқышы */}
+        <button
+          onClick={toggleVoiceReply}
+          title={t("chat.voiceReply")}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-btn border transition-all text-xs font-medium ${
+            voiceReply
+              ? "border-accent-gold/50 bg-accent-gold/10 text-accent-gold"
+              : "border-border bg-surface text-text-secondary hover:bg-surface-2"
+          }`}
+        >
+          {voiceReply ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+          <span className="hidden sm:inline">{t("chat.voiceReply")}</span>
+        </button>
       </div>
+
+      {/* Режим таңдау терезесі */}
+      <AnimatePresence>
+        {modeModalOpen && (
+          <ModePickerModal current={mode} onSelect={changeMode} onClose={() => setModeModalOpen(false)} />
+        )}
+      </AnimatePresence>
 
       {/* Хабарламалар */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto py-5 space-y-4">
         {messages.map((m) => (
-          <MessageBubble key={m.id} message={m} onRetry={m.error && lastFailed ? () => send(lastFailed) : undefined} />
+          <MessageBubble key={m.id} message={m} speakLang={learningLang === "zh" ? "zh" : "en"} onRetry={m.error && lastFailed ? () => send(lastFailed) : undefined} />
         ))}
         {loading && (
           <div className="flex items-start gap-3">
@@ -417,16 +530,29 @@ export default function ChatPage() {
 
       {/* Енгізу өрісі */}
       <div className="shrink-0 pt-3">
-        <div className="card p-2 flex items-center gap-2 border-border focus-within:border-accent-blue/40 transition-all">
+        <div className={`card p-2 flex items-center gap-2 transition-all ${micOn ? "border-accent-red/50" : "border-border focus-within:border-accent-blue/40"}`}>
+          {/* Дауыспен жазу */}
+          {isSpeechRecognitionSupported() && (
+            <button
+              onClick={toggleMic}
+              title={t("chat.voiceInput")}
+              className={`relative w-10 h-10 rounded-btn flex items-center justify-center shrink-0 transition-all ${
+                micOn ? "bg-accent-red text-white" : "bg-surface-2 text-text-secondary hover:text-accent-blue"
+              }`}
+            >
+              {micOn && <span className="absolute inset-0 rounded-btn bg-accent-red/40 animate-ping" />}
+              <Mic className="w-4 h-4 relative" />
+            </button>
+          )}
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send(input)}
-            placeholder={t("chat.placeholder")}
-            className="flex-1 bg-transparent px-3 py-2 text-text-primary placeholder:text-text-muted focus:outline-none"
+            placeholder={micOn ? t("chat.listening") : t("chat.placeholder")}
+            className="flex-1 bg-transparent px-3 py-2 text-text-primary placeholder:text-text-muted focus:outline-none min-w-0"
           />
           <button
-            onClick={() => send(input)}
+            onClick={() => { if (micOn) toggleMic(); send(input); }}
             disabled={!input.trim() || loading}
             className="w-10 h-10 rounded-btn bg-accent-blue text-white flex items-center justify-center shrink-0 disabled:opacity-40 hover:brightness-110 transition-all"
           >
@@ -439,7 +565,7 @@ export default function ChatPage() {
 }
 
 // ── Хабарлама көпіршігі ──
-function MessageBubble({ message, onRetry }: { message: DisplayMessage; onRetry?: () => void }) {
+function MessageBubble({ message, speakLang = "en", onRetry }: { message: DisplayMessage; speakLang?: "en" | "zh"; onRetry?: () => void }) {
   const { t } = useLang();
   const isUser = message.role === "user";
 
@@ -472,6 +598,16 @@ function MessageBubble({ message, onRetry }: { message: DisplayMessage; onRetry?
         </div>
         <div className="flex items-center gap-2 mt-1">
           <p className="text-[10px] text-text-muted">{message.time}</p>
+          {/* Жауапты дауыстап оқу */}
+          {!message.error && (
+            <button
+              onClick={() => speak(stripMarkdown(message.text), speakLang)}
+              title={t("chat.speakReply")}
+              className="text-text-muted hover:text-accent-blue transition-colors"
+            >
+              <Volume2 className="w-3.5 h-3.5" />
+            </button>
+          )}
           {message.error && onRetry && (
             <button
               onClick={onRetry}
