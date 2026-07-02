@@ -82,7 +82,11 @@ export default function VideoPlayer({ lesson, onShowTranscript, onAddWord }: Pro
   // Басқару
   const togglePlay = () => {
     if (!playerRef.current) return;
-    playing ? playerRef.current.pauseVideo() : playerRef.current.playVideo();
+    if (playing) {
+      playerRef.current.pauseVideo();
+    } else {
+      playerRef.current.playVideo();
+    }
   };
   const rewind = () => {
     if (!playerRef.current) return;

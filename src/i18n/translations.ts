@@ -303,6 +303,7 @@ export const translations = {
   "dash.continueLesson": { kk: "Сабақты жалғастыру", en: "Continue lesson" },
   "dash.weeklyGoal": { kk: "Апталық мақсат", en: "Weekly goal" },
   "dash.lessonsCompleted": { kk: "сабақ аяқталды", en: "lessons completed" },
+  "dash.daysActive": { kk: "күн белсенді", en: "days active" },
   "dash.currentLesson": { kk: "Ағымдағы сабақ", en: "Current lesson" },
   "dash.lessonProgress": { kk: "Сабақ барысы", en: "Lesson progress" },
 
