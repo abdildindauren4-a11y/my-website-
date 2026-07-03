@@ -142,7 +142,8 @@ export async function sendChatMessage(
   uiLang: "kk" | "en",
   level: string = "intermediate",
   mode: ChatMode = "immersion",
-  memory: string = ""
+  memory: string = "",
+  voiceMode: boolean = false
 ): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
   // Кілтті әр шақыруда тексереміз (баптаулардан өзгеруі мүмкін)
   const key = getGeminiKey();
@@ -169,10 +170,18 @@ export async function sendChatMessage(
         "═══════════════════════════════════════\n" + memory;
     }
 
-    // Форматтау: жауаптар жеңіл Markdown-мен келеді (чат оны әдемі көрсетеді)
-    fullSystemPrompt +=
-      "\n\nFORMATTING: You may use light Markdown — **bold** for key words/corrections, " +
-      "bullet lists for options, `code style` for words being analysed. Keep it minimal and clean.";
+    // Форматтау: дауыс режимінде — таза ауызекі мәтін, әдетте — жеңіл Markdown
+    if (voiceMode) {
+      fullSystemPrompt +=
+        "\n\nVOICE CONVERSATION MODE: The student is TALKING to you by voice and will HEAR your reply " +
+        "spoken aloud. Reply in plain conversational text ONLY — no markdown, no asterisks, no headings, " +
+        "no lists, no emojis, no brackets with notes. Speak like a real person: 1-3 short, natural sentences. " +
+        "Always end with a short question to keep the conversation going.";
+    } else {
+      fullSystemPrompt +=
+        "\n\nFORMATTING: You may use light Markdown — **bold** for key words/corrections, " +
+        "bullet lists for options, `code style` for words being analysed. Keep it minimal and clean.";
+    }
 
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash", // қазіргі тұрақты тегін модель (1.5 және 2.0 жабылған)
