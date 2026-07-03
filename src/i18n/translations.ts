@@ -493,6 +493,16 @@ export const translations = {
   "chat.voiceInput": { kk: "Дауыспен жазу", en: "Voice input" },
   "chat.listening": { kk: "Тыңдап тұрмын… (қазақша/ағылшынша/қытайша сөйлей беріңіз)", en: "Listening… (speak Kazakh, English or Chinese)" },
   "chat.transcribing": { kk: "Дауыс танылуда…", en: "Transcribing…" },
+  "voice.button": { kk: "Дауыс", en: "Voice" },
+  "voice.title": { kk: "Дауыспен сөйлесу", en: "Voice conversation" },
+  "voice.tapToSpeak": { kk: "Сөйлеу үшін басыңыз", en: "Tap to speak" },
+  "voice.listening": { kk: "Тыңдап тұрмын…", en: "Listening…" },
+  "voice.thinking": { kk: "Ойлануда…", en: "Thinking…" },
+  "voice.speaking": { kk: "Жауап беруде…", en: "Speaking…" },
+  "voice.hint": { kk: "Домалақты басып сөйлеңіз, AI дауыспен жауап береді", en: "Tap the orb and speak — the AI replies with voice" },
+  "voice.hintStop": { kk: "Айтып болған соң қайта басыңыз", en: "Tap again when you're done" },
+  "voice.micError": { kk: "Микрофонға қол жеткізілмеді", en: "Could not access the microphone" },
+  "voice.noSpeech": { kk: "Дауыс естілмеді, қайталап көріңіз", en: "No speech detected, try again" },
   "chat.speakReply": { kk: "Дауыстап оқу", en: "Read aloud" },
 
   // ── Сөздік (Dictionary + SRS) ──

@@ -18,19 +18,22 @@ import { createRecognition, isSpeechRecognitionSupported, type RecognitionContro
 import { speakSmart, stopSpeaking } from "@/lib/speech";
 import AnimatedBot, { type BotState } from "@/components/chat/AnimatedBot";
 import Markdown from "@/components/chat/Markdown";
+import VoiceMode from "@/components/chat/VoiceMode";
 import { knowledgeStats } from "@/lib/knowledge";
 import {
   Send, Key, ExternalLink, AlertCircle, RotateCcw,
   History, MessageSquarePlus, Trash2, Brain, X,
-  Mic, Volume2, VolumeX, SlidersHorizontal, Check,
+  Mic, Volume2, VolumeX, SlidersHorizontal, Check, AudioLines,
 } from "lucide-react";
 
-// Markdown белгілерін алып тастау (дауыстап оқу үшін таза мәтін)
+// Markdown белгілері мен эмодзиді алып тастау (дауыстап оқу үшін таза мәтін)
 function stripMarkdown(text: string): string {
   return text
     .replace(/\*\*|\*|`|_{1,2}/g, "")
     .replace(/^#+\s*/gm, "")
-    .replace(/^\s*[-•]\s*/gm, "");
+    .replace(/^\s*[-•]\s*/gm, "")
+    .replace(/\u{FE0F}/gu, "")
+    .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}]/gu, "");
 }
 
 type DisplayMessage = ChatMsg;
@@ -118,6 +121,7 @@ export default function ChatPage() {
     try { return localStorage.getItem("linguafast_chat_mode") === "teacher" ? "teacher" : "immersion"; } catch { return "immersion"; }
   });
   const [modeModalOpen, setModeModalOpen] = useState(false);
+  const [voiceModeOpen, setVoiceModeOpen] = useState(false); // толық экран дауыс режимі
   // Дауыс: енгізу (микрофон) + жауап (TTS)
   const [micOn, setMicOn] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
@@ -295,9 +299,11 @@ export default function ChatPage() {
     }
   };
 
-  const send = async (text: string) => {
+  // Хабарлама жіберу. viaVoice=true — дауыс режимінен (жауап мәтіні қайтарылады,
+  // оқуды VoiceMode өзі басқарады, «жазып жатыр» кідірісі қосылмайды).
+  const send = async (text: string, viaVoice = false): Promise<string | null> => {
     const trimmed = text.trim();
-    if (!trimmed || loading) return;
+    if (!trimmed || loading) return null;
 
     setLastFailed(null);
     const userMsg: DisplayMessage = { id: "u" + Date.now(), role: "user", text: trimmed, time: now() };
@@ -312,10 +318,10 @@ export default function ChatPage() {
 
     const learnLangName = learningLang === "zh" ? "Chinese" : "English";
     const t0 = Date.now();
-    const res = await sendChatMessage(history, trimmed, learnLangName, lang, prefs.level, mode, memoryRef.current);
-    // Кемінде 1,5 секунд «жазып жатыр» анимациясы көрінсін
+    const res = await sendChatMessage(history, trimmed, learnLangName, lang, prefs.level, mode, memoryRef.current, viaVoice);
+    // Кемінде 1,5 секунд «жазып жатыр» анимациясы көрінсін (дауыс режимінде керек емес)
     const elapsed = Date.now() - t0;
-    if (elapsed < 1500) await new Promise((r) => setTimeout(r, 1500 - elapsed));
+    if (!viaVoice && elapsed < 1500) await new Promise((r) => setTimeout(r, 1500 - elapsed));
     setLoading(false);
 
     if (res.ok) {
@@ -323,8 +329,8 @@ export default function ChatPage() {
       setBotState("happy");
       setTimeout(() => setBotState("idle"), 2500);
 
-      // Дауысты жауап қосулы болса — әр тілдік бөлікті өз дауысымен оқу
-      if (voiceReply) {
+      // Дауысты жауап қосулы болса — оқу (дауыс режимі оқуды өзі басқарады)
+      if (voiceReply && !viaVoice) {
         speakSmart(stripMarkdown(res.text));
       }
 
@@ -339,6 +345,7 @@ export default function ChatPage() {
           }
         });
       }
+      return res.text;
     } else {
       const errMsg =
         res.error === "quota" ? t("chat.errorQuota") :
@@ -347,6 +354,7 @@ export default function ChatPage() {
       setMessages((prev) => [...prev, { id: "e" + Date.now(), role: "model", text: errMsg, time: now(), error: true }]);
       setLastFailed(trimmed);
       setBotState("idle");
+      return null;
     }
   };
 
@@ -421,8 +429,19 @@ export default function ChatPage() {
             </div>
           </div>
         </div>
-        {/* Жаңа чат + тарих */}
+        {/* Дауыс режимі + жаңа чат + тарих */}
         <div className="flex items-center gap-1 shrink-0">
+          {/* Толық экран дауыспен сөйлесу */}
+          {isMicSupported() && (
+            <button
+              onClick={() => setVoiceModeOpen(true)}
+              className="flex items-center gap-1.5 text-xs font-semibold text-white bg-gradient-to-br from-accent-green to-accent-blue transition-all px-3 py-2 rounded-btn hover:brightness-110 shadow-soft"
+              title={t("voice.title")}
+            >
+              <AudioLines className="w-4 h-4" />
+              <span className="hidden md:inline">{t("voice.button")}</span>
+            </button>
+          )}
           <button
             onClick={startNewChat}
             className="flex items-center gap-1.5 text-xs font-medium text-text-secondary hover:text-accent-blue transition-colors px-2.5 py-2 rounded-btn hover:bg-surface-2"
@@ -522,6 +541,16 @@ export default function ChatPage() {
       <AnimatePresence>
         {modeModalOpen && (
           <ModePickerModal current={mode} onSelect={changeMode} onClose={() => setModeModalOpen(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* Толық экран дауыспен сөйлесу режимі */}
+      <AnimatePresence>
+        {voiceModeOpen && (
+          <VoiceMode
+            onSend={(text) => send(text, true)}
+            onClose={() => setVoiceModeOpen(false)}
+          />
         )}
       </AnimatePresence>
 
