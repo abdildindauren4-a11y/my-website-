@@ -86,6 +86,23 @@ export function stopSpeaking(): void {
   if (isSpeechSupported()) window.speechSynthesis.cancel();
 }
 
+// ── Курс мысалдарын оқу ──
+// Қытай курсында мәтін аралас келеді: "mā 妈 (1st) = mother".
+// Пиньинді (латын) қытай/ағылшын дауысымен оқу мүлде қате естіледі,
+// сондықтан ИЕРОГЛИФ бөлігін ғана қытай дауысымен оқимыз.
+export function speakLesson(text: string, courseLang: "en" | "zh"): void {
+  if (courseLang === "zh") {
+    const hanzi = text.match(/[一-鿿㐀-䶿]+/g);
+    if (hanzi && hanzi.length > 0) {
+      speak(hanzi.join("，"), "zh"); // тек қытайша бөлігі — дұрыс айтылым
+      return;
+    }
+    speak(text, "zh");
+    return;
+  }
+  speak(text, "en");
+}
+
 // ═══════════════════════════════════════════
 // КӨПТІЛДІ ОҚУ — мәтінді тілдік бөліктерге бөліп,
 // әрқайсысын өз дауысымен оқиды:

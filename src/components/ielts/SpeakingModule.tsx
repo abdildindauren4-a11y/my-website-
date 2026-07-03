@@ -9,7 +9,7 @@ import {
   speakingTests, evaluateSpeaking, createRecognition, isSpeechRecognitionSupported,
   type SpeakingTest, type SpeakingEvaluation, type RecognitionController,
 } from "@/lib/ieltsSpeaking";
-import { isGeminiConfigured } from "@/lib/gemini";
+import { isGeminiConfigured, transcribeAudio } from "@/lib/gemini";
 import { startMicRecording, isMicSupported, type MicRecorder, type MicError } from "@/lib/micRecorder";
 import { bandDescription } from "@/types/ielts";
 import EvaluationResult from "./EvaluationResult";
@@ -33,6 +33,7 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
   const [recSeconds, setRecSeconds] = useState(0);
   const [micLevel, setMicLevel] = useState(0);          // нақты дауыс деңгейі (0..1)
   const [audioUrl, setAudioUrl] = useState<string | null>(null); // жазылған жауап
+  const [transcribing, setTranscribing] = useState(false); // Gemini дауысты тануда
   const recognitionRef = useRef<RecognitionController | null>(null);
   const micRef = useRef<MicRecorder | null>(null);
   const levelRafRef = useRef<number>(0);
@@ -94,19 +95,32 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
 
   const toggleRecording = async () => {
     if (recording) {
-      // ── Тоқтату: тану + аудио жазба ──
+      // ── Тоқтату ──
       setRecording(false);
       stopLevelLoop();
       recognitionRef.current?.stop();
+      recognitionRef.current = null;
       const rec = await micRef.current?.stop();
       micRef.current = null;
-      if (rec) setAudioUrl(rec.url);
+      if (rec) {
+        setAudioUrl(rec.url);
+        // Gemini кілті болса — жазбаны AI таниды (браузер тануынан дәлірек,
+        // әрі микрофонды бір өзі қолданады: iPhone-дағы қақтығыс жоқ)
+        if (isGeminiConfigured()) {
+          setTranscribing(true);
+          const text = await transcribeAudio(rec.blob, rec.mimeType);
+          setTranscribing(false);
+          if (text) setTranscript((prev) => (prev ? prev + " " : "") + text);
+        }
+      }
     } else {
       // ── Бастау ──
       setError(null);
       clearRecording();
 
-      // 1) Нақты аудио жазу (тыңдап тексеру үшін)
+      const useGemini = isGeminiConfigured();
+
+      // 1) Нақты аудио жазу (тыңдап тексеру + Gemini тану үшін)
       if (isMicSupported()) {
         try {
           micRef.current = await startMicRecording();
@@ -118,8 +132,9 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
         }
       }
 
-      // 2) Сөзді тану (transcript — AI бағалауға)
-      if (isSpeechRecognitionSupported()) {
+      // 2) Браузер тануы — ТЕК Gemini жоқ болғанда.
+      // (Екеуін қатар қосу iPhone/Safari-де микрофон қақтығысын тудырады)
+      if (!(useGemini && micRef.current) && isSpeechRecognitionSupported()) {
         const rec = createRecognition(
           (text) => setTranscript(text),
           () => { /* тоқтағаны toggleRecording-те өңделеді */ },
@@ -314,6 +329,10 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
                   </span>
                   <span className="text-[11px] text-text-muted">{t("speak.tapToStop")}</span>
                 </div>
+              ) : transcribing ? (
+                <p className="text-sm font-medium text-accent-blue flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" /> {t("chat.transcribing")}
+                </p>
               ) : (
                 <p className="text-sm font-medium">{transcript ? t("speak.tapToContinue") : t("speak.startRecording")}</p>
               )}
@@ -354,7 +373,7 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
           </p>
         </div>
 
-        <button onClick={nextQuestion} disabled={!transcript.trim()} className="btn-primary w-full disabled:opacity-40">
+        <button onClick={nextQuestion} disabled={!transcript.trim() || transcribing} className="btn-primary w-full disabled:opacity-40">
           {qIdx + 1 >= (test?.questions.length || 0) ? t("speak.finish") : t("speak.nextQuestion")}
         </button>
       </div>
