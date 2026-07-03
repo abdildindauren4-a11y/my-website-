@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
-import { speak } from "@/lib/speech";
+import { speakLesson } from "@/lib/speech";
 import { shuffle } from "@/lib/gamesData";
 import { playMatch, playWrong, playTap } from "@/lib/soundFX";
 import type { Exercise } from "@/types/course";
@@ -12,10 +12,11 @@ import { Volume2, Check, X, ArrowRight, Lightbulb } from "lucide-react";
 
 interface Props {
   exercise: Exercise;
+  courseLang?: "en" | "zh"; // курс тілі — дұрыс дауыспен оқу үшін
   onAnswer: (correct: boolean) => void;
 }
 
-export default function ExercisePlayer({ exercise, onAnswer }: Props) {
+export default function ExercisePlayer({ exercise, courseLang = "en", onAnswer }: Props) {
   const { t, lang } = useLang();
   const [answered, setAnswered] = useState(false);
   const [correct, setCorrect] = useState(false);
@@ -64,7 +65,7 @@ export default function ExercisePlayer({ exercise, onAnswer }: Props) {
     return (
       <div>
         <div className="card p-8 text-center mb-4 bg-gradient-to-br from-accent-green/5 to-accent-blue/5">
-          <button onClick={() => speak(exercise.term!, "en")} className="inline-flex items-center gap-2 mb-2 hover:text-accent-blue transition-colors">
+          <button onClick={() => speakLesson(exercise.term!, courseLang)} className="inline-flex items-center gap-2 mb-2 hover:text-accent-blue transition-colors">
             <span className="text-3xl font-display font-bold">{exercise.term}</span>
             <Volume2 className="w-6 h-6 text-text-muted" />
           </button>
@@ -127,7 +128,7 @@ export default function ExercisePlayer({ exercise, onAnswer }: Props) {
         <div className="card p-6 mb-4">
           <p className="font-medium text-center mb-1">{displayPrompt}</p>
           {exercise.type === "translation" && exercise.term && (
-            <button onClick={() => speak(exercise.term!, "en")} className="mx-auto flex items-center gap-1 text-sm text-accent-blue">
+            <button onClick={() => speakLesson(exercise.term!, courseLang)} className="mx-auto flex items-center gap-1 text-sm text-accent-blue">
               <Volume2 className="w-4 h-4" /> {exercise.term}
             </button>
           )}

@@ -244,7 +244,7 @@ export default function CoursesPage() {
 
         {/* Сабақ ойнатқыш */}
         {activeLesson && (
-          <LessonPlayer lesson={activeLesson} onClose={() => setActiveLesson(null)} onComplete={() => setActiveLesson(null)} />
+          <LessonPlayer lesson={activeLesson} courseLang={course.lang} onClose={() => setActiveLesson(null)} onComplete={() => setActiveLesson(null)} />
         )}
       </div>
     );

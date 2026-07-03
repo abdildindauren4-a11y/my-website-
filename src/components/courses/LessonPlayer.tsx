@@ -8,18 +8,19 @@ import { useProgress } from "@/store/progressStore";
 import { useCourseProgress } from "@/store/courseStore";
 import { celebrate } from "@/lib/celebrate";
 import { playWin } from "@/lib/soundFX";
-import { speak } from "@/lib/speech";
+import { speakLesson } from "@/lib/speech";
 import ExercisePlayer from "./ExercisePlayer";
 import type { Lesson } from "@/types/course";
 import { X, BookOpen, Volume2, Trophy, ArrowRight, Star } from "lucide-react";
 
 interface Props {
   lesson: Lesson;
+  courseLang?: "en" | "zh"; // курс тілі — дұрыс дауыспен оқу үшін
   onClose: () => void;
   onComplete: () => void;
 }
 
-export default function LessonPlayer({ lesson, onClose, onComplete }: Props) {
+export default function LessonPlayer({ lesson, courseLang = "en", onClose, onComplete }: Props) {
   const { lang } = useLang();
   const { addXP } = useProgress();
   const { completeLesson } = useCourseProgress();
@@ -114,7 +115,7 @@ export default function LessonPlayer({ lesson, onClose, onComplete }: Props) {
                   <p className="font-medium">{ex.text}</p>
                   <p className="text-sm text-text-secondary">{ex.translation}</p>
                 </div>
-                <button onClick={() => speak(ex.text, "en")} className="text-text-muted hover:text-accent-blue shrink-0">
+                <button onClick={() => speakLesson(ex.text, courseLang)} className="text-text-muted hover:text-accent-blue shrink-0">
                   <Volume2 className="w-5 h-5" />
                 </button>
               </motion.div>
@@ -194,7 +195,7 @@ export default function LessonPlayer({ lesson, onClose, onComplete }: Props) {
         {/* Жаттығу */}
         <AnimatePresence mode="wait">
           <motion.div key={exerciseIdx} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-            <ExercisePlayer exercise={exercise} onAnswer={handleAnswer} />
+            <ExercisePlayer exercise={exercise} courseLang={courseLang} onAnswer={handleAnswer} />
           </motion.div>
         </AnimatePresence>
       </div>
