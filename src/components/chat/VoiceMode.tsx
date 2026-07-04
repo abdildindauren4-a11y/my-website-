@@ -8,7 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { startMicRecording, type MicRecorder } from "@/lib/micRecorder";
 import { transcribeAudio } from "@/lib/gemini";
-import { speakSmart, stopSpeaking } from "@/lib/speech";
+import { generateSpeech } from "@/lib/geminiTTS";
+import { speakSmart, stopSpeaking, unlockSpeech } from "@/lib/speech";
 import { X, Mic } from "lucide-react";
 
 type Phase = "idle" | "listening" | "thinking" | "speaking";
@@ -37,8 +38,49 @@ export default function VoiceMode({ onSend, onClose }: Props) {
   const micRef = useRef<MicRecorder | null>(null);
   const rafRef = useRef<number>(0);
   const phaseRef = useRef<Phase>("idle");
+  // Web Audio — iOS-та сенімді ойнату үшін (speechSynthesis емес)
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const sourceRef = useRef<AudioBufferSourceNode | null>(null);
 
   const setPh = (p: Phase) => { phaseRef.current = p; setPhase(p); };
+
+  // AudioContext-ті нақты басу кезінде ашу/жалғастыру (iOS талабы)
+  const ensureAudioCtx = () => {
+    if (!audioCtxRef.current) {
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      if (AC) audioCtxRef.current = new AC();
+    }
+    if (audioCtxRef.current?.state === "suspended") audioCtxRef.current.resume();
+    return audioCtxRef.current;
+  };
+
+  // Ағымдағы ойнап жатқан аудионы тоқтату
+  const stopAudio = () => {
+    try { sourceRef.current?.stop(); } catch { /* */ }
+    sourceRef.current = null;
+    stopSpeaking();
+  };
+
+  // Gemini дауысын ойнату (сәтсіз болса — браузер TTS-ке қайту)
+  const playReply = async (spoken: string) => {
+    const buf = await generateSpeech(spoken);
+    const ctx = audioCtxRef.current;
+    if (buf && ctx) {
+      try {
+        const audioBuf = await ctx.decodeAudioData(buf.slice(0));
+        if (phaseRef.current !== "speaking") return;
+        const src = ctx.createBufferSource();
+        src.buffer = audioBuf;
+        src.connect(ctx.destination);
+        src.onended = () => { if (phaseRef.current === "speaking") setPh("idle"); };
+        sourceRef.current = src;
+        src.start();
+        return;
+      } catch { /* декод сәтсіз — төмендегі fallback */ }
+    }
+    // Қосалқы: браузер TTS
+    speakSmart(spoken, () => { if (phaseRef.current === "speaking") setPh("idle"); });
+  };
 
   // Микрофон деңгейін тірі көрсету
   const levelLoop = useCallback(() => {
@@ -77,26 +119,20 @@ export default function VoiceMode({ onSend, onClose }: Props) {
     const reply = await onSend(text);
     if (!reply) { setPh("idle"); return; }
 
-    // Жауапты дауыстап оқу
+    // Жауапты дауыстап оқу (Gemini дауысы — iOS-та сенімді)
     const spoken = clean(reply);
     setCaption(spoken);
     setPh("speaking");
-    speakSmart(spoken);
-
-    // Оқу аяқталғанын бақылау → idle-ге қайту
-    const check = setInterval(() => {
-      if (!window.speechSynthesis.speaking) {
-        clearInterval(check);
-        if (phaseRef.current === "speaking") setPh("idle");
-      }
-    }, 300);
+    playReply(spoken);
   };
 
   // Домалақты басу — күйге қарай әрекет
   const handleTap = () => {
+    ensureAudioCtx(); // iOS: нақты басу — аудио жүйесін ашамыз
+    unlockSpeech();   // қосалқы браузер TTS үшін
     if (phase === "idle") startListening();
     else if (phase === "listening") stopAndRespond();
-    else if (phase === "speaking") { stopSpeaking(); setPh("idle"); } // үзіп, қайта сөйлеуге дайын
+    else if (phase === "speaking") { stopAudio(); setPh("idle"); } // үзіп, қайта сөйлеуге дайын
     // thinking кезінде — күтеміз
   };
 
@@ -104,7 +140,8 @@ export default function VoiceMode({ onSend, onClose }: Props) {
   useEffect(() => () => {
     cancelAnimationFrame(rafRef.current);
     micRef.current?.cancel();
-    stopSpeaking();
+    stopAudio();
+    audioCtxRef.current?.close().catch(() => { /* */ });
   }, []);
 
   // Күй мәтіні

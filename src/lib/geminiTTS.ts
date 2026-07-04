@@ -56,6 +56,38 @@ export function isStudioVoiceAvailable(): boolean {
   return !!getGeminiKey();
 }
 
+// ── Жалғыз мәтінді дауысқа айналдыру (чат дауыс режимі) ──
+// Тілді автоматты таниды (қазақша/ағылшынша/қытайша). WAV ArrayBuffer қайтарады.
+// iOS-та браузердің speechSynthesis-і сенімсіз, сондықтан нағыз аудио қолданамыз.
+export async function generateSpeech(text: string): Promise<ArrayBuffer | null> {
+  const apiKey = getGeminiKey();
+  const clean = text.trim();
+  if (!apiKey || !clean) return null;
+
+  try {
+    const res = await fetch(`${API_URL}?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: `Say this naturally in a warm, friendly voice: ${clean}` }] }],
+        generationConfig: {
+          responseModalities: ["AUDIO"],
+          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: FEMALE_VOICE } } },
+        },
+      }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const part = data.candidates?.[0]?.content?.parts?.[0];
+    const b64 = part?.inlineData?.data;
+    if (!b64) return null;
+    const wav = pcmToWav(b64, rateFromMime(part.inlineData.mimeType));
+    return await wav.arrayBuffer();
+  } catch {
+    return null;
+  }
+}
+
 // ── Бөлім аудиосын жасау ──
 // Диалог: сөйлеушілерге бөлек дауыс. Монолог: бір дауыс.
 // Сәтті болса — ойнатуға дайын object URL, қате болса null.

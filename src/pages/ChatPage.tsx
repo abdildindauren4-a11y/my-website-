@@ -15,7 +15,7 @@ import {
   type ChatSession, type ChatMsg,
 } from "@/lib/chatStore";
 import { createRecognition, isSpeechRecognitionSupported, type RecognitionController } from "@/lib/ieltsSpeaking";
-import { speakSmart, stopSpeaking } from "@/lib/speech";
+import { speakSmart, stopSpeaking, unlockSpeech } from "@/lib/speech";
 import AnimatedBot, { type BotState } from "@/components/chat/AnimatedBot";
 import Markdown from "@/components/chat/Markdown";
 import VoiceMode from "@/components/chat/VoiceMode";
@@ -199,7 +199,8 @@ export default function ChatPage() {
   const toggleVoiceReply = () => {
     const next = !voiceReply;
     setVoiceReply(next);
-    if (!next) stopSpeaking();
+    if (next) unlockSpeech(); // iOS: осы басуда дауыс жүйесін оятамыз
+    else stopSpeaking();
     try { localStorage.setItem("linguafast_chat_voice", next ? "1" : "0"); } catch { /* */ }
   };
 
