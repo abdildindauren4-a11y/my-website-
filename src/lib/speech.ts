@@ -86,6 +86,22 @@ export function stopSpeaking(): void {
   if (isSpeechSupported()) window.speechSynthesis.cancel();
 }
 
+// ── Дауыс жүйесін «ояту» ──
+// iOS/Safari (әрі кейбір мобиль браузерлер) speechSynthesis-ті ТЕК қолданушы
+// әрекетінде (басу) іске қосуға рұқсат етеді. Async оқу (транскрипциядан кейін)
+// бөгеледі. Сондықтан НАҚТЫ басу кезінде бір рет үнсіз оқу арқылы ашып қоямыз.
+let speechUnlocked = false;
+export function unlockSpeech(): void {
+  if (speechUnlocked || !isSpeechSupported()) return;
+  try {
+    loadVoices();
+    const u = new SpeechSynthesisUtterance(" ");
+    u.volume = 0;
+    window.speechSynthesis.speak(u);
+    speechUnlocked = true;
+  } catch { /* ignore */ }
+}
+
 // ── Курс мысалдарын оқу ──
 // Қытай курсында мәтін аралас келеді: "mā 妈 (1st) = mother".
 // Пиньинді (латын) қытай/ағылшын дауысымен оқу мүлде қате естіледі,
@@ -170,12 +186,15 @@ function pickCyrillicVoice(): SpeechSynthesisVoice | null {
 
 // Аралас тілді мәтінді мәнерлеп оқу — әр бөлік өз дауысымен.
 // speechSynthesis кезекті өзі басқарады (бөліктер бірінен соң бірі оқылады).
-export function speakSmart(text: string): void {
-  if (!isSpeechSupported() || !text.trim()) return;
+// onDone — соңғы бөлік оқылып болғанда шақырылады (дауыс режимі үшін).
+export function speakSmart(text: string, onDone?: () => void): void {
+  if (!isSpeechSupported() || !text.trim()) { onDone?.(); return; }
   window.speechSynthesis.cancel();
 
   const segments = splitByScript(text);
-  for (const seg of segments) {
+  if (segments.length === 0) { onDone?.(); return; }
+
+  segments.forEach((seg, i) => {
     const u = new SpeechSynthesisUtterance(seg.text);
     if (seg.script === "han") {
       const v = pickBestVoice("zh");
@@ -192,6 +211,11 @@ export function speakSmart(text: string): void {
     }
     u.pitch = 1.0;
     u.volume = 1.0;
+    // Соңғы бөлік аяқталғанда — onDone
+    if (i === segments.length - 1 && onDone) {
+      u.onend = onDone;
+      u.onerror = onDone;
+    }
     window.speechSynthesis.speak(u); // кезекке қосылады
-  }
+  });
 }

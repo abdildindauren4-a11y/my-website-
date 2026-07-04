@@ -47,8 +47,38 @@ export const geminiConfigured = isGeminiConfigured();
 // Тіл үйретудің ең күшті әдістеріне негізделген: Krashen, Swain, Vygotsky, SRS.
 export type ChatMode = "immersion" | "teacher";
 
+// ── Сайт туралы білім қоры ──
+// AI осы арқылы LinguaFast-тың мүмкіндіктерін біледі әрі қолданушыға
+// сайтты қалай пайдалануды ҚАЗАҚША түсіндіре алады.
+const SITE_GUIDE = `
+═══════════════════════════════════════
+ABOUT THE APP — you are the built-in assistant of "LinguaFast"
+═══════════════════════════════════════
+LinguaFast is a language-learning web app for Kazakh speakers (learn English or Chinese). Its main sections (in the left sidebar):
+- Басты бет (Dashboard): күнделікті мақсат, XP деңгейі, серия (streak), жалғастыратын курс.
+- Курстар (Courses): құрылымды сабақтар (ағылшын шақтары, етістіктер, іскери ағылшын, қытай пиньинь мен грамматика). Теория + жаттығу + тест.
+- LinguaCinema (Кино): кез келген YouTube видеосын қосып, субтитр (.srt/.vtt) жүктеп, AI-мен қазақша аударма + сөздік + тест жасайды. Субтитрдегі сөзді бассаң — мағынасы; ✨ батырма — сөйлем грамматикасын түсіндіреді.
+- ImmersionChat (осы чат): AI тәлімгермен мәтінмен не дауыспен сөйлесу. Жоғарыда «Дауыс» батырмасы — толық дауыстық режим.
+- Сөздік (Dictionary): SRS әдісімен сөз жаттау, іздеу, «Қайталау».
+- Жаттығулар (Practice): лексика/грамматика жаттығулары.
+- Ойындар (Games): Сөз сәйкестігі, Жылдам викторина, Сөз жаңбыры, Әріп табу, Сөйлем құрау, Жады дуэлі.
+- IELTS: Reading, Listening (студиялық AI дауыс), Writing және Speaking (микрофон + AI бағалау), Жылдам тест.
+- Прогресс, Рейтинг, Баптаулар (мұнда Gemini API кілтін қосады).
+
+When the student asks HOW to use the app, WHERE a feature is, or asks for help with the site → answer helpfully and point them to the right section, using the names above.`;
+
 function buildSystemPrompt(learningLang: string, uiLang: "kk" | "en", level: string, mode: ChatMode = "immersion"): string {
   const explainIn = uiLang === "kk" ? "Kazakh" : "English";
+
+  // Барлық режимге ортақ ереже: сайт/көмек сұрақтарына ҚАЗАҚША жауап беру
+  const kazakhHelpRule = `
+═══════════════════════════════════════
+LANGUAGE OF YOUR REPLY (important)
+═══════════════════════════════════════
+- If the student writes or SPEAKS in Kazakh, or asks a question ABOUT the app / how to do something / for help / a real-life question — ANSWER IN KAZAKH so they fully understand. Be a helpful assistant first.
+- Use the site guide below to help them navigate LinguaFast.
+- Only after helping, gently invite them back to practise ${learningLang}. Never ignore a Kazakh question by replying only in ${learningLang}.
+${SITE_GUIDE}`;
 
   // ── МҰҒАЛІМ РЕЖИМІ — қазақшаны араластырып түсіндіреді ──
   if (mode === "teacher") {
@@ -69,7 +99,8 @@ TEACHING METHOD
 - Correct the 1–2 most important mistakes; show the correct ${learningLang} form, then explain WHY in Kazakh.
 - Adapt to a ${level} learner: ${level === "beginner" ? "very simple, lots of Kazakh support." : level === "advanced" ? "more ${learningLang}, deeper explanations." : "balance Kazakh explanation with ${learningLang} practice."}
 - Be encouraging and clear. Keep it focused (3–6 sentences).
-- ALWAYS end by inviting the student to try something in ${learningLang}.`;
+- ALWAYS end by inviting the student to try something in ${learningLang}.
+${kazakhHelpRule}`;
   }
 
   // ── ИММЕРСИЯ РЕЖИМІ (әдепкі) — негізінен ${learningLang} ──
@@ -123,7 +154,8 @@ RULES
 - ALWAYS end with a question or prompt to continue the conversation.
 - Be genuinely warm, patient, and encouraging — like the best teacher they've ever had.
 - Adapt difficulty to their ${level} level automatically.
-- If they write in ${explainIn} instead of ${learningLang}, gently encourage them to try in ${learningLang}, and help them.`;
+- If they write in ${explainIn} instead of ${learningLang}, gently encourage them to try in ${learningLang}, and help them.
+${kazakhHelpRule}`;
 }
 
 export interface ChatMessage {

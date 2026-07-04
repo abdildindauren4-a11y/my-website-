@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { startMicRecording, type MicRecorder } from "@/lib/micRecorder";
 import { transcribeAudio } from "@/lib/gemini";
-import { speakSmart, stopSpeaking } from "@/lib/speech";
+import { speakSmart, stopSpeaking, unlockSpeech } from "@/lib/speech";
 import { X, Mic } from "lucide-react";
 
 type Phase = "idle" | "listening" | "thinking" | "speaking";
@@ -77,23 +77,18 @@ export default function VoiceMode({ onSend, onClose }: Props) {
     const reply = await onSend(text);
     if (!reply) { setPh("idle"); return; }
 
-    // Жауапты дауыстап оқу
+    // Жауапты дауыстап оқу; аяқталғанда — idle-ге қайту (қайта сөйлеуге дайын)
     const spoken = clean(reply);
     setCaption(spoken);
     setPh("speaking");
-    speakSmart(spoken);
-
-    // Оқу аяқталғанын бақылау → idle-ге қайту
-    const check = setInterval(() => {
-      if (!window.speechSynthesis.speaking) {
-        clearInterval(check);
-        if (phaseRef.current === "speaking") setPh("idle");
-      }
-    }, 300);
+    speakSmart(spoken, () => {
+      if (phaseRef.current === "speaking") setPh("idle");
+    });
   };
 
   // Домалақты басу — күйге қарай әрекет
   const handleTap = () => {
+    unlockSpeech(); // iOS: нақты басу — дауыс жүйесін оятамыз (кейін оқу бөгелмейді)
     if (phase === "idle") startListening();
     else if (phase === "listening") stopAndRespond();
     else if (phase === "speaking") { stopSpeaking(); setPh("idle"); } // үзіп, қайта сөйлеуге дайын
