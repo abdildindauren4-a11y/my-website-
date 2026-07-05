@@ -3,11 +3,12 @@
 // Алдыңғы жағы: сөз. Артқы жағы: аударма + мысал.
 // SRS батырмалары: Again / Hard / Good / Easy.
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { speak } from "@/lib/speech";
-import { Volume2, RotateCw } from "lucide-react";
+import { getCardImage, generateCardImage, canGenerateImages } from "@/lib/cardImages";
+import { Volume2, RotateCw, Sparkles, Loader2 } from "lucide-react";
 import type { VocabCard, ReviewResult } from "@/types/vocabulary";
 
 interface Props {
@@ -18,6 +19,32 @@ interface Props {
 export default function Flashcard({ card, onReview }: Props) {
   const { t } = useLang();
   const [flipped, setFlipped] = useState(false);
+  // AI-сурет: репо (/cards) → құрылғы қоймасы (IndexedDB) → «жасау» батырмасы
+  const [imgUrl, setImgUrl] = useState<string | null>(null);
+  const [imgLoading, setImgLoading] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  // Карта ауысқанда сақталған суретті іздеу
+  useEffect(() => {
+    let alive = true;
+    setImgUrl(null);
+    setImgError(false);
+    getCardImage(card.term, card.lang).then((url) => {
+      if (alive) setImgUrl(url);
+    });
+    return () => { alive = false; };
+  }, [card.term, card.lang]);
+
+  // Gemini-мен постер-стиліндегі сурет жасау (бір рет — кейін қоймадан)
+  const makeImage = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setImgLoading(true);
+    setImgError(false);
+    const url = await generateCardImage(card.term, card.translation, card.lang);
+    setImgLoading(false);
+    if (url) setImgUrl(url);
+    else setImgError(true);
+  };
 
   const handleReview = (result: ReviewResult) => {
     onReview(result);
@@ -48,28 +75,57 @@ export default function Flashcard({ card, onReview }: Props) {
         onClick={() => !flipped && setFlipped(true)}
       >
         <motion.div
-          className="relative w-full min-h-[320px]"
+          className={`relative w-full ${imgUrl || imgLoading || canGenerateImages() ? "min-h-[480px]" : "min-h-[320px]"}`}
           animate={{ rotateY: flipped ? 180 : 0 }}
           transition={{ duration: 0.5 }}
           style={{ transformStyle: "preserve-3d" }}
         >
-          {/* Алдыңғы жағы (сөз) */}
+          {/* Алдыңғы жағы (сөз + AI-сурет) */}
           <div
-            className="absolute inset-0 card p-8 flex flex-col items-center justify-center text-center"
+            className="absolute inset-0 card p-6 flex flex-col items-center justify-center text-center"
             style={{ backfaceVisibility: "hidden" }}
           >
-            <span className="text-xs text-text-muted mb-4 uppercase tracking-wide">
+            <span className="text-xs text-text-muted mb-3 uppercase tracking-wide">
               {card.lang === "en" ? "English" : "中文"}
             </span>
-            <h2 className="text-4xl font-display font-bold mb-3">{card.term}</h2>
-            {card.phonetic && <p className="text-text-secondary font-mono mb-2">{card.phonetic}</p>}
+
+            {/* AI-сурет (постер-стилі) немесе «жасау» батырмасы */}
+            {imgUrl ? (
+              <motion.img
+                key={imgUrl}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                src={imgUrl}
+                alt=""
+                draggable={false}
+                className="w-32 h-32 sm:w-36 sm:h-36 rounded-2xl object-cover shadow-card mb-3 select-none"
+              />
+            ) : imgLoading ? (
+              <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-2xl bg-surface-2 flex flex-col items-center justify-center gap-2 mb-3">
+                <Loader2 className="w-7 h-7 text-accent-purple animate-spin" />
+                <span className="text-[10px] text-text-muted px-2">{t("vocab.imageMaking")}</span>
+              </div>
+            ) : canGenerateImages() ? (
+              <button
+                onClick={makeImage}
+                className="w-32 h-32 sm:w-36 sm:h-36 rounded-2xl border-2 border-dashed border-accent-purple/30 bg-accent-purple/5 hover:bg-accent-purple/10 flex flex-col items-center justify-center gap-1.5 mb-3 transition-colors group"
+              >
+                <Sparkles className="w-7 h-7 text-accent-purple group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-medium text-accent-purple px-2">
+                  {imgError ? t("vocab.imageError") : t("vocab.makeImage")}
+                </span>
+              </button>
+            ) : null}
+
+            <h2 className="text-3xl sm:text-4xl font-display font-bold mb-2">{card.term}</h2>
+            {card.phonetic && <p className="text-text-secondary font-mono text-sm mb-1">{card.phonetic}</p>}
             <button
               onClick={(e) => { e.stopPropagation(); speak(card.term, card.lang); }}
-              className="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center text-text-secondary hover:text-accent-blue transition-colors mt-2"
+              className="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center text-text-secondary hover:text-accent-blue transition-colors mt-1"
             >
               <Volume2 className="w-5 h-5" />
             </button>
-            <p className="text-text-muted text-sm mt-6 flex items-center gap-1.5">
+            <p className="text-text-muted text-sm mt-4 flex items-center gap-1.5">
               <RotateCw className="w-3.5 h-3.5" /> {t("vocab.tapToFlip")}
             </p>
           </div>
@@ -80,6 +136,10 @@ export default function Flashcard({ card, onReview }: Props) {
             style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
           >
             <span className="text-xs text-text-muted mb-2 uppercase tracking-wide">{t("vocab.translation")}</span>
+            {/* Артқы жағында да сурет — сөз бен мағынаны байланыстырады */}
+            {imgUrl && (
+              <img src={imgUrl} alt="" draggable={false} className="w-24 h-24 rounded-xl object-cover shadow-soft mb-3 select-none" />
+            )}
             <h3 className="text-3xl font-display font-bold text-accent-green mb-4">{card.translation}</h3>
             {card.partOfSpeech && <span className="text-xs text-text-secondary mb-3">{card.partOfSpeech}</span>}
             {card.example && (
