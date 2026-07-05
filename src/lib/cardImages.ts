@@ -113,8 +113,10 @@ export async function getCardImage(term: string, lang: string): Promise<string |
   return null;
 }
 
+// Сурет жасау әрқашан қолжетімді: Gemini кілті болса — сол,
+// болмаса/лимит болса — тегін қосалқы генератор (Pollinations, кілтсіз).
 export function canGenerateImages(): boolean {
-  return !!getGeminiKey();
+  return true;
 }
 
 // ── base64 суретті кішірейтіп, жеңіл JPEG-ке айналдыру ──
@@ -166,39 +168,89 @@ async function tryModel(model: string, apiKey: string, prompt: string): Promise<
   }
 }
 
-// ═══════════ Gemini-мен сурет жасау ═══════════
+// ── Қосалқы ТЕГІН генератор (Pollinations.ai — кілт керек емес) ──
+// Gemini сурет модельдері тегін тарифте жабық болуы мүмкін (жаңа кілтте де 429).
+// Бұл қызмет кілтсіз, тікелей суреттің өзін қайтарады.
+async function tryPollinations(prompt: string): Promise<Blob | null> {
+  try {
+    const url =
+      "https://image.pollinations.ai/prompt/" +
+      encodeURIComponent(prompt) +
+      "?width=512&height=512&nologo=true";
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 60000); // генерация 10-40 сек алуы мүмкін
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return blob.type.startsWith("image/") ? blob : null;
+  } catch {
+    return null;
+  }
+}
+
+// Blob-ты кішірейту (canvas арқылы) — сақтауға жеңіл болуы үшін
+function downscaleBlob(blob: Blob): Promise<Blob | null> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement("canvas");
+      canvas.width = IMG_SIZE;
+      canvas.height = IMG_SIZE;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { resolve(blob); return; }
+      const side = Math.min(img.width, img.height);
+      ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, IMG_SIZE, IMG_SIZE);
+      canvas.toBlob((b) => resolve(b || blob), "image/jpeg", 0.85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(blob); };
+    img.src = url;
+  });
+}
+
+// ═══════════ Сурет жасау ═══════════
 // Постер-стилі: жұмсақ 3D-мультяш, ашық пастель фон (сайттың безендіру үлгісіне сай).
-// Модельдер кезекпен тексеріледі; қате түрі нақты қайтарылады.
+// Тәртібі: Gemini модельдері (кілт болса) → тегін Pollinations → қате.
 export async function generateCardImage(
   term: string,
   translation: string,
   lang: string
 ): Promise<ImageGenResult> {
-  const apiKey = getGeminiKey();
-  if (!apiKey) return { ok: false, error: "unavailable" };
-
   const meaningHint = translation ? ` (meaning: "${translation}")` : "";
   const prompt =
     `A cute 3D cartoon illustration for a children's language-learning flashcard showing the word "${term}"${meaningHint}. ` +
     `Style: soft glossy toy-like 3D render, warm pastel background, vibrant friendly colors, one clear centered subject, ` +
     `kid-friendly, adorable, high quality. NO text, NO letters, NO words in the image. Square composition.`;
 
-  let sawQuota = false;
-  for (const model of IMAGE_MODELS) {
-    const r = await tryModel(model, apiKey, prompt);
-    if (r.ok) {
-      const blob = await downscale(r.base64, r.mime);
-      if (!blob) return { ok: false, error: "general" };
-      // Құрылғыға сақтау — қайта жасалмайды
-      const key = keyOf(term, lang);
-      await idbSet(key, blob);
-      const url = URL.createObjectURL(blob);
-      urlCache.set(key, url);
-      return { ok: true, url };
+  const key = keyOf(term, lang);
+  const save = async (blob: Blob): Promise<ImageGenResult> => {
+    await idbSet(key, blob);
+    const url = URL.createObjectURL(blob);
+    urlCache.set(key, url);
+    return { ok: true, url };
+  };
+
+  // 1) Gemini (кілт болса) — стиль дәлірек
+  const apiKey = getGeminiKey();
+  if (apiKey) {
+    for (const model of IMAGE_MODELS) {
+      const r = await tryModel(model, apiKey, prompt);
+      if (r.ok) {
+        const blob = await downscale(r.base64, r.mime);
+        if (blob) return save(blob);
+      }
+      // 429/404/400 — келесі модель, соңында тегін генераторға өтеміз
     }
-    if (r.status === 429) sawQuota = true;
-    // 404/400 — модель бұл кілтке жоқ: келесісін көреміз
   }
 
-  return { ok: false, error: sawQuota ? "quota" : "unavailable" };
+  // 2) Тегін қосалқы генератор (кілтсіз жұмыс істейді)
+  const pBlob = await tryPollinations(prompt);
+  if (pBlob) {
+    const small = await downscaleBlob(pBlob);
+    if (small) return save(small);
+  }
+
+  return { ok: false, error: "general" };
 }
