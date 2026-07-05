@@ -508,6 +508,7 @@ export const translations = {
   "vocab.imageError": { kk: "Сәтсіз. Қайталап көріңіз", en: "Failed. Try again" },
   "vocab.imageQuota": { kk: "Күндік лимит бітті. Ертең көріңіз", en: "Daily limit reached. Try tomorrow" },
   "vocab.imageUnavailable": { kk: "Сурет жасау бұл кілтте қолжетімсіз", en: "Image generation unavailable for this key" },
+  "vocab.deleteImage": { kk: "Суретті өшіру (қайта жасауға болады)", en: "Remove image (you can regenerate)" },
   "chat.speakReply": { kk: "Дауыстап оқу", en: "Read aloud" },
 
   // ── Сөздік (Dictionary + SRS) ──

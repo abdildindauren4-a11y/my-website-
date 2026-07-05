@@ -73,6 +73,16 @@ async function idbSet(key: string, blob: Blob): Promise<void> {
   });
 }
 
+async function idbDelete(key: string): Promise<void> {
+  const db = await openDB();
+  if (!db) return;
+  return new Promise((resolve) => {
+    const tx = db.transaction(STORE, "readwrite").objectStore(STORE).delete(key);
+    tx.onsuccess = () => resolve();
+    tx.onerror = () => resolve();
+  });
+}
+
 // Сессия ішіндегі object URL кэші (қайта жасамау үшін)
 const urlCache = new Map<string, string | null>();
 
@@ -117,6 +127,16 @@ export async function getCardImage(term: string, lang: string): Promise<string |
 // болмаса/лимит болса — тегін қосалқы генератор (Pollinations, кілтсіз).
 export function canGenerateImages(): boolean {
   return true;
+}
+
+// ── Ұнамаған суретті өшіру ──
+// Құрылғы қоймасынан жойылады; кейін қайта жасауға болады.
+export async function deleteCardImage(term: string, lang: string): Promise<void> {
+  const key = keyOf(term, lang);
+  const url = urlCache.get(key);
+  if (url && url.startsWith("blob:")) URL.revokeObjectURL(url);
+  urlCache.delete(key);
+  await idbDelete(key);
 }
 
 // ── base64 суретті кішірейтіп, жеңіл JPEG-ке айналдыру ──
@@ -218,11 +238,16 @@ export async function generateCardImage(
   translation: string,
   lang: string
 ): Promise<ImageGenResult> {
-  const meaningHint = translation ? ` (meaning: "${translation}")` : "";
+  const meaningHint = translation ? ` (its meaning: "${translation}")` : "";
+  // Абстракт сөздерде (use, find, think…) сөздің жазуын емес, МАҒЫНАСЫН
+  // көрсететін көрініс сұраймыз. Фон — таза ақ (картаға сіңіп кетуі үшін).
   const prompt =
-    `A cute 3D cartoon illustration for a children's language-learning flashcard showing the word "${term}"${meaningHint}. ` +
-    `Style: soft glossy toy-like 3D render, warm pastel background, vibrant friendly colors, one clear centered subject, ` +
-    `kid-friendly, adorable, high quality. NO text, NO letters, NO words in the image. Square composition.`;
+    `Beautiful 3D Disney-Pixar animation style illustration for a children's language flashcard. ` +
+    `Depict the MEANING of the word "${term}"${meaningHint} as ONE simple, concrete scene a child instantly understands. ` +
+    `If the word is abstract or a verb (like "use", "find", "think"), show a cute expressive character clearly PERFORMING that action with an object. ` +
+    `Style: gorgeous Disney-Pixar 3D render, soft cinematic lighting, adorable big-eyed character, vibrant colors, high quality. ` +
+    `CRITICAL: subject isolated on a PURE WHITE background, no frame, no border, no ground shadow box. ` +
+    `Absolutely NO text, NO letters, NO numbers, NO words anywhere in the image.`;
 
   const key = keyOf(term, lang);
   const save = async (blob: Blob): Promise<ImageGenResult> => {
