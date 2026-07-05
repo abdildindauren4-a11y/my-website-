@@ -10,11 +10,12 @@
 
 import { getGeminiKey } from "./gemini";
 
-// Модельдер кезекпен тексеріледі (кілтке қайсысы қолжетімді болса — сол)
+// Модельдер кезекпен тексеріледі — сапасы жоғарысы бірінші
+// (billing қосылған кілтте ашылады; қолжетімсізі өткізіліп жіберіледі)
 const IMAGE_MODELS = [
-  "gemini-2.5-flash-image",      // Nano Banana (кең таралған)
-  "gemini-3.1-flash-lite-image", // Nano Banana 2 Lite (жаңа, жеңіл)
-  "gemini-3.1-flash-image",      // Nano Banana 2
+  "gemini-3.1-flash-image",      // Nano Banana 2 — ең сапалысы
+  "gemini-2.5-flash-image",      // Nano Banana — классикалық
+  "gemini-3.1-flash-lite-image", // Nano Banana 2 Lite — жеңіл нұсқа
 ];
 const IMG_SIZE = 384; // сақталатын өлшем (жеткілікті әрі жеңіл, ~30-60КБ)
 
