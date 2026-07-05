@@ -506,6 +506,8 @@ export const translations = {
   "vocab.makeImage": { kk: "AI сурет жасау", en: "Make AI image" },
   "vocab.imageMaking": { kk: "Сурет жасалуда…", en: "Making image…" },
   "vocab.imageError": { kk: "Сәтсіз. Қайталап көріңіз", en: "Failed. Try again" },
+  "vocab.imageQuota": { kk: "Күндік лимит бітті. Ертең көріңіз", en: "Daily limit reached. Try tomorrow" },
+  "vocab.imageUnavailable": { kk: "Сурет жасау бұл кілтте қолжетімсіз", en: "Image generation unavailable for this key" },
   "chat.speakReply": { kk: "Дауыстап оқу", en: "Read aloud" },
 
   // ── Сөздік (Dictionary + SRS) ──

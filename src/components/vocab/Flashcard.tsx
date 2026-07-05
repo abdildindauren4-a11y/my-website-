@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { speak } from "@/lib/speech";
-import { getCardImage, generateCardImage, canGenerateImages } from "@/lib/cardImages";
+import { getCardImage, generateCardImage, canGenerateImages, type ImageGenError } from "@/lib/cardImages";
 import { Volume2, RotateCw, Sparkles, Loader2 } from "lucide-react";
 import type { VocabCard, ReviewResult } from "@/types/vocabulary";
 
@@ -22,13 +22,13 @@ export default function Flashcard({ card, onReview }: Props) {
   // AI-сурет: репо (/cards) → құрылғы қоймасы (IndexedDB) → «жасау» батырмасы
   const [imgUrl, setImgUrl] = useState<string | null>(null);
   const [imgLoading, setImgLoading] = useState(false);
-  const [imgError, setImgError] = useState(false);
+  const [imgError, setImgError] = useState<ImageGenError | null>(null);
 
   // Карта ауысқанда сақталған суретті іздеу
   useEffect(() => {
     let alive = true;
     setImgUrl(null);
-    setImgError(false);
+    setImgError(null);
     getCardImage(card.term, card.lang).then((url) => {
       if (alive) setImgUrl(url);
     });
@@ -39,11 +39,11 @@ export default function Flashcard({ card, onReview }: Props) {
   const makeImage = async (e: React.MouseEvent) => {
     e.stopPropagation();
     setImgLoading(true);
-    setImgError(false);
-    const url = await generateCardImage(card.term, card.translation, card.lang);
+    setImgError(null);
+    const result = await generateCardImage(card.term, card.translation, card.lang);
     setImgLoading(false);
-    if (url) setImgUrl(url);
-    else setImgError(true);
+    if (result.ok) setImgUrl(result.url);
+    else setImgError(result.error);
   };
 
   const handleReview = (result: ReviewResult) => {
@@ -112,7 +112,10 @@ export default function Flashcard({ card, onReview }: Props) {
               >
                 <Sparkles className="w-7 h-7 text-accent-purple group-hover:scale-110 transition-transform" />
                 <span className="text-[10px] font-medium text-accent-purple px-2">
-                  {imgError ? t("vocab.imageError") : t("vocab.makeImage")}
+                  {imgError === "quota" ? t("vocab.imageQuota")
+                    : imgError === "unavailable" ? t("vocab.imageUnavailable")
+                    : imgError ? t("vocab.imageError")
+                    : t("vocab.makeImage")}
                 </span>
               </button>
             ) : null}
