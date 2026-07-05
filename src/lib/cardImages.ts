@@ -193,10 +193,11 @@ async function tryModel(model: string, apiKey: string, prompt: string): Promise<
 // Бұл қызмет кілтсіз, тікелей суреттің өзін қайтарады.
 async function tryPollinations(prompt: string): Promise<Blob | null> {
   try {
+    // 1024px — сапа әлдеқайда жақсы (сақтауда бәрібір кішірейтіледі)
     const url =
       "https://image.pollinations.ai/prompt/" +
       encodeURIComponent(prompt) +
-      "?width=512&height=512&nologo=true";
+      "?width=1024&height=1024&nologo=true&model=flux";
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 60000); // генерация 10-40 сек алуы мүмкін
     const res = await fetch(url, { signal: controller.signal });
@@ -230,24 +231,61 @@ function downscaleBlob(blob: Blob): Promise<Blob | null> {
   });
 }
 
+// ── 1-қадам: сөзден КӨРІНІС сипаттамасын жасау (Gemini мәтін моделі — тегін) ──
+// Неге керек: сурет промптына сөздің өзі кірсе, модель әріптерді салып қояды.
+// Оның орнына Gemini сөздің мағынасын бейнелейтін нақты көріністі сипаттайды,
+// сурет генераторы сол көріністі ғана көреді — мәтін мүлде шықпайды,
+// абстракт сөздер де (use, find…) әрекет көрінісіне айналады.
+async function describeScene(term: string, translation: string): Promise<string | null> {
+  const apiKey = getGeminiKey();
+  if (!apiKey) return null;
+
+  const meaning = translation ? ` (meaning in Kazakh: "${translation}")` : "";
+  const prompt = `You write scene descriptions for an image generator.
+In ONE short English sentence (max 25 words), describe a simple, concrete, joyful visual scene that unambiguously shows the meaning of the word "${term}"${meaning} to a child.
+If the word is abstract or a verb, show a cute character clearly performing that action with an object.
+The scene must contain NO written text, letters, signs or labels.
+Output ONLY the sentence, nothing else.`;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.6, maxOutputTokens: 120, thinkingConfig: { thinkingBudget: 0 } },
+        }),
+      }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const text: string = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+    return text.length > 10 && text.length < 400 ? text : null;
+  } catch {
+    return null;
+  }
+}
+
 // ═══════════ Сурет жасау ═══════════
-// Постер-стилі: жұмсақ 3D-мультяш, ашық пастель фон (сайттың безендіру үлгісіне сай).
-// Тәртібі: Gemini модельдері (кілт болса) → тегін Pollinations → қате.
+// Екі қадам: сөз → көрініс сипаттамасы (Gemini) → Disney-стиліндегі сурет.
+// Тәртібі: Gemini сурет модельдері (кілтте рұқсат болса) → тегін генератор → қате.
 export async function generateCardImage(
   term: string,
   translation: string,
   lang: string
 ): Promise<ImageGenResult> {
-  const meaningHint = translation ? ` (its meaning: "${translation}")` : "";
-  // Абстракт сөздерде (use, find, think…) сөздің жазуын емес, МАҒЫНАСЫН
-  // көрсететін көрініс сұраймыз. Фон — таза ақ (картаға сіңіп кетуі үшін).
+  // 1-қадам: көрініс (сөздің өзі сурет промптына кірмейді — мәтін шықпайды)
+  const scene =
+    (await describeScene(term, translation)) ||
+    // Кілт жоқ болса — қарапайым қор (сөзді тырнақшасыз, «word» демей қолданамыз)
+    `a cute character joyfully demonstrating: ${translation || term}`;
+
   const prompt =
-    `Beautiful 3D Disney-Pixar animation style illustration for a children's language flashcard. ` +
-    `Depict the MEANING of the word "${term}"${meaningHint} as ONE simple, concrete scene a child instantly understands. ` +
-    `If the word is abstract or a verb (like "use", "find", "think"), show a cute expressive character clearly PERFORMING that action with an object. ` +
-    `Style: gorgeous Disney-Pixar 3D render, soft cinematic lighting, adorable big-eyed character, vibrant colors, high quality. ` +
-    `CRITICAL: subject isolated on a PURE WHITE background, no frame, no border, no ground shadow box. ` +
-    `Absolutely NO text, NO letters, NO numbers, NO words anywhere in the image.`;
+    `Adorable Disney Pixar style 3D render: ${scene}. ` +
+    `Soft cinematic lighting, vibrant colors, big expressive eyes, adorable, ` +
+    `plain pure white background, clean minimal composition, high quality.`;
 
   const key = keyOf(term, lang);
   const save = async (blob: Blob): Promise<ImageGenResult> => {
