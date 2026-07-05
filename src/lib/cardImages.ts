@@ -192,22 +192,26 @@ async function tryModel(model: string, apiKey: string, prompt: string): Promise<
 // Gemini сурет модельдері тегін тарифте жабық болуы мүмкін (жаңа кілтте де 429).
 // Бұл қызмет кілтсіз, тікелей суреттің өзін қайтарады.
 async function tryPollinations(prompt: string): Promise<Blob | null> {
-  try {
-    // 1024px — сапа әлдеқайда жақсы (сақтауда бәрібір кішірейтіледі)
-    const url =
-      "https://image.pollinations.ai/prompt/" +
-      encodeURIComponent(prompt) +
-      "?width=1024&height=1024&nologo=true&model=flux";
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 60000); // генерация 10-40 сек алуы мүмкін
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timer);
-    if (!res.ok) return null;
-    const blob = await res.blob();
-    return blob.type.startsWith("image/") ? blob : null;
-  } catch {
-    return null;
+  // gptimage — сапасы жоғары (GPT-image негізінде), flux — қосалқы
+  for (const model of ["gptimage", "flux"]) {
+    try {
+      // 1024px — сапа әлдеқайда жақсы (сақтауда бәрібір кішірейтіледі)
+      const url =
+        "https://image.pollinations.ai/prompt/" +
+        encodeURIComponent(prompt) +
+        `?width=1024&height=1024&nologo=true&model=${model}`;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 60000); // генерация 10-40 сек алуы мүмкін
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timer);
+      if (!res.ok) continue;
+      const blob = await res.blob();
+      if (blob.type.startsWith("image/")) return blob;
+    } catch {
+      /* келесі модель */
+    }
   }
+  return null;
 }
 
 // Blob-ты кішірейту (canvas арқылы) — сақтауға жеңіл болуы үшін
