@@ -3,12 +3,11 @@
 // Алдыңғы жағы: сөз. Артқы жағы: аударма + мысал.
 // SRS батырмалары: Again / Hard / Good / Easy.
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { speak } from "@/lib/speech";
-import { getCardImage, generateCardImage, deleteCardImage, type ImageGenError } from "@/lib/cardImages";
-import { Volume2, RotateCw, Sparkles, Loader2, Trash2 } from "lucide-react";
+import { Volume2, RotateCw } from "lucide-react";
 import type { VocabCard, ReviewResult } from "@/types/vocabulary";
 
 interface Props {
@@ -19,40 +18,6 @@ interface Props {
 export default function Flashcard({ card, onReview }: Props) {
   const { t } = useLang();
   const [flipped, setFlipped] = useState(false);
-  // AI-сурет: репо (/cards) → құрылғы қоймасы (IndexedDB) → «жасау» батырмасы
-  const [imgUrl, setImgUrl] = useState<string | null>(null);
-  const [imgLoading, setImgLoading] = useState(false);
-  const [imgError, setImgError] = useState<ImageGenError | null>(null);
-
-  // Карта ауысқанда сақталған суретті іздеу
-  useEffect(() => {
-    let alive = true;
-    setImgUrl(null);
-    setImgError(null);
-    getCardImage(card.term, card.lang).then((url) => {
-      if (alive) setImgUrl(url);
-    });
-    return () => { alive = false; };
-  }, [card.term, card.lang]);
-
-  // Disney-стиліндегі сурет жасау (бір рет — кейін қоймадан)
-  const makeImage = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setImgLoading(true);
-    setImgError(null);
-    const result = await generateCardImage(card.term, card.translation, card.lang);
-    setImgLoading(false);
-    if (result.ok) setImgUrl(result.url);
-    else setImgError(result.error);
-  };
-
-  // Ұнамаған суретті өшіру (қайта жасауға болады)
-  const removeImage = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    await deleteCardImage(card.term, card.lang);
-    setImgUrl(null);
-    setImgError(null);
-  };
 
   const handleReview = (result: ReviewResult) => {
     onReview(result);
@@ -83,7 +48,7 @@ export default function Flashcard({ card, onReview }: Props) {
         onClick={() => !flipped && setFlipped(true)}
       >
         <motion.div
-          className={`relative w-full ${flipped ? "min-h-[480px]" : "min-h-[320px]"} transition-all`}
+          className="relative w-full min-h-[320px]"
           animate={{ rotateY: flipped ? 180 : 0 }}
           transition={{ duration: 0.5 }}
           style={{ transformStyle: "preserve-3d" }}
@@ -115,47 +80,6 @@ export default function Flashcard({ card, onReview }: Props) {
             style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
           >
             <span className="text-xs text-text-muted mb-2 uppercase tracking-wide">{t("vocab.translation")}</span>
-
-            {/* AI-сурет — тек аударылған жақта, фонсыз (картаның бөлшегі сияқты).
-                mix-blend-multiply: суреттің ақ фоны картаның ашық фонына сіңіп кетеді. */}
-            {imgUrl ? (
-              <div className="relative group/img mb-2">
-                <motion.img
-                  key={imgUrl}
-                  initial={{ opacity: 0, scale: 0.92 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  src={imgUrl}
-                  alt=""
-                  draggable={false}
-                  className="w-40 h-40 sm:w-44 sm:h-44 object-contain select-none mix-blend-multiply"
-                />
-                {/* Ұнамаса — өшіру (кейін қайта жасауға болады) */}
-                <button
-                  onClick={removeImage}
-                  title={t("vocab.deleteImage")}
-                  className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-surface border border-border text-text-muted hover:text-accent-red hover:border-accent-red/40 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover/img:opacity-100 transition-opacity shadow-soft"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ) : imgLoading ? (
-              <div className="w-40 h-40 flex flex-col items-center justify-center gap-2 mb-2">
-                <Loader2 className="w-8 h-8 text-accent-purple animate-spin" />
-                <span className="text-[11px] text-text-muted">{t("vocab.imageMaking")}</span>
-              </div>
-            ) : (
-              <button
-                onClick={makeImage}
-                className="mb-3 inline-flex items-center gap-1.5 text-xs font-medium text-accent-purple bg-accent-purple/10 hover:bg-accent-purple/20 border border-accent-purple/30 rounded-btn px-3 py-2 transition-colors"
-              >
-                <Sparkles className="w-4 h-4" />
-                {imgError === "quota" ? t("vocab.imageQuota")
-                  : imgError === "unavailable" ? t("vocab.imageUnavailable")
-                  : imgError ? t("vocab.imageError")
-                  : t("vocab.makeImage")}
-              </button>
-            )}
-
             <h3 className="text-3xl font-display font-bold text-accent-green mb-4">{card.translation}</h3>
             {card.partOfSpeech && <span className="text-xs text-text-secondary mb-3">{card.partOfSpeech}</span>}
             {card.example && (
