@@ -42,7 +42,7 @@ export default function LessonPlayer({ lesson, courseLang = "en", onClose, onCom
       const scorePercent = Math.round(((correct ? correctCount + 1 : correctCount) / totalExercises) * 100);
       setFinished(true);
       completeLesson(lesson.id, scorePercent);
-      addXP(lesson.xpReward);
+      addXP(lesson.xpReward, { type: "lesson", module: "courses", meta: { lessonId: lesson.id, score: scorePercent } });
       playWin();
       celebrate();
     } else {

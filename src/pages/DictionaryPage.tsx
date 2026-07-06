@@ -84,7 +84,8 @@ export default function DictionaryPage() {
     const cardId = reviewQueue[reviewIndex];
     reviewCard(cardId, result);
     // Әр қайталау = XP (дұрыс жауап көбірек)
-    addXP(result === "easy" ? 15 : result === "good" ? 10 : result === "hard" ? 5 : 2);
+    addXP(result === "easy" ? 15 : result === "good" ? 10 : result === "hard" ? 5 : 2,
+      { type: "review", module: "dictionary", meta: { result } });
     if (reviewIndex + 1 < reviewQueue.length) {
       setReviewIndex(reviewIndex + 1);
     } else {

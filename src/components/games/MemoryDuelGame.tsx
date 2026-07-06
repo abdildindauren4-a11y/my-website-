@@ -168,7 +168,7 @@ export default function MemoryDuelGame() {
           playWin();
           celebrateBig();
         }
-        addXP(Math.floor(newTotal / 3));
+        addXP(Math.floor(newTotal / 3), { type: "game", module: "games", meta: { game: "memory-duel", score: newTotal } });
       }, 500);
     } else {
       setPhase("levelDone");

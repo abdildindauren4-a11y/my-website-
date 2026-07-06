@@ -142,7 +142,7 @@ export default function WordMatchGame() {
           playWin();
           celebrateBig();
         }
-        addXP(Math.floor(newTotal / 3));
+        addXP(Math.floor(newTotal / 3), { type: "game", module: "games", meta: { game: "word-match", score: newTotal } });
       }, 400);
     } else {
       setPhase("levelDone");
