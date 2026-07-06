@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { useUserPrefs } from "@/store/userPrefs";
 import { useProgress, levelProgress } from "@/store/progressStore";
+import { cefrMeta } from "@/lib/cefr";
 import { useVocab } from "@/store/vocabStore";
 import { useCourseProgress } from "@/store/courseStore";
 import { getCoursesByLang } from "@/data/courses";
@@ -67,8 +68,16 @@ export default function DashboardPage() {
         <div className="absolute -left-8 -bottom-16 w-48 h-48 rounded-full bg-white/10 blur-2xl" />
         <div className="relative flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <div className="inline-flex items-center gap-1.5 text-xs font-medium bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full mb-3">
-              <Sparkles className="w-3.5 h-3.5" /> {t("top.level")} {lvl.level}
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                <Sparkles className="w-3.5 h-3.5" /> {t("top.level")} {lvl.level}
+              </span>
+              {/* CEFR деңгей белгісі (тесттен/таңдаудан) */}
+              {prefs.cefrLevel && (
+                <span className="inline-flex items-center gap-1 text-xs font-bold bg-white text-accent-green px-2.5 py-1 rounded-full">
+                  {cefrMeta(prefs.cefrLevel).emoji} {prefs.cefrLevel} · {cefrMeta(prefs.cefrLevel).titleKk}
+                </span>
+              )}
             </div>
             <h1 className="text-2xl sm:text-4xl font-display font-bold leading-tight">
               {t("dash.greeting")}, {name}! 👋
