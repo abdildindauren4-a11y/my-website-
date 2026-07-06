@@ -503,12 +503,6 @@ export const translations = {
   "voice.hintStop": { kk: "Айтып болған соң қайта басыңыз", en: "Tap again when you're done" },
   "voice.micError": { kk: "Микрофонға қол жеткізілмеді", en: "Could not access the microphone" },
   "voice.noSpeech": { kk: "Дауыс естілмеді, қайталап көріңіз", en: "No speech detected, try again" },
-  "vocab.makeImage": { kk: "AI сурет жасау", en: "Make AI image" },
-  "vocab.imageMaking": { kk: "Сурет жасалуда…", en: "Making image…" },
-  "vocab.imageError": { kk: "Сәтсіз. Қайталап көріңіз", en: "Failed. Try again" },
-  "vocab.imageQuota": { kk: "Күндік лимит бітті. Ертең көріңіз", en: "Daily limit reached. Try tomorrow" },
-  "vocab.imageUnavailable": { kk: "Сурет жасау бұл кілтте қолжетімсіз", en: "Image generation unavailable for this key" },
-  "vocab.deleteImage": { kk: "Суретті өшіру (қайта жасауға болады)", en: "Remove image (you can regenerate)" },
   "chat.speakReply": { kk: "Дауыстап оқу", en: "Read aloud" },
 
   // ── Сөздік (Dictionary + SRS) ──
