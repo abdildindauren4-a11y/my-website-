@@ -127,7 +127,7 @@ export default function SentenceBuilderGame() {
       playWin();
       celebrate();
       speak(current.text, gameLang);
-      addXP(Math.round(points / 2));
+      addXP(Math.round(points / 2), { type: "game", module: "games", meta: { game: "sentence-builder", points } });
     } else {
       setStreak(0);
       playWrong();

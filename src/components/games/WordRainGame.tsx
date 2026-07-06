@@ -179,7 +179,7 @@ export default function WordRainGame() {
     } else if (score > 0) {
       celebrate();
     }
-    addXP(Math.floor(score / 2));
+    addXP(Math.floor(score / 2), { type: "game", module: "games", meta: { game: "word-rain", score } });
   };
 
   const answer = (option: string) => {

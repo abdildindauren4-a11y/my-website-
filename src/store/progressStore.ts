@@ -1,9 +1,15 @@
 // filepath: src/store/progressStore.ts
-// Нақты прогресс жүйесі — XP, деңгей, серия (streak), белсенділік.
-// localStorage-та сақталады (Firebase кейін).
-// DEMO сандарды алмастырады — енді бәрі нақты есептеледі.
+// Прогресс жүйесі — енді learnEvents журналының ҮСТІНДЕГІ КӨРІНІС (ROADMAP 1.5).
+// XP, серия (streak), минуттар — бәрі орталық оқиға журналынан есептеледі.
+// Ескі деректер бір реттік көшірумен (migration) baseline ретінде сақталады,
+// сондықтан бұрынғы XP/серия сандары жоғалмайды.
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useSyncExternalStore } from "react";
+import {
+  logEvent, clearEvents, subscribeLearnEvents, getEventsVersion,
+  totalXp, minutesByDay, countByType, activeDays, todayKey,
+  type LearnEventType,
+} from "@/store/learnEvents";
 
 export interface ProgressData {
   xp: number;                 // жалпы XP
@@ -17,45 +23,35 @@ export interface ProgressData {
   weeklyMinutes: Record<string, number>; // {YYYY-MM-DD: minutes}
 }
 
-const STORAGE_KEY = "linguafast_progress";
+// Ескі жүйеден көшірілген бастапқы нүкте (журналға дейінгі жетістіктер)
+interface ProgressBaseline {
+  xp: number;
+  streakDays: number;
+  lastActiveDate: string;
+  minutesToday: number;
+  minutesDate: string;
+  totalWordsLearned: number;
+  lessonsCompleted: number;
+  weeklyMinutes: Record<string, number>;
+}
 
-const DEFAULT_PROGRESS: ProgressData = {
-  xp: 0,
-  streakDays: 0,
-  lastActiveDate: "",
-  minutesToday: 0,
-  minutesDate: "",
-  totalWordsLearned: 0,
-  lessonsCompleted: 0,
-  weeklyMinutes: {},
+const LEGACY_KEY = "linguafast_progress";
+const BASE_KEY = "linguafast_progress_base";
+
+const EMPTY_BASE: ProgressBaseline = {
+  xp: 0, streakDays: 0, lastActiveDate: "", minutesToday: 0, minutesDate: "",
+  totalWordsLearned: 0, lessonsCompleted: 0, weeklyMinutes: {},
 };
 
-// Бүгінгі күн (YYYY-MM-DD)
-function today(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-// Екі күн арасындағы айырма (күнмен)
-function daysBetween(date1: string, date2: string): number {
-  if (!date1 || !date2) return 999;
-  const d1 = new Date(date1).getTime();
-  const d2 = new Date(date2).getTime();
-  return Math.round((d2 - d1) / (24 * 60 * 60 * 1000));
-}
-
-// ── XP → Деңгей формуласы ──
-// Әр деңгей сайын көбірек XP керек (прогрессивті).
-// Деңгей N үшін: N*N*100 XP жинау керек
+// ── XP → Деңгей формуласы (өзгеріссіз) ──
 export function levelFromXP(xp: number): number {
   return Math.floor(Math.sqrt(xp / 100)) + 1;
 }
 
-// Келесі деңгейге дейінгі XP шегі
 export function xpForLevel(level: number): number {
   return (level - 1) * (level - 1) * 100;
 }
 
-// Ағымдағы деңгейдегі прогресс (0-100%)
 export function levelProgress(xp: number): { level: number; current: number; needed: number; percent: number } {
   const level = levelFromXP(xp);
   const currentLevelXP = xpForLevel(level);
@@ -66,100 +62,142 @@ export function levelProgress(xp: number): { level: number; current: number; nee
   return { level, current, needed, percent };
 }
 
-function loadProgress(): ProgressData {
+// ── Baseline: жүктеу + бір реттік migration ──
+let baseline: ProgressBaseline | null = null;
+let baseVersion = 0;
+const baseListeners = new Set<() => void>();
+
+function loadBaseline(): ProgressBaseline {
+  if (baseline) return baseline;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return { ...DEFAULT_PROGRESS, ...JSON.parse(raw) };
-  } catch { /* ignore */ }
-  return DEFAULT_PROGRESS;
-}
-
-function saveProgress(data: ProgressData) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch { /* ignore */ }
-}
-
-// Серияны (streak) жаңарту логикасы
-function updateStreak(data: ProgressData): ProgressData {
-  const t = today();
-  const gap = daysBetween(data.lastActiveDate, t);
-
-  if (data.lastActiveDate === t) {
-    // Бүгін бұрын белсенді болған — серия сол қалады
-    return data;
-  } else if (gap === 1) {
-    // Кеше белсенді еді — серия +1
-    return { ...data, streakDays: data.streakDays + 1, lastActiveDate: t };
-  } else if (gap > 1 || !data.lastActiveDate) {
-    // Үзіліс болды немесе алғаш рет — серия 1-ден басталады
-    return { ...data, streakDays: 1, lastActiveDate: t };
-  }
-  return data;
-}
-
-// Прогресс hook
-export function useProgress() {
-  const [progress, setProgress] = useState<ProgressData>(DEFAULT_PROGRESS);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    let data = loadProgress();
-    // Бүгінгі минут басқа күннен болса — нөлдеу
-    if (data.minutesDate !== today()) {
-      data = { ...data, minutesToday: 0, minutesDate: today() };
+    const raw = localStorage.getItem(BASE_KEY);
+    if (raw) {
+      baseline = { ...EMPTY_BASE, ...(JSON.parse(raw) as Partial<ProgressBaseline>) };
+      return baseline!;
     }
-    setProgress(data);
-    setLoaded(true);
+    // Migration: ескі progressStore деректері бар болса — baseline етеміз
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if (legacy) {
+      baseline = { ...EMPTY_BASE, ...(JSON.parse(legacy) as Partial<ProgressBaseline>) };
+      localStorage.setItem(BASE_KEY, JSON.stringify(baseline));
+      return baseline!;
+    }
+  } catch { /* ignore */ }
+  baseline = { ...EMPTY_BASE };
+  return baseline;
+}
+
+function saveBaseline(next: ProgressBaseline) {
+  baseline = next;
+  try { localStorage.setItem(BASE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+  baseVersion++;
+  baseListeners.forEach((fn) => fn());
+}
+
+// Екі күн арасындағы айырма (күнмен)
+function daysBetween(date1: string, date2: string): number {
+  if (!date1 || !date2) return 999;
+  const d1 = new Date(date1).getTime();
+  const d2 = new Date(date2).getTime();
+  return Math.round((d2 - d1) / (24 * 60 * 60 * 1000));
+}
+
+// ── Есептелген көрініс: baseline + журнал оқиғалары ──
+function computeProgress(): ProgressData {
+  const base = loadBaseline();
+  const t = todayKey();
+
+  // Серия: baseline-нан кейінгі белсенді күндерді ретімен жинақтаймыз
+  let streak = base.streakDays;
+  let last = base.lastActiveDate;
+  for (const day of activeDays()) {
+    if (last && day <= last) continue; // baseline-ға дейінгі/сол күнгі
+    const gap = daysBetween(last, day);
+    if (gap === 1) streak += 1;
+    else streak = 1; // үзіліс немесе алғашқы белсенділік
+    last = day;
+  }
+
+  // Минуттар: baseline (бүгін болса) + журналдағы minutes
+  const baseToday = base.minutesDate === t ? base.minutesToday : 0;
+  const weekly: Record<string, number> = { ...base.weeklyMinutes };
+  const evMinutes = minutesByDay();
+  for (const [day, m] of Object.entries(evMinutes)) {
+    weekly[day] = (weekly[day] || 0) + m;
+  }
+
+  return {
+    xp: base.xp + totalXp(),
+    streakDays: streak,
+    lastActiveDate: last,
+    minutesToday: baseToday + (evMinutes[t] || 0),
+    minutesDate: t,
+    totalWordsLearned: base.totalWordsLearned,
+    lessonsCompleted: base.lessonsCompleted + countByType("lesson"),
+    weeklyMinutes: weekly,
+  };
+}
+
+// useSyncExternalStore үшін кэштелген snapshot (референс тұрақтылығы)
+let cachedSnapshot: ProgressData | null = null;
+let cachedKey = "";
+
+function getSnapshot(): ProgressData {
+  const key = `${getEventsVersion()}:${baseVersion}:${todayKey()}`;
+  if (!cachedSnapshot || cachedKey !== key) {
+    cachedSnapshot = computeProgress();
+    cachedKey = key;
+  }
+  return cachedSnapshot;
+}
+
+function subscribe(fn: () => void): () => void {
+  const unsub = subscribeLearnEvents(fn);
+  baseListeners.add(fn);
+  return () => {
+    unsub();
+    baseListeners.delete(fn);
+  };
+}
+
+// XP қосу опциялары — оқиғаның түрі/модулі (байланыс картасы үшін)
+export interface XpOptions {
+  type?: LearnEventType;
+  module?: string;
+  meta?: Record<string, unknown>;
+}
+
+// Прогресс hook — API бұрынғыдай, іші журналға жазады
+export function useProgress() {
+  const progress = useSyncExternalStore(subscribe, getSnapshot);
+
+  // XP қосу (әрекет жасағанда) — журналға оқиға болып түседі
+  const addXP = useCallback((amount: number, opts?: XpOptions) => {
+    logEvent(opts?.type ?? "exercise", opts?.module ?? "app", amount, opts?.meta);
   }, []);
 
-  // XP қосу (әрекет жасағанда)
-  const addXP = useCallback((amount: number) => {
-    setProgress((prev) => {
-      let next = updateStreak({ ...prev, xp: prev.xp + amount });
-      saveProgress(next);
-      return next;
-    });
+  // Белсенділік минуттарын қосу (кино және т.б.)
+  const addMinutes = useCallback((mins: number, module = "cinema") => {
+    logEvent("cinema-min", module, 0, { minutes: mins });
   }, []);
 
-  // Белсенділік минуттарын қосу
-  const addMinutes = useCallback((mins: number) => {
-    setProgress((prev) => {
-      const t = today();
-      const next = updateStreak({
-        ...prev,
-        minutesToday: (prev.minutesDate === t ? prev.minutesToday : 0) + mins,
-        minutesDate: t,
-        weeklyMinutes: { ...prev.weeklyMinutes, [t]: ((prev.weeklyMinutes[t] || 0) + mins) },
-      });
-      saveProgress(next);
-      return next;
-    });
+  // Сабақ аяқталды (+50 XP)
+  const completeLesson = useCallback((meta?: Record<string, unknown>) => {
+    logEvent("lesson", "courses", 50, meta);
   }, []);
 
-  // Сабақ аяқталды
-  const completeLesson = useCallback(() => {
-    setProgress((prev) => {
-      const next = updateStreak({ ...prev, lessonsCompleted: prev.lessonsCompleted + 1, xp: prev.xp + 50 });
-      saveProgress(next);
-      return next;
-    });
-  }, []);
-
-  // Үйренген сөз санын орнату (сөздіктен синхрондау)
+  // Үйренген сөз санын орнату (сөздіктен синхрондау) — оқиға емес, күй
   const setWordsLearned = useCallback((count: number) => {
-    setProgress((prev) => {
-      if (prev.totalWordsLearned === count) return prev;
-      const next = { ...prev, totalWordsLearned: count };
-      saveProgress(next);
-      return next;
-    });
+    const base = loadBaseline();
+    if (base.totalWordsLearned === count) return;
+    saveBaseline({ ...base, totalWordsLearned: count });
   }, []);
 
   const reset = useCallback(() => {
-    saveProgress(DEFAULT_PROGRESS);
-    setProgress(DEFAULT_PROGRESS);
+    clearEvents();
+    saveBaseline({ ...EMPTY_BASE });
+    try { localStorage.removeItem(LEGACY_KEY); } catch { /* ignore */ }
   }, []);
 
-  return { progress, loaded, addXP, addMinutes, completeLesson, setWordsLearned, reset };
+  return { progress, loaded: true, addXP, addMinutes, completeLesson, setWordsLearned, reset };
 }

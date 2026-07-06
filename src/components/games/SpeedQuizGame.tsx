@@ -106,7 +106,7 @@ export default function SpeedQuizGame() {
     } else if (score > 0) {
       celebrate();
     }
-    addXP(Math.floor(score / 2));
+    addXP(Math.floor(score / 2), { type: "game", module: "games", meta: { game: "speed-quiz", score } });
   };
 
   // Жүзіп шығатын ұпай

@@ -53,7 +53,7 @@ export default function WritingModule({ onBack }: { onBack: () => void }) {
     try {
       const result = await evaluateWriting(task, essay, lang);
       setEvaluation(result);
-      addXP(Math.round(result.overallBand * 10));
+      addXP(Math.round(result.overallBand * 10), { type: "ielts", module: "ielts", meta: { section: "writing", band: result.overallBand } });
       setView("result");
     } catch (e: any) {
       setError(e.message === "NO_API_KEY" ? "NO_KEY" : "EVAL_ERROR");

@@ -16,6 +16,7 @@ import {
 } from "@/lib/chatStore";
 import { createRecognition, isSpeechRecognitionSupported, type RecognitionController } from "@/lib/ieltsSpeaking";
 import { speakSmart, stopSpeaking, unlockSpeech } from "@/lib/speech";
+import { logEvent } from "@/store/learnEvents";
 import AnimatedBot, { type BotState } from "@/components/chat/AnimatedBot";
 import Markdown from "@/components/chat/Markdown";
 import VoiceMode from "@/components/chat/VoiceMode";
@@ -329,6 +330,8 @@ export default function ChatPage() {
       setMessages((prev) => [...prev, { id: "m" + Date.now(), role: "model", text: res.text, time: now() }]);
       setBotState("happy");
       setTimeout(() => setBotState("idle"), 2500);
+      // Орталық журналға жазу: чат практикасы = +2 XP (квест/лига/статистика көреді)
+      logEvent("chat-msg", "chat", 2, { mode, viaVoice });
 
       // Дауысты жауап қосулы болса — оқу (дауыс режимі оқуды өзі басқарады)
       if (voiceReply && !viaVoice) {

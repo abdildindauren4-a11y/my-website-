@@ -112,7 +112,7 @@ export default function IeltsPage() {
     const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
     const res = gradeTest(activeTest, answers, timeSpent);
     setResult(res);
-    addXP(res.correct * 5); // әр дұрыс жауап = 5 XP
+    addXP(res.correct * 5, { type: "ielts", module: "ielts", meta: { section: "reading", correct: res.correct } });
     setView("result");
   };
 
@@ -132,7 +132,7 @@ export default function IeltsPage() {
     const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
     const res = gradeListeningTest(activeListening, answers, timeSpent);
     setResult(res);
-    addXP(res.correct * 5);
+    addXP(res.correct * 5, { type: "ielts", module: "ielts", meta: { section: "listening", correct: res.correct } });
     setView("listen-result");
   };
 

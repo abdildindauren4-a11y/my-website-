@@ -139,10 +139,10 @@ export default function CinemaPage() {
     if (!activeId) return;
     const firstComplete = setQuizScore(activeId, score);
     if (firstComplete) {
-      completeLesson(); // +50 XP + сабақ есебі
+      completeLesson({ videoId: activeId, score }); // +50 XP + сабақ есебі
       celebrateBig();
     } else {
-      addXP(Math.max(5, Math.round(score / 10)));
+      addXP(Math.max(5, Math.round(score / 10)), { type: "quiz", module: "cinema", meta: { videoId: activeId, score } });
     }
   };
 

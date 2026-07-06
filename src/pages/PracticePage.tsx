@@ -137,7 +137,7 @@ export default function PracticePage() {
     if (qIdx + 1 >= questions.length) {
       // Аяқталды
       const finalCorrect = correctCount;
-      addXP(finalCorrect * 3);
+      addXP(finalCorrect * 3, { type: "exercise", module: "practice", meta: { correct: finalCorrect, total: questions.length } });
       playWin();
       if (finalCorrect / questions.length >= 0.8) celebrate();
       setView("result");
