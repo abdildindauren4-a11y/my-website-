@@ -7,6 +7,7 @@ import { useLang } from "@/contexts/LangContext";
 import { speakLesson } from "@/lib/speech";
 import { shuffle } from "@/lib/gamesData";
 import { playMatch, playWrong, playTap } from "@/lib/soundFX";
+import { gradeAnswer, normalizeAnswer } from "@/lib/exerciseAdapter";
 import type { Exercise } from "@/types/course";
 import { Volume2, Check, X, ArrowRight, Lightbulb } from "lucide-react";
 
@@ -29,21 +30,12 @@ export default function ExercisePlayer({ exercise, courseLang = "en", onAnswer }
   );
   const [builtОrder, setBuiltOrder] = useState<string[]>([]);
 
-  // Жауапты тексеру
-  const normalize = (s: string) => s.trim().toLowerCase().replace(/[.,!?]/g, "");
-  const checkAnswer = (userAnswer: string): boolean => {
-    const correct = normalize(exercise.answer);
-    const user = normalize(userAnswer);
-    if (user === correct) return true;
-    if (exercise.acceptableAnswers) {
-      return exercise.acceptableAnswers.some((a) => normalize(a) === user);
-    }
-    return false;
-  };
+  // Жауапты тексеру — ортақ бағалаушы (exerciseAdapter), барлық жүйемен бірдей
+  const normalize = normalizeAnswer;
 
   const submit = (userAnswer: string) => {
     if (answered) return;
-    const isCorrect = checkAnswer(userAnswer);
+    const isCorrect = gradeAnswer(exercise, userAnswer);
     setCorrect(isCorrect);
     setAnswered(true);
     if (isCorrect) playMatch();
