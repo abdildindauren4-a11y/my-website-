@@ -3,6 +3,7 @@
 // Onboarding-та орнатылады, localStorage-та сақталады (Firebase кейін).
 
 import { useState, useEffect, useCallback } from "react";
+import type { CefrLevel } from "@/lib/cefr";
 
 export type LearningLanguage = "en" | "zh";
 export type ProficiencyLevel = "beginner" | "intermediate" | "advanced";
@@ -10,7 +11,8 @@ export type ProficiencyLevel = "beginner" | "intermediate" | "advanced";
 export interface UserPrefs {
   onboarded: boolean;          // onboarding аяқталды ма
   learningLang: LearningLanguage; // нені үйренеді
-  level: ProficiencyLevel;     // деңгейі
+  level: ProficiencyLevel;     // деңгейі (ескі 3-сатылы, кері үйлесімділік)
+  cefrLevel?: CefrLevel;       // нақты CEFR деңгейі (A1–C2, тесттен)
   dailyGoalMin: number;        // күндік мақсат (минут)
   name?: string;               // аты (қаласа)
 }

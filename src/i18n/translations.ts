@@ -504,6 +504,15 @@ export const translations = {
   "voice.micError": { kk: "Микрофонға қол жеткізілмеді", en: "Could not access the microphone" },
   "voice.noSpeech": { kk: "Дауыс естілмеді, қайталап көріңіз", en: "No speech detected, try again" },
   "chat.speakReply": { kk: "Дауыстап оқу", en: "Read aloud" },
+  "place.title": { kk: "Деңгей анықтау тесті", en: "Placement test" },
+  "place.hint": { kk: "Сұрақтар біртіндеп қиындайды — білмесеңіз де қорықпаңыз, тест өзі тоқтайды", en: "Questions get harder gradually — the test stops automatically" },
+  "place.cta": { kk: "Деңгейімді тест арқылы анықтау", en: "Find my level with a test" },
+  "place.ctaDesc": { kk: "3–5 минут · сұрақтар деңгейіңізге бейімделеді", en: "3–5 min · questions adapt to your level" },
+  "place.recommended": { kk: "ҰСЫНЫЛАДЫ", en: "RECOMMENDED" },
+  "place.orManual": { kk: "немесе өзіңіз таңдаңыз:", en: "or choose manually:" },
+  "place.yourLevel": { kk: "Сіздің деңгейіңіз", en: "Your level" },
+  "place.continue": { kk: "Осы деңгеймен жалғастыру", en: "Continue with this level" },
+  "place.skip": { kk: "Тестен бас тарту — өзім таңдаймын", en: "Skip the test — I'll choose myself" },
 
   // ── Сөздік (Dictionary + SRS) ──
   "vocab.title": { kk: "Сөздік", en: "Dictionary" },
