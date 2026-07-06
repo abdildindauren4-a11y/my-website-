@@ -57,6 +57,7 @@ export interface CurriculumUnit {
   lessons: CurriculumLesson[];       // 4-6 сабақ
   dialogue?: DialogueLine[];         // қорытынды диалог
   checkpoint: ExerciseSpec[];        // юнит тесті: 10-12 сұрақ, өту ≥80%
+  legacyCourseId?: string;           // ескі курстан көшірілген юнит үшін (навигация)
 }
 
 // Бір CEFR/HSK деңгейінің толық бағдарламасы
