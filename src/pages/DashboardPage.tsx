@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { useUserPrefs } from "@/store/userPrefs";
 import { useProgress, levelProgress } from "@/store/progressStore";
+import { cefrMeta } from "@/lib/cefr";
 import { useVocab } from "@/store/vocabStore";
 import { useCourseProgress } from "@/store/courseStore";
 import { getCoursesByLang } from "@/data/courses";
@@ -17,7 +18,7 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } 
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] as const } } };
 
 export default function DashboardPage() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const navigate = useNavigate();
   const { prefs } = useUserPrefs();
   const { progress } = useProgress();
@@ -52,7 +53,7 @@ export default function DashboardPage() {
   ] as const;
 
   const stats = [
-    { icon: Clock, label: t("dash.todayGoal"), value: minutesToday, suffix: `/ ${minutesGoal} ${t("top.days") === "days" ? "min" : "мин"}`, color: "accent-blue", bar: minPercent },
+    { icon: Clock, label: t("dash.todayGoal"), value: minutesToday, suffix: `/ ${minutesGoal} ${lang === "en" ? "min" : "мин"}`, color: "accent-blue", bar: minPercent },
     { icon: BookA, label: t("dash.wordsLearned"), value: wordsLearned, suffix: t("vocab.mastered").toLowerCase(), color: "accent-green" },
     { icon: Flame, label: t("top.streak"), value: streak, suffix: t("top.days"), color: "accent-gold" },
   ] as const;
@@ -67,8 +68,16 @@ export default function DashboardPage() {
         <div className="absolute -left-8 -bottom-16 w-48 h-48 rounded-full bg-white/10 blur-2xl" />
         <div className="relative flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <div className="inline-flex items-center gap-1.5 text-xs font-medium bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full mb-3">
-              <Sparkles className="w-3.5 h-3.5" /> {t("top.level")} {lvl.level}
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                <Sparkles className="w-3.5 h-3.5" /> {t("top.level")} {lvl.level}
+              </span>
+              {/* CEFR деңгей белгісі (тесттен/таңдаудан) */}
+              {prefs.cefrLevel && (
+                <span className="inline-flex items-center gap-1 text-xs font-bold bg-white text-accent-green px-2.5 py-1 rounded-full">
+                  {cefrMeta(prefs.cefrLevel).emoji} {prefs.cefrLevel} · {cefrMeta(prefs.cefrLevel).titleKk}
+                </span>
+              )}
             </div>
             <h1 className="text-2xl sm:text-4xl font-display font-bold leading-tight">
               {t("dash.greeting")}, {name}! 👋
@@ -144,8 +153,8 @@ export default function DashboardPage() {
               {currentCourse.emoji || <GraduationCap className="w-7 h-7 text-accent-green" />}
             </div>
             <div className="flex-1 min-w-0">
-              <span className="text-xs text-text-secondary">{currentPct > 0 ? t("dash.currentLesson") : (t("top.days") === "days" ? "Start a course" : "Курсты бастау")}</span>
-              <h3 className="font-display font-bold truncate">{prefs.learningLang === "zh" ? currentCourse.titleKk : currentCourse.title}</h3>
+              <span className="text-xs text-text-secondary">{currentPct > 0 ? t("dash.currentLesson") : (lang === "en" ? "Start a course" : "Курсты бастау")}</span>
+              <h3 className="font-display font-bold truncate">{lang === "kk" ? currentCourse.titleKk : currentCourse.title}</h3>
               <div className="flex items-center gap-2 mt-2">
                 <div className="flex-1 h-2 rounded-full bg-border overflow-hidden">
                   <motion.div className="h-full bg-gradient-to-r from-accent-green to-accent-blue rounded-full" initial={{ width: 0 }} animate={{ width: `${currentPct}%` }} transition={{ duration: 0.8, ease: "easeOut" }} />

@@ -1,40 +1,29 @@
 // filepath: src/App.tsx
 // Негізгі қосымша: тіл провайдері + маршрут жүйесі + onboarding.
+// Беттер lazy-жүктеледі (code splitting) — алғашқы ашылу жылдам.
 
-import { useState } from "react";
+import { useState, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LangProvider } from "@/contexts/LangContext";
 import { useUserPrefs } from "@/store/userPrefs";
 import Layout from "@/components/layout/Layout";
-import PlaceholderPage from "@/pages/PlaceholderPage";
+import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import DashboardPage from "@/pages/DashboardPage";
-import CinemaPage from "@/pages/CinemaPage";
-import ChatPage from "@/pages/ChatPage";
-import DictionaryPage from "@/pages/DictionaryPage";
 import OnboardingPage from "@/pages/OnboardingPage";
-import SettingsPage from "@/pages/SettingsPage";
-import GamesPage from "@/pages/GamesPage";
-import IeltsPage from "@/pages/IeltsPage";
-import CoursesPage from "@/pages/CoursesPage";
-import PracticePage from "@/pages/PracticePage";
-import ProgressPage from "@/pages/ProgressPage";
-import LeaderboardPage from "@/pages/LeaderboardPage";
-import ProfilePage from "@/pages/ProfilePage";
 
-// Маршруттар (кейін placeholder-лер нақты беттерге ауысады)
-const routes: [string, string][] = [
-  ["/", "Басты бет"],
-  ["/courses", "Курстар"],
-  ["/cinema", "LinguaCinema"],
-  ["/chat", "ImmersionChat"],
-  ["/dictionary", "Сөздік"],
-  ["/practice", "Жаттығулар"],
-  ["/games", "Ойындар"],
-  ["/ielts", "IELTS"],
-  ["/progress", "Прогресс"],
-  ["/leaderboard", "Рейтинг"],
-  ["/settings", "Баптаулар"],
-];
+// Ауыр беттер — қажет болғанда ғана жүктеледі
+const CinemaPage = lazy(() => import("@/pages/CinemaPage"));
+const ChatPage = lazy(() => import("@/pages/ChatPage"));
+const DictionaryPage = lazy(() => import("@/pages/DictionaryPage"));
+const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
+const GamesPage = lazy(() => import("@/pages/GamesPage"));
+const IeltsPage = lazy(() => import("@/pages/IeltsPage"));
+const CoursesPage = lazy(() => import("@/pages/CoursesPage"));
+const PracticePage = lazy(() => import("@/pages/PracticePage"));
+const ProgressPage = lazy(() => import("@/pages/ProgressPage"));
+const LeaderboardPage = lazy(() => import("@/pages/LeaderboardPage"));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
+const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
 
 function AppContent() {
   const { prefs, loaded } = useUserPrefs();
@@ -42,7 +31,7 @@ function AppContent() {
 
   // Жүктелуде — бос экран (жыпылықтамау үшін)
   if (!loaded) {
-    return <div className="min-h-screen bg-bg" />;
+    return <div className="min-h-screen bg-background" />;
   }
 
   // Onboarding аяқталмаған — оны көрсету
@@ -67,9 +56,7 @@ function AppContent() {
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          {routes.filter(([p]) => !["/", "/cinema", "/chat", "/dictionary", "/settings", "/games", "/ielts", "/courses", "/practice", "/progress", "/leaderboard"].includes(p)).map(([path, title]) => (
-            <Route key={path} path={path} element={<PlaceholderPage title={title} />} />
-          ))}
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
@@ -78,8 +65,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <LangProvider>
-      <AppContent />
-    </LangProvider>
+    <ErrorBoundary>
+      <LangProvider>
+        <AppContent />
+      </LangProvider>
+    </ErrorBoundary>
   );
 }

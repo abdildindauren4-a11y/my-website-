@@ -6,8 +6,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
+import { useUserPrefs } from "@/store/userPrefs";
 import { useProgress } from "@/store/progressStore";
 import { shuffle } from "@/lib/gamesData";
+import { getSentences, type BankSentence } from "@/data/sentenceBank";
 import { celebrate, celebrateBig } from "@/lib/celebrate";
 import { speak } from "@/lib/speech";
 import {
@@ -17,44 +19,20 @@ import {
 import { ListOrdered, RotateCcw, Volume2, VolumeX, Trophy, Check, X, Lightbulb, Sparkles, Flame, Eraser } from "lucide-react";
 import { GameIntro } from "./SpeedQuizGame";
 
-interface Sentence {
-  en: string;
-  kk: string;
-  level: number; // 1=қысқа, 2=орта, 3=ұзын
-}
-
-// Сөйлемдер — деңгейге бөлінген (қысқа → ұзын)
-const SENTENCES: Sentence[] = [
-  // Деңгей 1 — қысқа
-  { en: "I like coffee", kk: "Мен кофе ұнатамын", level: 1 },
-  { en: "She is happy", kk: "Ол бақытты", level: 1 },
-  { en: "We are friends", kk: "Біз доспыз", level: 1 },
-  { en: "He reads books", kk: "Ол кітап оқиды", level: 1 },
-  { en: "They play music", kk: "Олар музыка ойнайды", level: 1 },
-  // Деңгей 2 — орта
-  { en: "I want to learn English", kk: "Мен ағылшын тілін үйренгім келеді", level: 2 },
-  { en: "She is reading a book", kk: "Ол кітап оқып жатыр", level: 2 },
-  { en: "We are going to school", kk: "Біз мектепке барамыз", level: 2 },
-  { en: "He likes to play football", kk: "Ол футбол ойнағанды ұнатады", level: 2 },
-  { en: "My favorite color is blue", kk: "Менің сүйікті түсім — көк", level: 2 },
-  // Деңгей 3 — ұзын
-  { en: "The weather is very nice today", kk: "Бүгін ауа райы өте жақсы", level: 3 },
-  { en: "I have two brothers and one sister", kk: "Менің екі ағам, бір қарындасым бар", level: 3 },
-  { en: "We will travel to many countries next year", kk: "Біз келесі жылы көп елге саяхаттаймыз", level: 3 },
-  { en: "She always helps me with my homework", kk: "Ол маған үй жұмысыма әрқашан көмектеседі", level: 3 },
-  { en: "Learning a new language opens many doors", kk: "Жаңа тіл үйрену көп есік ашады", level: 3 },
-];
+type Sentence = BankSentence;
 
 interface WordChip {
   id: number;
   text: string;
 }
 
-const ROUNDS = 8; // бір ойында неше сөйлем
+const ROUNDS = 9; // бір ойында неше сөйлем (3 деңгей × 3)
 
 export default function SentenceBuilderGame() {
   const { t, lang } = useLang();
+  const { prefs } = useUserPrefs();
   const { addXP } = useProgress();
+  const gameLang = prefs.learningLang; // en | zh — сөйлемдер үйрену тілінде
   const [phase, setPhase] = useState<"ready" | "playing" | "result">("ready");
   const [pool, setPool] = useState<Sentence[]>([]);
   const [index, setIndex] = useState(0);
@@ -68,7 +46,7 @@ export default function SentenceBuilderGame() {
 
   const current = pool[index];
 
-  const bestKey = "linguafast_game_builder";
+  const bestKey = gameLang === "zh" ? "linguafast_game_builder_zh" : "linguafast_game_builder";
   const [best, setBest] = useState(() => {
     try { return parseInt(localStorage.getItem(bestKey) || "0"); } catch { return 0; }
   });
@@ -76,7 +54,7 @@ export default function SentenceBuilderGame() {
   const start = () => {
     setSoundOn(isSoundEnabled());
     // Деңгей бойынша реттеп, біртіндеп қиындату
-    const sorted = [...SENTENCES].sort((a, b) => a.level - b.level);
+    const sorted = [...getSentences(gameLang)].sort((a, b) => a.level - b.level);
     const selected: Sentence[] = [];
     [1, 2, 3].forEach((lv) => {
       const lvSentences = shuffle(sorted.filter((s) => s.level === lv));
@@ -92,7 +70,7 @@ export default function SentenceBuilderGame() {
   };
 
   const setupSentence = (sentence: Sentence) => {
-    const words = sentence.en.split(" ").map((w, i) => ({ id: i, text: w }));
+    const words = sentence.text.split(" ").map((w, i) => ({ id: i, text: w }));
     setAvailable(shuffle(words));
     setBuilt([]);
     setCorrect(null);
@@ -122,7 +100,7 @@ export default function SentenceBuilderGame() {
   // Көмек — келесі дұрыс сөзді орналастыру
   const useHint = () => {
     if (correct !== null) return;
-    const correctWords = current.en.split(" ");
+    const correctWords = current.text.split(" ");
     const nextPos = built.length;
     if (nextPos >= correctWords.length) return;
     const nextWord = correctWords[nextPos];
@@ -137,7 +115,7 @@ export default function SentenceBuilderGame() {
 
   const check = () => {
     const answer = built.map((w) => w.text).join(" ");
-    const isCorrect = answer === current.en;
+    const isCorrect = answer === current.text;
     setCorrect(isCorrect);
     if (isCorrect) {
       const base = 20 + current.level * 10;
@@ -148,8 +126,8 @@ export default function SentenceBuilderGame() {
       setStreak((s) => s + 1);
       playWin();
       celebrate();
-      speak(current.en, "en");
-      addXP(Math.round(points / 2));
+      speak(current.text, gameLang);
+      addXP(Math.round(points / 2), { type: "game", module: "games", meta: { game: "sentence-builder", points } });
     } else {
       setStreak(0);
       playWrong();
@@ -219,7 +197,7 @@ export default function SentenceBuilderGame() {
   }
 
   // Дұрыс сөздерді көрсету (нәтиже аймағында дұрыс/қате белгілеу)
-  const correctWords = current.en.split(" ");
+  const correctWords = current.text.split(" ");
 
   return (
     <div>
@@ -266,8 +244,11 @@ export default function SentenceBuilderGame() {
         </span>
       </div>
 
-      {/* Құрылған сөйлем */}
-      <div className={`min-h-[5rem] rounded-card border-2 border-dashed p-3 mb-3 flex flex-wrap gap-2 items-start transition-colors ${
+      {/* Құрылған сөйлем (қате болса — шайқалады) */}
+      <motion.div
+        animate={correct === false ? { x: [0, -10, 10, -6, 6, 0] } : { x: 0 }}
+        transition={{ duration: 0.45 }}
+        className={`min-h-[5rem] rounded-card border-2 border-dashed p-3 mb-3 flex flex-wrap gap-2 items-start transition-colors ${
         correct === true ? "border-accent-green bg-accent-green/5" :
         correct === false ? "border-accent-red bg-accent-red/5" :
         "border-border bg-surface-2/50"
@@ -299,7 +280,7 @@ export default function SentenceBuilderGame() {
             );
           })}
         </AnimatePresence>
-      </div>
+      </motion.div>
 
       {/* Нәтиже хабары */}
       <AnimatePresence>
@@ -310,10 +291,10 @@ export default function SentenceBuilderGame() {
           >
             {correct ? <Check className="w-5 h-5 shrink-0" /> : <X className="w-5 h-5 shrink-0" />}
             <span className="font-medium text-sm flex-1">
-              {correct ? t("build.correct") : current.en}
+              {correct ? t("build.correct") : current.text}
             </span>
             {correct && (
-              <button onClick={() => speak(current.en, "en")}>
+              <button onClick={() => speak(current.text, gameLang)}>
                 <Volume2 className="w-4 h-4" />
               </button>
             )}

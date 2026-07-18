@@ -47,8 +47,38 @@ export const geminiConfigured = isGeminiConfigured();
 // Тіл үйретудің ең күшті әдістеріне негізделген: Krashen, Swain, Vygotsky, SRS.
 export type ChatMode = "immersion" | "teacher";
 
+// ── Сайт туралы білім қоры ──
+// AI осы арқылы LinguaFast-тың мүмкіндіктерін біледі әрі қолданушыға
+// сайтты қалай пайдалануды ҚАЗАҚША түсіндіре алады.
+const SITE_GUIDE = `
+═══════════════════════════════════════
+ABOUT THE APP — you are the built-in assistant of "LinguaFast"
+═══════════════════════════════════════
+LinguaFast is a language-learning web app for Kazakh speakers (learn English or Chinese). Its main sections (in the left sidebar):
+- Басты бет (Dashboard): күнделікті мақсат, XP деңгейі, серия (streak), жалғастыратын курс.
+- Курстар (Courses): құрылымды сабақтар (ағылшын шақтары, етістіктер, іскери ағылшын, қытай пиньинь мен грамматика). Теория + жаттығу + тест.
+- LinguaCinema (Кино): кез келген YouTube видеосын қосып, субтитр (.srt/.vtt) жүктеп, AI-мен қазақша аударма + сөздік + тест жасайды. Субтитрдегі сөзді бассаң — мағынасы; ✨ батырма — сөйлем грамматикасын түсіндіреді.
+- ImmersionChat (осы чат): AI тәлімгермен мәтінмен не дауыспен сөйлесу. Жоғарыда «Дауыс» батырмасы — толық дауыстық режим.
+- Сөздік (Dictionary): SRS әдісімен сөз жаттау, іздеу, «Қайталау».
+- Жаттығулар (Practice): лексика/грамматика жаттығулары.
+- Ойындар (Games): Сөз сәйкестігі, Жылдам викторина, Сөз жаңбыры, Әріп табу, Сөйлем құрау, Жады дуэлі.
+- IELTS: Reading, Listening (студиялық AI дауыс), Writing және Speaking (микрофон + AI бағалау), Жылдам тест.
+- Прогресс, Рейтинг, Баптаулар (мұнда Gemini API кілтін қосады).
+
+When the student asks HOW to use the app, WHERE a feature is, or asks for help with the site → answer helpfully and point them to the right section, using the names above.`;
+
 function buildSystemPrompt(learningLang: string, uiLang: "kk" | "en", level: string, mode: ChatMode = "immersion"): string {
   const explainIn = uiLang === "kk" ? "Kazakh" : "English";
+
+  // Барлық режимге ортақ ереже: сайт/көмек сұрақтарына ҚАЗАҚША жауап беру
+  const kazakhHelpRule = `
+═══════════════════════════════════════
+LANGUAGE OF YOUR REPLY (important)
+═══════════════════════════════════════
+- If the student writes or SPEAKS in Kazakh, or asks a question ABOUT the app / how to do something / for help / a real-life question — ANSWER IN KAZAKH so they fully understand. Be a helpful assistant first.
+- Use the site guide below to help them navigate LinguaFast.
+- Only after helping, gently invite them back to practise ${learningLang}. Never ignore a Kazakh question by replying only in ${learningLang}.
+${SITE_GUIDE}`;
 
   // ── МҰҒАЛІМ РЕЖИМІ — қазақшаны араластырып түсіндіреді ──
   if (mode === "teacher") {
@@ -69,7 +99,8 @@ TEACHING METHOD
 - Correct the 1–2 most important mistakes; show the correct ${learningLang} form, then explain WHY in Kazakh.
 - Adapt to a ${level} learner: ${level === "beginner" ? "very simple, lots of Kazakh support." : level === "advanced" ? "more ${learningLang}, deeper explanations." : "balance Kazakh explanation with ${learningLang} practice."}
 - Be encouraging and clear. Keep it focused (3–6 sentences).
-- ALWAYS end by inviting the student to try something in ${learningLang}.`;
+- ALWAYS end by inviting the student to try something in ${learningLang}.
+${kazakhHelpRule}`;
   }
 
   // ── ИММЕРСИЯ РЕЖИМІ (әдепкі) — негізінен ${learningLang} ──
@@ -123,13 +154,17 @@ RULES
 - ALWAYS end with a question or prompt to continue the conversation.
 - Be genuinely warm, patient, and encouraging — like the best teacher they've ever had.
 - Adapt difficulty to their ${level} level automatically.
-- If they write in ${explainIn} instead of ${learningLang}, gently encourage them to try in ${learningLang}, and help them.`;
+- If they write in ${explainIn} instead of ${learningLang}, gently encourage them to try in ${learningLang}, and help them.
+${kazakhHelpRule}`;
 }
 
 export interface ChatMessage {
   role: "user" | "model";
   text: string;
 }
+
+// Ұзақ әңгімеде API-ға жіберілетін хабарлама шегі
+const MAX_HISTORY = 60;
 
 // AI-ге хабарлама жіберіп, жауап алу
 export async function sendChatMessage(
@@ -138,7 +173,9 @@ export async function sendChatMessage(
   learningLang: string,
   uiLang: "kk" | "en",
   level: string = "intermediate",
-  mode: ChatMode = "immersion"
+  mode: ChatMode = "immersion",
+  memory: string = "",
+  voiceMode: boolean = false
 ): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
   // Кілтті әр шақыруда тексереміз (баптаулардан өзгеруі мүмкін)
   const key = getGeminiKey();
@@ -151,26 +188,51 @@ export async function sendChatMessage(
     // Қолданушы хабарламасына қарай ҚАЖЕТТІ білімді таңдау (тіл + деңгей)
     const langForKb = learningLang.includes("Chinese") || learningLang.includes("中") ? "Chinese" : "English";
     const knowledge = buildKnowledgeContext(newMessage, level as any, langForKb);
-    const fullSystemPrompt = buildSystemPrompt(learningLang, uiLang, level, mode) +
+    let fullSystemPrompt = buildSystemPrompt(learningLang, uiLang, level, mode) +
       "\n\n═══════════════════════════════════════\n" +
       "YOUR KNOWLEDGE BASE (use the most relevant parts for THIS message):\n" +
       "═══════════════════════════════════════\n" + knowledge;
+
+    // Ұзақ мерзімді жады — өткен әңгімелерден оқушы туралы конспект
+    if (memory) {
+      fullSystemPrompt +=
+        "\n\n═══════════════════════════════════════\n" +
+        "LONG-TERM MEMORY — what you know about THIS student from previous conversations.\n" +
+        "Use it naturally (recall their interests, goals, recurring mistakes). Never say you are reading notes.\n" +
+        "═══════════════════════════════════════\n" + memory;
+    }
+
+    // Форматтау: дауыс режимінде — таза ауызекі мәтін, әдетте — жеңіл Markdown
+    if (voiceMode) {
+      fullSystemPrompt +=
+        "\n\nVOICE CONVERSATION MODE: The student is TALKING to you by voice and will HEAR your reply " +
+        "spoken aloud. Reply in plain conversational text ONLY — no markdown, no asterisks, no headings, " +
+        "no lists, no emojis, no brackets with notes. Speak like a real person: 1-3 short, natural sentences. " +
+        "Always end with a short question to keep the conversation going.";
+    } else {
+      fullSystemPrompt +=
+        "\n\nFORMATTING: You may use light Markdown — **bold** for key words/corrections, " +
+        "bullet lists for options, `code style` for words being analysed. Keep it minimal and clean.";
+    }
 
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash", // қазіргі тұрақты тегін модель (1.5 және 2.0 жабылған)
       systemInstruction: fullSystemPrompt,
     });
 
-    // Тарихты Gemini форматына айналдыру
+    // Тарихты Gemini форматына айналдыру (соңғы MAX_HISTORY хабарлама)
     const chat = model.startChat({
-      history: history.map((m) => ({
+      history: history.slice(-MAX_HISTORY).map((m) => ({
         role: m.role,
         parts: [{ text: m.text }],
       })),
       generationConfig: {
-        maxOutputTokens: 500,
+        // 500 аз еді — жауап ортасынан үзілетін. 2048 — толық жауапқа жеткілікті.
+        maxOutputTokens: 2048,
         temperature: 0.7,
-      },
+        // Ішкі «ойлануды» өшіру: ойлану токендері лимитті жемейді, жауап жылдамырақ
+        thinkingConfig: { thinkingBudget: 0 },
+      } as object,
     });
 
     const result = await chat.sendMessage(newMessage);
@@ -190,5 +252,92 @@ export async function sendChatMessage(
       return { ok: false, error: "quota" };
     }
     return { ok: false, error: "general" };
+  }
+}
+
+// ── Дауысты тану (транскрипция) ──
+// Аудионы Gemini-ге жібереді — тілді АВТОМАТТЫ анықтайды
+// (қазақша, ағылшынша, қытайша — қайсысында сөйлесе, сол тілде жазады).
+export async function transcribeAudio(blob: Blob, mimeType: string): Promise<string | null> {
+  const key = getGeminiKey();
+  if (!key) return null;
+
+  try {
+    // Blob → base64
+    const buf = await blob.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    let binary = "";
+    const CHUNK = 0x8000;
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+    }
+    const base64 = btoa(binary);
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { inlineData: { mimeType, data: base64 } },
+              { text: "Transcribe this speech EXACTLY as spoken, in the ORIGINAL language (it may be Kazakh, English, or Chinese — detect automatically). Output ONLY the transcription text, nothing else. If there is no speech, output an empty string." },
+            ],
+          }],
+          generationConfig: { temperature: 0, maxOutputTokens: 1000, thinkingConfig: { thinkingBudget: 0 } },
+        }),
+      }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+    return text || null;
+  } catch {
+    return null;
+  }
+}
+
+// ── Ұзақ мерзімді жадыны жаңарту ──
+// Соңғы әңгіме үзіндісінен оқушы туралы қысқа конспект жасайды.
+// Фонда шақырылады (әр бірнеше хабарлама сайын); қате болса — үнсіз өтеді.
+export async function updateStudentMemory(
+  recentHistory: ChatMessage[],
+  currentMemory: string,
+  learningLang: string
+): Promise<string | null> {
+  const key = getGeminiKey();
+  if (!key) return null;
+
+  try {
+    const genAI = new GoogleGenerativeAI(key);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const transcript = recentHistory
+      .slice(-16)
+      .map((m) => `${m.role === "user" ? "Student" : "Tutor"}: ${m.text}`)
+      .join("\n");
+
+    const prompt = `You maintain a compact long-term memory about a ${learningLang} student for their AI tutor.
+
+CURRENT MEMORY:
+${currentMemory || "(empty)"}
+
+RECENT CONVERSATION:
+${transcript}
+
+Update the memory. Keep ONLY durable, useful facts:
+- name, interests, goals, profession/studies
+- recurring grammar/vocabulary mistakes
+- topics already covered, words already taught
+- level observations
+
+Rules: max 120 words, plain bullet lines, no commentary, merge with current memory (drop outdated facts). Output ONLY the updated memory.`;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim();
+    return text.length > 0 && text.length < 2000 ? text : null;
+  } catch {
+    return null; // жады жаңармаса — маңызды емес, келесіде қайталанады
   }
 }

@@ -1,6 +1,6 @@
 // filepath: src/store/customVideoStore.ts
-// Қолданушы өзі қосқан YouTube видео сабақтары (localStorage).
-// Кітапханада дайын сабақтармен қатар көрсетіледі.
+// Қолданушының YouTube видео сабақтары (localStorage).
+// Субтитр, AI жасаған сөздік/тест те осында сақталады.
 
 import { useState, useEffect, useCallback } from "react";
 import type { CinemaLesson } from "@/types/cinema";
@@ -19,6 +19,7 @@ export function parseYouTubeId(input: string): string | null {
     /(?:youtu\.be\/)([\w-]{11})/,
     /(?:youtube\.com\/embed\/)([\w-]{11})/,
     /(?:youtube\.com\/shorts\/)([\w-]{11})/,
+    /(?:youtube\.com\/live\/)([\w-]{11})/,
   ];
   for (const re of patterns) {
     const m = s.match(re);
@@ -78,9 +79,14 @@ export function useCustomVideos() {
     return lesson;
   }, []);
 
+  // Видеоны жаңарту: субтитр, сөздік, тест, ұзақтық т.б. сақтау
+  const updateVideo = useCallback((id: string, patch: Partial<CinemaLesson>) => {
+    setVideos((prev) => prev.map((v) => (v.id === id ? { ...v, ...patch } : v)));
+  }, []);
+
   const removeVideo = useCallback((id: string) => {
     setVideos((prev) => prev.filter((v) => v.id !== id));
   }, []);
 
-  return { videos, addVideo, removeVideo };
+  return { videos, addVideo, updateVideo, removeVideo };
 }

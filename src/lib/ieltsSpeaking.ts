@@ -51,13 +51,14 @@ export interface RecognitionController {
 export function createRecognition(
   onResult: (transcript: string, isFinal: boolean) => void,
   onEnd: () => void,
-  onError?: (error: string) => void
+  onError?: (error: string) => void,
+  lang: string = "en-US"
 ): RecognitionController | null {
   if (!isSpeechRecognitionSupported()) return null;
 
   const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
   const recognition = new SpeechRecognition();
-  recognition.lang = "en-US";
+  recognition.lang = lang;
   recognition.continuous = true;
   recognition.interimResults = true;
 
@@ -147,7 +148,7 @@ Respond ONLY with valid JSON (no markdown):
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: systemPrompt + "\n\nRESPONSES:\n" + qaText }] }],
-        generationConfig: { temperature: 0.3, maxOutputTokens: 1500 },
+        generationConfig: { temperature: 0.3, maxOutputTokens: 2500, thinkingConfig: { thinkingBudget: 0 } },
       }),
     }
   );

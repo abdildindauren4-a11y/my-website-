@@ -6,6 +6,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { parseYouTubeId, type NewVideoInput } from "@/store/customVideoStore";
+import { categories } from "@/lib/cinemaData";
 import { X, Film, Check, AlertCircle } from "lucide-react";
 
 interface Props {
@@ -21,6 +22,7 @@ export default function AddVideoModal({ onClose, onAdd }: Props) {
   const [description, setDescription] = useState("");
   const [level, setLevel] = useState<"beginner" | "intermediate" | "advanced">("beginner");
   const [videoLang, setVideoLang] = useState<"en" | "zh">("en");
+  const [category, setCategory] = useState("movies");
 
   const youtubeId = parseYouTubeId(url);
   const urlTouched = url.trim().length > 0;
@@ -35,7 +37,7 @@ export default function AddVideoModal({ onClose, onAdd }: Props) {
       descriptionKk: description.trim(),
       youtubeId,
       level,
-      category: "custom",
+      category,
       lang: videoLang,
     });
     onClose();
@@ -131,6 +133,22 @@ export default function AddVideoModal({ onClose, onAdd }: Props) {
                   className={`flex-1 p-2.5 rounded-card border text-sm font-medium transition-all ${level === val ? "border-accent-pink bg-accent-pink/10 text-accent-pink" : "border-border hover:border-accent-pink/40"}`}
                 >
                   {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Категория */}
+          <div>
+            <label className="text-sm font-medium mb-1.5 block">{t("cinema.videoCategory")}</label>
+            <div className="flex flex-wrap gap-2">
+              {categories.filter((c) => c.id !== "all").map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setCategory(c.id)}
+                  className={`px-3 py-1.5 rounded-btn border text-xs font-medium transition-all ${category === c.id ? "border-accent-pink bg-accent-pink/10 text-accent-pink" : "border-border text-text-secondary hover:border-accent-pink/40"}`}
+                >
+                  {c.emoji} {lang === "kk" ? c.labelKk : c.labelEn}
                 </button>
               ))}
             </div>

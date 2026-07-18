@@ -28,6 +28,44 @@ type View = "hub" | "reading-list" | "listening-list" | "test" | "result" | "lis
 
 const listeningTests: ListeningTest[] = [listeningTest1, listeningTest2];
 
+// ── Сұрақ палитрасы — нағыз компьютерлік IELTS-тегідей ──
+// Барлық сұрақ нөмірі: жауап берілгені боялған; басу → сол бөлімге өту.
+interface PaletteItem {
+  id: string;
+  number: number;
+  partIdx: number;
+  answered: boolean;
+}
+
+function QuestionPalette({ items, currentPart, accent, partLabel, onJump }: {
+  items: PaletteItem[];
+  currentPart: number;
+  accent: "green" | "blue";
+  partLabel: string;
+  onJump: (partIdx: number) => void;
+}) {
+  const activeCls = accent === "green" ? "bg-accent-green text-white" : "bg-accent-blue text-white";
+  const ringCls = accent === "green" ? "ring-accent-green" : "ring-accent-blue";
+  return (
+    <div className="sticky bottom-0 z-20 bg-background/95 backdrop-blur-sm border-t border-border -mx-4 px-4 py-2.5 mt-5">
+      <div className="flex items-center gap-1.5 flex-wrap justify-center">
+        {items.map((q) => (
+          <button
+            key={q.id}
+            onClick={() => onJump(q.partIdx)}
+            title={`${partLabel} ${q.partIdx + 1}`}
+            className={`w-7 h-7 rounded text-[11px] font-bold tabular-nums transition-all ${
+              q.answered ? activeCls : "bg-surface-2 text-text-secondary border border-border hover:bg-surface"
+            } ${q.partIdx === currentPart ? `ring-2 ring-offset-1 ${ringCls}` : ""}`}
+          >
+            {q.number}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function IeltsPage() {
   const { t, lang } = useLang();
   const { addXP } = useProgress();
@@ -42,10 +80,14 @@ export default function IeltsPage() {
   const [timeLeft, setTimeLeft] = useState(0);
   const startTimeRef = useRef<number>(0);
 
-  // Таймер
+  // Таймер (Reading және Listening — уақыт біткенде автоматты тапсырылады)
   useEffect(() => {
-    if (view !== "test") return;
-    if (timeLeft <= 0) { handleSubmit(); return; }
+    if (view !== "test" && view !== "listen-test") return;
+    if (timeLeft <= 0) {
+      if (view === "test") handleSubmit();
+      else handleListeningSubmit();
+      return;
+    }
     const timer = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearTimeout(timer);
     // eslint-disable-next-line
@@ -70,7 +112,7 @@ export default function IeltsPage() {
     const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
     const res = gradeTest(activeTest, answers, timeSpent);
     setResult(res);
-    addXP(res.correct * 5); // әр дұрыс жауап = 5 XP
+    addXP(res.correct * 5, { type: "ielts", module: "ielts", meta: { section: "reading", correct: res.correct } });
     setView("result");
   };
 
@@ -80,6 +122,7 @@ export default function IeltsPage() {
     setAnswers({});
     setResult(null);
     setSectionIdx(0);
+    setTimeLeft(30 * 60); // нағыз IELTS Listening — 30 минут
     startTimeRef.current = Date.now();
     setView("listen-test");
   };
@@ -89,7 +132,7 @@ export default function IeltsPage() {
     const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
     const res = gradeListeningTest(activeListening, answers, timeSpent);
     setResult(res);
-    addXP(res.correct * 5);
+    addXP(res.correct * 5, { type: "ielts", module: "ielts", meta: { section: "listening", correct: res.correct } });
     setView("listen-result");
   };
 
@@ -312,6 +355,9 @@ export default function IeltsPage() {
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
     const answeredCount = Object.keys(answers).filter((k) => answers[k]?.trim()).length;
+    const paletteItems = activeTest.passages.flatMap((p, pi) =>
+      p.groups.flatMap((g) => g.questions.map((q) => ({ id: q.id, number: q.number, partIdx: pi, answered: !!answers[q.id]?.trim() })))
+    );
 
     return (
       <div className="max-w-6xl mx-auto">
@@ -362,10 +408,11 @@ export default function IeltsPage() {
               <span className="text-xs text-text-muted">{passage.wordCount} {lang === "kk" ? "сөз" : "words"}</span>
             </div>
             <h2 className="text-lg font-display font-bold mb-3">{passage.title}</h2>
-            <div className="space-y-3">
+            {/* Нағыз емтихандағыдай serif қаріп */}
+            <div className="space-y-3 font-serif">
               {passage.paragraphs.map((para) => (
-                <div key={para.label} className="text-sm leading-relaxed">
-                  <span className="font-bold text-accent-green mr-1.5">{para.label}</span>
+                <div key={para.label} className="text-[15px] leading-relaxed text-justify">
+                  <span className="font-bold text-accent-green mr-1.5 font-sans">{para.label}</span>
                   {para.text}
                 </div>
               ))}
@@ -417,6 +464,15 @@ export default function IeltsPage() {
             ))}
           </div>
         </div>
+
+        {/* Сұрақ палитрасы */}
+        <QuestionPalette
+          items={paletteItems}
+          currentPart={passageIdx}
+          accent="green"
+          partLabel={t("ielts.passage")}
+          onJump={setPassageIdx}
+        />
       </div>
     );
   }
@@ -527,6 +583,11 @@ export default function IeltsPage() {
   if (view === "listen-test" && activeListening) {
     const section = activeListening.sections[sectionIdx];
     const answeredCount = Object.keys(answers).filter((k) => answers[k]?.trim()).length;
+    const lMinutes = Math.floor(timeLeft / 60);
+    const lSeconds = timeLeft % 60;
+    const paletteItems = activeListening.sections.flatMap((s, si) =>
+      s.groups.flatMap((g) => g.questions.map((q) => ({ id: q.id, number: q.number, partIdx: si, answered: !!answers[q.id]?.trim() })))
+    );
 
     return (
       <div className="max-w-5xl mx-auto">
@@ -538,6 +599,10 @@ export default function IeltsPage() {
             </button>
             <div className="flex items-center gap-4">
               <span className="text-sm text-text-secondary">{answeredCount}/{activeListening.totalQuestions} {t("ielts.answered")}</span>
+              <div className={`flex items-center gap-1.5 font-display font-bold ${timeLeft <= 300 ? "text-accent-red" : ""}`}>
+                <Clock className="w-4 h-4" />
+                <span className="tabular-nums">{lMinutes}:{String(lSeconds).padStart(2, "0")}</span>
+              </div>
               <button onClick={() => { if (window.confirm(t("ielts.submitConfirm"))) handleListeningSubmit(); }} className="btn-primary text-sm py-1.5 px-4">
                 {t("ielts.submit")}
               </button>
@@ -601,6 +666,15 @@ export default function IeltsPage() {
             </div>
           ))}
         </div>
+
+        {/* Сұрақ палитрасы */}
+        <QuestionPalette
+          items={paletteItems}
+          currentPart={sectionIdx}
+          accent="blue"
+          partLabel={t("listen.section")}
+          onJump={setSectionIdx}
+        />
       </div>
     );
   }

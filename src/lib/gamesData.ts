@@ -56,6 +56,23 @@ export interface GameMeta {
   accent: string;     // екпін түсі
 }
 
+// Ойынның ең жақсы нәтижесін оқу (хаб карточкаларына)
+export function getBestScore(gameId: string, lang: LearnLang): number {
+  const keys: Record<string, string> = {
+    "word-match": `linguafast_game_match_${lang}`,
+    "speed-quiz": `linguafast_game_speedquiz_${lang}`,
+    "word-rain": `linguafast_game_wordrain_${lang}`,
+    "hangman": "linguafast_game_hangman_en",
+    "sentence-builder": lang === "zh" ? "linguafast_game_builder_zh" : "linguafast_game_builder",
+    "memory-duel": `linguafast_game_memory_${lang}`,
+  };
+  try {
+    return parseInt(localStorage.getItem(keys[gameId] || "") || "0") || 0;
+  } catch {
+    return 0;
+  }
+}
+
 export const gamesList: GameMeta[] = [
   {
     id: "word-match",

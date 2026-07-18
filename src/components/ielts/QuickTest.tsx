@@ -41,7 +41,7 @@ export default function QuickTest({ onBack }: { onBack: () => void }) {
 
   const next = () => {
     if (idx + 1 >= questions.length) {
-      addXP(correctCount * 5);
+      addXP(correctCount * 5, { type: "ielts", module: "ielts", meta: { section: "quick-test", correct: correctCount } });
       setPhase("done");
     } else {
       setIdx((i) => i + 1);

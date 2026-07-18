@@ -89,7 +89,7 @@ export default function HangmanGame() {
         playWin();
         celebrate();
         speak(word!.term, "en");
-        addXP(points);
+        addXP(points, { type: "game", module: "games", meta: { game: "hangman", score: newScore } });
         if (newScore > best) {
           setBest(newScore);
           try { localStorage.setItem(bestKey, String(newScore)); } catch { /* */ }

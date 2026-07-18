@@ -6,7 +6,10 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { useUserPrefs, type LearningLanguage, type ProficiencyLevel } from "@/store/userPrefs";
-import { Zap, ArrowRight, ArrowLeft, Check, Sparkles, GraduationCap, Target, Globe } from "lucide-react";
+import { cefrToLegacy, legacyToCefr, type CefrLevel } from "@/lib/cefr";
+import PlacementTest from "@/components/shared/PlacementTest";
+import Logo from "@/components/shared/Logo";
+import { ArrowRight, ArrowLeft, Check, Sparkles, GraduationCap, Target, Globe } from "lucide-react";
 
 interface Props {
   onComplete: () => void;
@@ -20,13 +23,29 @@ export default function OnboardingPage({ onComplete }: Props) {
   const [name, setName] = useState("");
   const [learningLang, setLearningLang] = useState<LearningLanguage>("en");
   const [level, setLevel] = useState<ProficiencyLevel>("beginner");
+  const [cefr, setCefr] = useState<CefrLevel | null>(null);
+  const [testMode, setTestMode] = useState(false); // деңгей анықтау тесті ашық па
   const [goalMin, setGoalMin] = useState(15);
 
   const totalSteps = 3; // welcome-тен кейінгі қадамдар
 
   const finish = () => {
-    completeOnboarding({ learningLang, level, dailyGoalMin: goalMin, name: name.trim() || undefined });
+    completeOnboarding({
+      learningLang,
+      level,
+      cefrLevel: cefr || legacyToCefr(level),
+      dailyGoalMin: goalMin,
+      name: name.trim() || undefined,
+    });
     onComplete();
+  };
+
+  // Тест нәтижесі → деңгей орнатылып, келесі қадамға
+  const handlePlacementDone = (result: CefrLevel) => {
+    setCefr(result);
+    setLevel(cefrToLegacy(result));
+    setTestMode(false);
+    setStep(3);
   };
 
   return (
@@ -64,9 +83,9 @@ export default function OnboardingPage({ onComplete }: Props) {
             <motion.div key="welcome" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center">
               <motion.div
                 initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", delay: 0.1 }}
-                className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent-blue to-accent-purple flex items-center justify-center mx-auto mb-6"
+                className="w-20 h-20 mx-auto mb-6 flex items-center justify-center"
               >
-                <Zap className="w-10 h-10 text-white" />
+                <Logo size={80} />
               </motion.div>
               <h1 className="text-3xl font-display font-bold mb-3">{t("onb.welcome")}</h1>
               <p className="text-text-secondary mb-8 max-w-md mx-auto leading-relaxed">{t("onb.welcomeDesc")}</p>
@@ -132,13 +151,42 @@ export default function OnboardingPage({ onComplete }: Props) {
           )}
 
           {/* ── ҚАДАМ 2: Деңгей ── */}
-          {step === 2 && (
+          {step === 2 && testMode && (
+            <motion.div key="placement" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
+              <PlacementTest
+                lang={learningLang}
+                onDone={handlePlacementDone}
+                onSkip={() => setTestMode(false)}
+              />
+            </motion.div>
+          )}
+          {step === 2 && !testMode && (
             <motion.div key="level" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
               <div className="flex items-center gap-3 mb-2">
                 <GraduationCap className="w-7 h-7 text-accent-gold" />
                 <h2 className="text-2xl font-display font-bold">{t("onb.chooseLevel")}</h2>
               </div>
               <p className="text-text-secondary mb-6">{t("onb.chooseLevelDesc")}</p>
+
+              {/* Тест арқылы анықтау — ұсынылатын жол (Busuu/Duolingo үлгісі) */}
+              <button
+                onClick={() => setTestMode(true)}
+                className="card p-4 w-full flex items-center gap-4 text-left mb-4 border-accent-blue/40 bg-gradient-to-r from-accent-blue/10 to-accent-purple/5 hover:border-accent-blue transition-all"
+              >
+                <div className="w-11 h-11 rounded-card bg-accent-blue/15 flex items-center justify-center shrink-0">
+                  <Target className="w-6 h-6 text-accent-blue" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-display font-semibold flex items-center gap-2">
+                    {t("place.cta")}
+                    <span className="text-[10px] font-bold bg-accent-blue text-white px-2 py-0.5 rounded-full">{t("place.recommended")}</span>
+                  </div>
+                  <div className="text-sm text-text-secondary">{t("place.ctaDesc")}</div>
+                </div>
+                <ArrowRight className="w-5 h-5 text-accent-blue shrink-0" />
+              </button>
+
+              <p className="text-xs text-text-muted mb-3 text-center">{t("place.orManual")}</p>
               <div className="space-y-3 mb-8">
                 {([
                   ["beginner", t("onb.levelBeginner"), t("onb.levelBeginnerDesc"), "🌱"],
@@ -147,8 +195,8 @@ export default function OnboardingPage({ onComplete }: Props) {
                 ] as const).map(([val, title, desc, emoji]) => (
                   <ChoiceCard
                     key={val}
-                    selected={level === val}
-                    onClick={() => setLevel(val)}
+                    selected={level === val && !cefr}
+                    onClick={() => { setLevel(val); setCefr(null); }}
                     flag={emoji}
                     title={title}
                     desc={desc}

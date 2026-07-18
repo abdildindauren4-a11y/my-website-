@@ -53,7 +53,7 @@ export default function Flashcard({ card, onReview }: Props) {
           transition={{ duration: 0.5 }}
           style={{ transformStyle: "preserve-3d" }}
         >
-          {/* Алдыңғы жағы (сөз) */}
+          {/* Алдыңғы жағы (тек сөз — жауапты еске түсіру үшін сурет жоқ) */}
           <div
             className="absolute inset-0 card p-8 flex flex-col items-center justify-center text-center"
             style={{ backfaceVisibility: "hidden" }}

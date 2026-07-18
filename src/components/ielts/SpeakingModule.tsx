@@ -9,10 +9,11 @@ import {
   speakingTests, evaluateSpeaking, createRecognition, isSpeechRecognitionSupported,
   type SpeakingTest, type SpeakingEvaluation, type RecognitionController,
 } from "@/lib/ieltsSpeaking";
-import { isGeminiConfigured } from "@/lib/gemini";
+import { isGeminiConfigured, transcribeAudio } from "@/lib/gemini";
+import { startMicRecording, isMicSupported, type MicRecorder, type MicError } from "@/lib/micRecorder";
 import { bandDescription } from "@/types/ielts";
 import EvaluationResult from "./EvaluationResult";
-import { Mic, MicOff, ArrowLeft, ChevronRight, AlertCircle, Loader2, Volume2 } from "lucide-react";
+import { Mic, Square, ArrowLeft, ChevronRight, AlertCircle, Loader2, Volume2, Play, Trash2 } from "lucide-react";
 import { speak } from "@/lib/speech";
 
 type View = "list" | "test" | "evaluating" | "result";
@@ -30,8 +31,13 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [prepTime, setPrepTime] = useState(0);
   const [recSeconds, setRecSeconds] = useState(0);
+  const [micLevel, setMicLevel] = useState(0);          // нақты дауыс деңгейі (0..1)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null); // жазылған жауап
+  const [transcribing, setTranscribing] = useState(false); // Gemini дауысты тануда
   const recognitionRef = useRef<RecognitionController | null>(null);
-  const speechSupported = isSpeechRecognitionSupported();
+  const micRef = useRef<MicRecorder | null>(null);
+  const levelRafRef = useRef<number>(0);
+  const speechSupported = isSpeechRecognitionSupported() || isMicSupported();
 
   const question = test?.questions[qIdx];
 
@@ -71,30 +77,90 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
     setView("test");
   };
 
-  const toggleRecording = () => {
+  // Деңгей өлшегіш цикл (жазу кезінде нақты амплитуданы көрсетеді)
+  const levelLoop = () => {
+    setMicLevel(micRef.current?.getLevel() || 0);
+    levelRafRef.current = requestAnimationFrame(levelLoop);
+  };
+
+  const stopLevelLoop = () => {
+    cancelAnimationFrame(levelRafRef.current);
+    setMicLevel(0);
+  };
+
+  const clearRecording = () => {
+    if (audioUrl) URL.revokeObjectURL(audioUrl);
+    setAudioUrl(null);
+  };
+
+  const toggleRecording = async () => {
     if (recording) {
-      recognitionRef.current?.stop();
+      // ── Тоқтату ──
       setRecording(false);
-    } else {
-      const rec = createRecognition(
-        (text) => setTranscript(text),
-        () => setRecording(false),
-        (err) => { setError(err === "not-allowed" ? "MIC_PERMISSION" : null); setRecording(false); }
-      );
+      stopLevelLoop();
+      recognitionRef.current?.stop();
+      recognitionRef.current = null;
+      const rec = await micRef.current?.stop();
+      micRef.current = null;
       if (rec) {
-        recognitionRef.current = rec;
-        setRecSeconds(0);
-        rec.start();
-        setRecording(true);
+        setAudioUrl(rec.url);
+        // Gemini кілті болса — жазбаны AI таниды (браузер тануынан дәлірек,
+        // әрі микрофонды бір өзі қолданады: iPhone-дағы қақтығыс жоқ)
+        if (isGeminiConfigured()) {
+          setTranscribing(true);
+          const text = await transcribeAudio(rec.blob, rec.mimeType);
+          setTranscribing(false);
+          if (text) setTranscript((prev) => (prev ? prev + " " : "") + text);
+        }
       }
+    } else {
+      // ── Бастау ──
+      setError(null);
+      clearRecording();
+
+      const useGemini = isGeminiConfigured();
+
+      // 1) Нақты аудио жазу (тыңдап тексеру + Gemini тану үшін)
+      if (isMicSupported()) {
+        try {
+          micRef.current = await startMicRecording();
+        } catch (e) {
+          const err = e as MicError;
+          if (err === "not-allowed") { setError("MIC_PERMISSION"); return; }
+          if (err === "no-device") { setError("MIC_NO_DEVICE"); return; }
+          micRef.current = null; // жазылмаса да тану жұмыс істей береді
+        }
+      }
+
+      // 2) Браузер тануы — ТЕК Gemini жоқ болғанда.
+      // (Екеуін қатар қосу iPhone/Safari-де микрофон қақтығысын тудырады)
+      if (!(useGemini && micRef.current) && isSpeechRecognitionSupported()) {
+        const rec = createRecognition(
+          (text) => setTranscript(text),
+          () => { /* тоқтағаны toggleRecording-те өңделеді */ },
+          (err) => {
+            if (err === "not-allowed") { setError("MIC_PERMISSION"); setRecording(false); stopLevelLoop(); }
+          }
+        );
+        recognitionRef.current = rec;
+        rec?.start();
+      }
+
+      setRecSeconds(0);
+      setRecording(true);
+      if (micRef.current) levelLoop();
     }
   };
 
   const nextQuestion = () => {
     if (!question) return;
     recognitionRef.current?.stop();
+    micRef.current?.cancel();
+    micRef.current = null;
+    stopLevelLoop();
     setRecording(false);
     setRecSeconds(0);
+    clearRecording();
     // Жауапты сақтау
     const newAnswers = [...answers, { question: question.question, answer: transcript || "(no answer)" }];
     setAnswers(newAnswers);
@@ -113,7 +179,7 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
     try {
       const result = await evaluateSpeaking(finalAnswers, lang);
       setEvaluation(result);
-      addXP(Math.round(result.overallBand * 10));
+      addXP(Math.round(result.overallBand * 10), { type: "ielts", module: "ielts", meta: { section: "speaking", band: result.overallBand } });
       setView("result");
     } catch (e: any) {
       setError(e.message === "NO_API_KEY" ? "NO_KEY" : "EVAL_ERROR");
@@ -190,7 +256,7 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
         {error && (
           <div className="card p-3 mb-3 border-accent-red/30 bg-accent-red/5 flex items-start gap-2">
             <AlertCircle className="w-4 h-4 text-accent-red shrink-0 mt-0.5" />
-            <p className="text-sm text-accent-red">{error === "MIC_PERMISSION" ? t("speak.micPermission") : error === "NO_KEY" ? t("write.needApiKey") : t("write.error")}</p>
+            <p className="text-sm text-accent-red">{error === "MIC_PERMISSION" ? t("speak.micPermission") : error === "MIC_NO_DEVICE" ? t("speak.micNoDevice") : error === "NO_KEY" ? t("write.needApiKey") : t("write.error")}</p>
           </div>
         )}
 
@@ -227,34 +293,66 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
         <div className="card p-6 mb-4">
           {speechSupported && (
             <div className="flex flex-col items-center mb-4">
-              <button
-                onClick={toggleRecording}
-                className={`w-20 h-20 rounded-full flex items-center justify-center mb-3 transition-all ${
-                  recording ? "bg-accent-red text-white shadow-card-hover" : "bg-accent-gold text-white hover:bg-accent-gold/90 shadow-card"
-                }`}
-              >
-                {recording ? <MicOff className="w-8 h-8" /> : <Mic className="w-8 h-8" />}
-              </button>
+              {/* Микрофон батырмасы — нақты дауыс деңгейімен пульстейтін сақина */}
+              <div className="relative mb-3">
+                {recording && (
+                  <span
+                    className="absolute inset-0 rounded-full bg-accent-red/25 transition-transform duration-75"
+                    style={{ transform: `scale(${1.15 + micLevel * 0.6})` }}
+                  />
+                )}
+                <button
+                  onClick={toggleRecording}
+                  className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all ${
+                    recording ? "bg-accent-red text-white shadow-card-hover" : "bg-accent-gold text-white hover:bg-accent-gold/90 shadow-card"
+                  }`}
+                >
+                  {recording ? <Square className="w-7 h-7" fill="currentColor" /> : <Mic className="w-8 h-8" />}
+                </button>
+              </div>
 
               {/* Тірі индикатор + таймер */}
               {recording ? (
                 <div className="flex flex-col items-center gap-1.5">
-                  <div className="flex items-end gap-1 h-5">
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <motion.span
+                  {/* Нақты дауыс деңгейінің жолақтары */}
+                  <div className="flex items-end gap-1 h-6">
+                    {[0.5, 0.8, 1, 0.8, 0.5].map((mult, i) => (
+                      <span
                         key={i}
-                        className="w-1.5 rounded-full bg-accent-red"
-                        animate={{ height: ["6px", "20px", "6px"] }}
-                        transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.12 }}
+                        className="w-1.5 rounded-full bg-accent-red transition-all duration-75"
+                        style={{ height: `${Math.max(6, micLevel * 24 * mult + (micRef.current ? 0 : 8))}px` }}
                       />
                     ))}
                   </div>
                   <span className="text-sm font-medium text-accent-red tabular-nums">
                     {Math.floor(recSeconds / 60)}:{String(recSeconds % 60).padStart(2, "0")} · {t("speak.recording")}
                   </span>
+                  <span className="text-[11px] text-text-muted">{t("speak.tapToStop")}</span>
                 </div>
+              ) : transcribing ? (
+                <p className="text-sm font-medium text-accent-blue flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" /> {t("chat.transcribing")}
+                </p>
               ) : (
                 <p className="text-sm font-medium">{transcript ? t("speak.tapToContinue") : t("speak.startRecording")}</p>
+              )}
+
+              {/* Жазылған жауапты тыңдау */}
+              {audioUrl && !recording && (
+                <div className="w-full mt-4 p-3 rounded-card bg-surface-2 border border-border">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Play className="w-3.5 h-3.5 text-accent-gold" />
+                    <span className="text-xs font-semibold">{t("speak.listenBack")}</span>
+                    <button
+                      onClick={clearRecording}
+                      className="ml-auto text-text-muted hover:text-accent-red transition-colors"
+                      title={t("cinema.deleteVideo")}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <audio src={audioUrl} controls className="w-full h-9" />
+                </div>
               )}
             </div>
           )}
@@ -275,7 +373,7 @@ export default function SpeakingModule({ onBack }: { onBack: () => void }) {
           </p>
         </div>
 
-        <button onClick={nextQuestion} disabled={!transcript.trim()} className="btn-primary w-full disabled:opacity-40">
+        <button onClick={nextQuestion} disabled={!transcript.trim() || transcribing} className="btn-primary w-full disabled:opacity-40">
           {qIdx + 1 >= (test?.questions.length || 0) ? t("speak.finish") : t("speak.nextQuestion")}
         </button>
       </div>
